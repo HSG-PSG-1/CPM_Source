@@ -1,0 +1,25 @@
+﻿@{
+    ViewBag.Title = "Navigate";
+}
+<body style="font-family:Verdana">
+    <h2>
+        Navigate</h2>
+    @using (Html.BeginForm("Navigate", "Common", FormMethod.Post, new { @id = "frmNav", @name = "frmNav", @onsubmit1 = "$('#btnSearch').prop('disabled', true);" }))
+    {
+        <table>
+            <tr>
+                <td>
+                    Go to:
+                </td>
+                <td>
+                    <input type="text" id="searchText" name="searchText" class="textbox" />
+                </td>
+                <td>
+                    <input type="submit" id="btnSubmit" value="Search" class="button" />
+                </td>
+            </tr>
+        </table>
+    }
+    <hr />
+    <b>@Html.Raw((ViewData["Message"] ?? "").ToString())</b>
+</body>

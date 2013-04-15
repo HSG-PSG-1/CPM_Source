@@ -1,0 +1,28 @@
+﻿@model CPM.DAL.MasterSetting.SettingVal
+@using CPM.Helper
+@using CPM.Services
+@using System.Collections
+@Html.HiddenFor(model => model.setting)@Html.ValidationMessageFor(model => model.setting)
+
+@*Render control based on the setting enum data provided with setting Enum assiend to identify each setting
+For now, we only need Dropdown or textbox *@
+@{ switch (Model.settingEnum)
+   {
+       case SettingService.settings.Default_Claim_Assignee:
+       case SettingService.settings.Default_Claim_Status:
+       //case SettingService.settings.Default_Claim_Customer:
+       case SettingService.settings.Error_Detail_Level:
+        
+        @(Html.DropDownList("val", new SelectList((IEnumerable)ViewData[Model.setting], "id", "value", Model.val),
+            new { @class = "dropDown w100" }))
+        
+        break;
+       case SettingService.settings.Remember_Me_Hours:
+       case SettingService.settings.Dashboard_Page_Size:
+       case SettingService.settings.User_List_Page_Size:
+       case SettingService.settings.Contact_Email:
+       @Html.TextBoxFor(model => model.val,new { @class = "textbox w100" })
+         break;
+   }}
+   @*Finally we do need a validation message*@
+   @Html.ValidationMessageFor(model => model.val)

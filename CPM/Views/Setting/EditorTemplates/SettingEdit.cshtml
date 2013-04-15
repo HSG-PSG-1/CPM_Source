@@ -1,0 +1,22 @@
+﻿@model CPM.DAL.MasterSetting
+@using CPM.Helper
+<tr>
+        <td class="sqz">@* Store setting & id - required *@
+        @Html.HiddenFor(model => model.ID)@Html.HiddenFor(model => model.Setting)
+        @Html.Label(Model.Setting.ToString().Replace("_"," "))
+        </td>
+             <td width="30%">@*Render editor for "MasterSetting.SettingVal" to map to user control*@
+            @Html.EditorFor(model => model.SettingValue)@Html.ValidationMessageFor(model => model.SettingValue)
+            @Html.HiddenFor(model => model.Value)
+        </td>   
+        <td@*class="sqz"*@>
+            &nbsp;@Model.Description @Html.HiddenFor(model => model.Description)
+        </td>   
+        <td class="sqz">
+            @Html.HiddenFor(model => model.LastModifiedBy)@Model.LastModifiedByVal@Html.HiddenFor(model => model.LastModifiedByVal)
+        </td>
+        <td align="center" class="sqz">
+            @Html.Hidden("LastModifiedDate", Model.LastModifiedDate.ToString("dd-MMM-yyyy hh:mm:ss"))@Model.LastModifiedDate.ToString(Defaults.dtFormat, Defaults.ci) 
+        </td>
+    </tr>
+

@@ -1,0 +1,71 @@
+﻿@model List<CPM.DAL.UserLocation>
+@{ const int LocPgSize = 10; }
+   @if(Model == null || Model.Count < 1){ <span>No locations found</span>} 
+   else {<div style="text-align: right; padding: 2px 2px 2px 2px; display: inline;">    
+@if(Model.Count > LocPgSize){ 
+    <span>Search: </span><input class="textbox" name="filter" id="filter-box" value="" maxlength="30" type="text" size="10" />
+<input id="filter-clear-button" type="button" value="Clear" class="button small"/>} 
+    &nbsp;&nbsp;&nbsp;Check the checkbox to link Location(s)</div>
+<table class="thinBorder tablesorter" id="sortable">
+    <thead class="header">
+        <tr>
+            <th></th>
+            <th nowrap="nowrap">Location&nbsp;&nbsp;&nbsp;</th>
+        </tr>
+    </thead>
+    <tbody>
+        @for (int i = 0; i < Model.Count(); i++) { 
+        <tr>
+            <td>@(Html.CheckBox(Model[i].LocID.ToString(), Model[i].IsLinked, 
+                new { @value = Model[i].LocID, @onclick = "LinkUnlinkLoc(this);", @WasLinked = Model[i].WasLinked }))
+            </td>
+            <td nowrap="nowrap">@Model[i].LocAndCode</td>
+        </tr>
+         }
+    </tbody>
+</table>
+if(Model.Count > LocPgSize) { 
+@*HT: Ref: http://tablesorter.com/docs/example-pager.html
+http://beckelman.net/2008/10/23/client-side-table-sorting-paging-and-filtering-with-jquery-demo/
+*@
+<div id="pager" class="pager" style="padding: 2px 2px 0px 0px;">
+    <table class="thinBorder" style="background-color:#F0F0F0;">
+        <tr>
+            <td><b class="first dDialog">|<</b></td>
+            <td><b class="prev dDialog"><<</b></td>
+            <td><input type="text" class="pagedisplay" disabled="disabled"
+                style="border: none; width: 60px; text-align: center;background-color:#F0F0F0;"/>
+            </td>
+            <td><b class="next dDialog">>></b>&nbsp;&nbsp;<b class="last dDialog">>|</b>
+            </td>
+            <td>Show: <select class="pagesize">
+                    <option selected="selected" value="10">10</option>
+                    <option value="20">20</option>
+                    <option value="30">30</option>
+                    <option value="40">40</option>
+                </select>
+            </td>
+        </tr>
+    </table>
+</div>
+
+    <script src="@Url.Content("~/Content/Scripts/jquery.tablesorter.min.js")" type="text/javascript"></script>
+    <script src="@Url.Content("~/Content/Scripts/jquery.tablesorter.pager.js")" type="text/javascript"></script>    
+    <script src="@Url.Content("~/Content/Scripts/jquery.tablesorter.filter.js")" type="text/javascript"></script>    
+    
+<script type="text/javascript">
+    $().ready(function() {
+    $("#LinkedLoc").val('');$("#UnlinkedLoc").val('');//reset
+        $("#sortable").tablesorter({textExtraction:"complex"})                      
+                      .tablesorterFilter({ filterContainer: "#filter-box", 
+                      filterClearContainer: "#filter-clear-button", filterColumns: [1]})
+                      //Render pagination only if rec count is > pagesize                      
+                      @if(Model.Count > LocPgSize){
+                      @Html.Raw(".tablesorterPager({ container: $(\"#pager\"), positionFixed: false })") 
+                      }
+                      ;      
+    });
+</script>
+}
+}
+

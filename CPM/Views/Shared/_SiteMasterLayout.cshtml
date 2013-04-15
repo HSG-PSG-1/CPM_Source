@@ -1,0 +1,178 @@
+﻿@using CPM.Helper
+@using CPM.Services
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>@ViewBag.Title</title>
+    <script type="text/javascript" language="javascript">
+        /* ===== Variables used in diff pages ===== */
+        
+        var loginURL = '@CPM.Helper.Defaults.commonRoot/Login'; //Make sure Login page has table with id=tblLogin001
+        //@* ===== Menu images ===== *@
+        var menuDownGifURL = '@Url.Content("~/Content/Menu/down.gif")'; //Make sure this is set for menu        
+        var menuRightGifURL = '@Url.Content("~/Content/Menu/right.gif")'; //Make sure this is set for menu
+        //@* ===== Loading content ===== *@
+        var loading = '<div id="loading" style="text-align:center;display:block;"><img src=" @Url.Content("~/Content/Images/loading.gif")" title="" alt="Loading" /></div>'; //Used by forms using AJAX
+        //@* ===== Required to show/hide search-panel ===== *@
+        var showImgPath = '@Url.Content("~/Content/Images/aroL.gif")'; //"../../Resources/images/aroL.gif";
+        var hideImgPath = '@Url.Content("~/Content/Images/aroB.gif")'; // "../../Resources/images/aroB.gif";
+        //@*- ===== Required by datePicker ===== -*@
+        var minSQLDate = new Date("@Defaults.minSQLDate.ToString(Defaults.dtUniFormat2)");
+        var maxSQLDate = new Date("@Defaults.maxSQLDate.ToString(Defaults.dtUniFormat2)");
+
+        /* ===== Functions used in diff pages ===== */
+        function setFocus(elemID) {//useful on most of the pages while inline rendering (allows to defer common.js include until end)
+            var elem = document.getElementById(elemID);
+            if (elem == null) {
+                elem = document.getElementsByName(elemID); //special case for MVC who don't render id!
+                if (elem.length > 0) elem = elem[0]; //If its a checkbox it'll have 2 of same name
+            }
+            try { elem.focus(); return; } catch (ex) { /*alert(elem + ":" + elemID + ":" + ex);*/ } //skip if id is wrong
+        }
+    </script>
+    <link rel="shortcut icon" href="@Url.Content("~/Content/favicon.ico")" type="image/x-icon" />
+    <link rel="icon" href="@Url.Content("~/Content/favicon.ico")" type="image/ico" />
+    <link href="@Url.Content("~/Content/Site.css")" rel="stylesheet" type="text/css" />
+    <link href="http://code.jquery.com/ui/1.10.2/themes/smoothness/jquery-ui.min.css" rel="stylesheet"type="text/css" />
+    <link rel="stylesheet" type="text/css" href="@Url.Content("~/Content/Menu/ddsmoothmenu.css")" />
+
+    @*SOME scripts are better persisted in head *@
+    <script src="http://code.jquery.com/jquery-1.9.1.min.js" type="text/javascript"></script>
+    <script src="http://code.jquery.com/jquery-migrate-1.1.1.min.js" type="text/javascript"></script>
+    
+    <script src="http://code.jquery.com/ui/1.10.2/jquery-ui.min.js" type="text/javascript"></script>
+    <script src="http://ajax.aspnetcdn.com/ajax/jquery.validate/1.11.0/jquery.validate.min.js" type="text/javascript"></script>
+        
+        <style type="text/css">
+		    body {overflow:scroll;background-color:Transparent;height:100%}
+		    /* for tablesorter plugin */
+		    table.tablesorter thead tr .header {
+	            background-position: center right;
+	            background-repeat: no-repeat;
+	            cursor: pointer;
+            }
+		    table.tablesorter thead tr .headerSortUp {/* ascending and descending images are working in reverse  */
+	            background-image: url('@Url.Content("~/Content/Images/dsc.gif")');            
+            }
+            table.tablesorter thead tr .headerSortDown {
+	            background-image: url('@Url.Content("~/Content/Images/asc.gif")');	            
+            }
+	    </style>
+        <!--[if IE 7]>
+	    <style type="text/css">
+		    body {overflow:auto;}
+		    /* Special case handing for IE 7 which showed double scrollbar */
+	    </style>
+    <![endif]-->
+    <!--[if IE 8]><style type="text/css">body {overflow:auto;}</style><![endif]-->    
+    <!--[if IE 9]><style type="text/css">body {overflow:auto;}</style><![endif]-->    
+    <!--[if IE 10]><style type="text/css">body {overflow:auto;}</style><![endif]-->    
+    @RenderSection("HeadContent", required: false)
+</head>
+<body>
+    <table cellpadding="3" width="100%" cellspacing="3" border="0" align="center">
+        <tr>
+            <td id="header">                
+                    &nbsp;&nbsp;<img src='@Url.Content("~/Content/Images/AOT Logo.jpg")' alt="AOT" border="0" style="display:inline"/>
+            </td>
+            <td id="logindisplay" align="right" valign="bottom" nowrap="nowrap">
+            @{Html.RenderPartial("LogOnUserControl");}
+            </td>
+        </tr>
+        <tr>
+            <td colspan="2" align="center" style="padding: 4px 4px 4px 4px">
+            @*MENU (ddsmoothmenu) : START *@
+                <div id="smoothmenu" class="ddsmoothmenu" style="text-align:left;" >
+                    <ul id="menu1">
+                        <li>
+                            @Html.ActionLink("Dashboard", "List", "Dashboard")
+                        </li>
+                        @if (_Session.RoleRights.ManageMaster || _Session.RoleRights.ManageUser || _Session.RoleRights.ManageRole)
+                        { 
+                        <li><a href="#">Manage</a>
+                            <ul>
+                                @if (_Session.RoleRights.ManageUser)
+                                {<li>@Html.ActionLink("Users", "List", "User")</li>} 
+                                @if (_Session.RoleRights.ManageRole)
+                                {<li>@Html.ActionLink("Roles", "Manage", "Role")</li>}
+                                @if (_Session.RoleRights.ManageMaster)
+                                {<li>@Html.ActionLink("Master", "Defect", "Manage")
+                                <ul>
+                                    <li>@Html.ActionLink("Defect", "Defect", "Manage")</li>
+                                    <li>@Html.ActionLink("Claim Status", "Claim_Status", "Manage")</li>
+                                    <li>@Html.ActionLink("File Type Header", "File_Type_Header", "Manage")</li>
+                                    <li>@Html.ActionLink("File Type Detail", "File_Type_Detail", "Manage")</li>
+                                </ul>
+                                </li>                                
+                                }  
+                                
+                                @if (_Session.RoleRights.ManageSetting)
+                                { 
+                                <li>@Html.ActionLink("Setting", "Manage", "Setting")</li>}
+                            </ul>
+                        </li>
+                        }                   
+                        @if (_Session.RoleRights.ViewActivity)
+                        { <li>@Html.ActionLink("Activity", "Log", "Activity")</li>}
+                        @*<li>@Html.ActionLink("Log Off", "LogOff", "Common") @</li>
+                            <li><a href="#">Reports</a>
+                            <ul>
+                            <li>@Html.ActionLink("Activity", "Activity", "Report") </li>                            
+                            <li><a href="#">User</a>
+                                <ul>
+                                <li>@Html.ActionLink("Org Typewise", "UserData", "Report", new { reportStr = "OrgTypewiseUser" }, null) </li>
+                                <li>@Html.ActionLink("Rolewise", "UserData", "Report", new { reportStr = "RolewiseUser" }, null) </li>
+                                </ul>
+                            </li>
+                            <li><a href="#">Claim</a>
+                                <ul>
+                                <li>@Html.ActionLink("Statuswise", "ClaimData", "Report", new { reportStr = "StatusClaim" }, null) </li>
+                                <li>@Html.ActionLink("Customerwise", "ClaimData", "Report", new { reportStr = "CustClaim" }, null) </li>
+                                <li>@Html.ActionLink("Brandwise", "ClaimData", "Report", new { reportStr = "BrandClaim" }, null) </li>
+                                <li>@Html.ActionLink("Yearwise", "ClaimData", "Report", new { reportStr = "YearlyClaim" }, null) </li>
+                                </ul>
+                            </li>
+                            </ul>
+                            </li>*@
+                    </ul>                    
+                    <br style="clear: left" />
+                </div>
+            @*MENU (ddsmoothmenu) : END*@
+            </td>
+        </tr>
+        <tr>
+            <td id="main" colspan="2" align="left" valign="top">@RenderBody()</td>
+        </tr>
+        <tr>
+            <td id="footer" colspan="2" align="center">
+                @* Copyright &copy; 2011 American Omni Trading *@
+                <img src="@Url.Content("~/Content/Images/spacer.gif")" height="1px" width="800px" />
+            </td>
+        </tr>
+    </table>
+    <script type="text/javascript" src="@Url.Content("~/Content/Menu/ddsmoothmenu2.js")"></script>    
+    <script language="javascript" src="@Url.Content("~/Content/Scripts/common.js")" type="text/javascript"></script>
+    <script language="javascript" src="@Url.Content("~/Content/Scripts/jquery.form.js")" type="text/javascript"></script>
+    <script type="text/javascript" language="javascript" defer="defer">
+        $().ready(function () {
+            ddsmoothmenu.init({
+                mainmenuid: "smoothmenu", //menu DIV id
+                orientation: 'h', //Horizontal or vertical menu: Set to "h" or "v"
+                classname: 'ddsmoothmenu', //class added to menu's outer DIV
+                //customtheme: ["#1c5a80", "#18374a"],
+                contentsource: "markup" //"markup" or ["container_id", "path_to_menu_file"]
+            });
+            $.validator.setDefaults({
+                //onfocusin: function(element) { $(element).valid(); },            
+                focusInvalid: false
+            , focusCleanup: true
+            , onsubmit: true
+            , onkeyup: false// Keep false possible internal bug : SO: 8045731, 4713849
+            , onfocusout: function (element) { return true; /*$(element).valid();*/ }
+            });
+            //$.validator.onkeyup = false; // http://forum.jquery.com/topic/jquery-validation-plug-in-setdefaults-not-working
+        });
+    </script>
+@RenderSection("FootContent", required: false)
+</body>
+</html>

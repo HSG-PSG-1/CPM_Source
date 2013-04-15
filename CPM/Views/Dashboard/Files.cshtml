@@ -1,0 +1,36 @@
+﻿@model List<CPM.DAL.FileHeader>
+@using CPM.Helper
+<table class="thinBorder" width="99%">
+    <thead class="header">
+        <tr>
+            <th>File</th>
+            <th>Type</th>
+            <th>Comment</th>
+            <th nowrap="nowrap">Uploaded By</th>
+            <th nowrap="nowrap">Uploaded Date</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>        
+            @foreach (var item in Model){ 
+         <tr>
+            <td>@item.FileName</td>
+            <td>@item.FileTypeTitle</td>
+            <td>@item.Comment</td>
+            <td>@item.UploadedBy</td>
+            <td>@item.UploadedOn.ToString(Defaults.dtFormat, Defaults.ci)</td>
+            <td>
+               @if (!string.IsNullOrEmpty(item.FileName) && item.ClaimID > 0){
+                   string codeStr = FileIO.getFileDownloadCode(item.FileName, item.ClaimGUID);
+                   string clipImgLink = string.Format(Defaults.clipImgLink,
+                       HttpUtility.UrlDecode(Url.Action("GetFile?" + codeStr, "Claim", new { ClaimID = item.ClaimID }))
+                       );
+                        @Html.Raw(clipImgLink)                        
+               }            
+            </td>
+        </tr>
+            }
+    </tbody>
+    <tfoot>@Html.Raw(Defaults.chkNoRecords(Model.Count(), 7))</tfoot>
+</table>
+

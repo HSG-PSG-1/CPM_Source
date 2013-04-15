@@ -1,0 +1,110 @@
+﻿@model CPM.DAL.vw_Claim_Master_User_Loc
+@using CPM.Helper
+
+@{ ViewBag.Title = "Archived Claim"; Layout = Defaults.masterLayout;}
+@section HeadContent { 
+    <script type="text/javascript">
+        //Make sure common.js is included for function renderAutoComplete(url, idBox, txtBox) {}
+        $().ready(function() {
+            $("#tabs").tabs({
+                /* cache: true, spinner: 'Loading...', ajaxOptions: { cache: false } //HT: cache: true - to prevent reload on each tab select!
+                http://jqueryui.com/upgrade-guide/1.9/#deprecated-ajaxoptions-and-cache-options-added-beforeload-event */
+            beforeLoad: function( event, ui ) {
+                ui.ajaxSettings.cache = false;
+                if ( ui.tab.data( "loaded" ) ) {  event.preventDefault();  return;  } 
+                ui.jqXHR.success(function() {   ui.tab.data( "loaded", true ); });
+               }
+            });
+        });
+    </script>    
+}
+    @{ bool isArchived = Model.Archived; }
+    <table width="99%" align="center" border="0">
+        <tr>
+            <td align="right">
+                <table style="width: 99%;" border="0">
+                    <tr>
+                        <td nowrap="nowrap" align="right">
+                        @*START: Archive*@
+                        @if (_Session.RoleRights.ArchiveClaim){
+                            using (Html.BeginForm("Archive", "Claim", new { id = Model.ID, ClaimGUID = Model.ClaimGUID, archive = !Model.Archived }, FormMethod.Post, new { @style = "display:inline", @onsubmit = "$('#btnUnarchive').prop('disabled', true);" }))
+           { <input type="submit" id="btnUnarchive" value="Unarchive" title="Unarchive this claim" class="button" onclick="if(confirmDeleteM(event, 'Are you sure you want to unarchive this claim?')){skipCommitChk=true;return true;} else return false;" />  }
+                         } 
+                        @* END: Archive*@
+                        @Html.Raw("&nbsp;")<input type="button" value="Print" class="button" onclick="javascript:openWin('@Url.Action("Print","Claim", new { ClaimID = Model.ID })',648,838);" />@Html.Raw("&nbsp;")
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <div id="tabs">
+                    <ul>
+                        <li><a href="#tabs-1"><span>Header</span></a></li>
+                        <li><a href='@Url.Action(isArchived ? "ItemsArchived" : "Items", new { ClaimGUID = Model.ClaimGUID.ToString() })'><span>Details</span></a></li>
+                        @if (!_Session.IsOnlyCustomer)
+                        { <li><a href='@Url.Action("CommentsPg", new { ClaimGUID = Model.ClaimGUID.ToString() })'><span>Comments</span></a></li>} 
+                        <li><a href='@Url.Action("FilesPg", new { ClaimGUID = Model.ClaimGUID.ToString() })'><span>Files</span></a></li>
+                    </ul>
+                    <div id="tabs-1">
+                        <table width="50%" cellpadding="2" cellspacing="2">
+                            <tr>
+                                <td nowrap="nowrap" width="1%" align="right">@Html.LabelFor(model => model.ClaimNo) : </td>
+                                <td nowrap="nowrap" width="40%" class="data">@Model.ClaimNo</td>
+                                <td nowrap="nowrap">&nbsp;&nbsp;</td>
+                                <td nowrap="nowrap" width="1%" align="right">@Html.LabelFor(model => model.StatusID) : </td>
+                                <td nowrap="nowrap" width="40%" class="data">@Model.Status&nbsp;&nbsp;&nbsp;</td>
+                                <td nowrap="nowrap" width="1%"><div class="dDialog uline" onclick="showDialog('#ddlg');">Status History</div>&nbsp;
+                                    <div id="ddlg" style="text-align: right"></div>
+                                    <script type="text/Javascript" language="javascript">
+                                        function showDialog(containerID) {
+                                            $(containerID).dialog({
+                                                modal: false,
+                                                open: function() {
+                                                    $(this).html(loading);
+                                                    $(this).load('@Url.Content("~/Claim/")@(Model.ID)/Status');
+                                                },
+                                                height: 360,
+                                                width: 650,
+                                                title: 'Status History'
+                                            });
+                                        }
+                                    </script>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td nowrap="nowrap" align="right">@Html.LabelFor(model => model.ClaimDate) :</td>
+                                <td nowrap="nowrap" class="data">
+                                &nbsp;@Model.ClaimDate.ToString(Defaults.dtFormat, Defaults.ci)</td>
+                                <td nowrap="nowrap">&nbsp;</td>
+                                <td nowrap="nowrap" align="right">@Html.LabelFor(model => model.BrandID) :</td>
+                                <td nowrap="nowrap" class="data">@Model.Brand</td>
+                                <td nowrap="nowrap">&nbsp;</td>
+                            </tr>
+                            <tr>
+                                <td nowrap="nowrap" align="right">@Html.LabelFor(model => model.CustID) : </td>
+                                <td nowrap="nowrap" class="data">@Model.CustOrg</td>
+                                <td nowrap="nowrap">&nbsp;</td>
+                                <td nowrap="nowrap" align="right">@Html.LabelFor(model => model.CustRefNo) : </td>
+                                <td nowrap="nowrap" class="data">@Model.CustRefNo</td>
+                                <td nowrap="nowrap">&nbsp;</td>
+                            </tr>
+                            <tr>
+                                <td nowrap="nowrap" align="right">@Html.LabelFor(model => model.ShipToLocationID) :</td>
+                                <td nowrap="nowrap" class="data">@Model.Location</td>
+                                <td nowrap="nowrap">&nbsp;</td>
+                                <td nowrap="nowrap" align="right">@Html.LabelFor(model => model.SalespersonID) :</td>
+                                <td nowrap="nowrap" class="data">@Model.SalespersonName</td>
+                                <td nowrap="nowrap">&nbsp;</td>
+                            </tr>
+                            <tr style="display: none">
+                                <td nowrap="nowrap" align="right">@Html.LabelFor(model => model.VendorID) :</td>
+                                <td nowrap="nowrap" colspan="5" class="data">@Model.VendorID</td>
+                            </tr>                            
+                        </table>
+                    </div>
+                </div>
+            </td>
+        </tr>
+    </table>

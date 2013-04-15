@@ -1,0 +1,116 @@
+﻿/*----------------------------------------------------------
+The base color for this template is #5c87b2. If you'd like
+to use a different color start by replacing all instances of
+#5c87b2 with your new color.
+----------------------------------------------------------*/
+body
+{
+    font-size: 12px;
+    font-family: Verdana, Helvetica, Sans-Serif;
+    margin:1px 36px 1px 36px;
+    padding: 0;
+    color: #505050; /*#f5f5f5; */
+}
+/* ====================================================== */
+.dropDown {FONT-FAMILY: Verdana, Arial, Helvetica;FONT-SIZE: 13px; COLOR: #646464;BORDER: #A3A3A3 1px solid;}
+.textBox {BORDER: #A3A3A3 1px solid; FONT-SIZE: 12px; COLOR: #000000; FONT-FAMILY: Verdana, Arial, Helvetica}
+/* .fieldSet{ BORDER-RIGHT: #C5C5C5 1px solid; BORDER-TOP: #C5C5C5 1px solid; BORDER-LEFT: #C5C5C5 1px solid; BORDER-BOTTOM: #C5C5C5 1px solid;} */
+.button {FONT-SIZE: 12px;font-family:Verdana}
+/*.header {background-color:#EEECE1; color:#000000;} */
+.header th {background-color:#EEECE1; color:#000000;text-align: center;font-weight:normal;border: solid 1px #D5D0B5;}/* color: #3f3f3f; background-color:#e3f3fd;  */
+.header th a:link {TEXT-DECORATION: none;font-weight:normal;}
+.header th a:visited {TEXT-DECORATION: none;font-weight:normal;}
+.header th a:hover {TEXT-DECORATION: none;font-weight:normal;}
+.header th a:active {TEXT-DECORATION: none;font-weight:bold;}
+
+.header thead tr th input{ border: #BFB88E 1px solid; font-size: 12px; color: #000000; font-family: Verdana, Helvetica, Sans-Serif;}
+
+.thinBorder {border: solid 1px #BFB88E;}
+.thinBorder td{border: solid 1px #D5D0B5;}
+.thinBorderWhite{border: solid 1px #EEECE1;}
+.onlyBorder {border: solid 1px #BFB88E;}
+
+.pager tr td{text-align:center; font-size:12px; border:none 0px; padding:4px;color:#949494;}
+.pager a:link {TEXT-DECORATION: none;font-weight:bold;font-size:12px; color:#949494;}
+.pager a:visited {TEXT-DECORATION: none;font-weight:bold;font-size:12px; color:#949494;}
+.pager a:hover {TEXT-DECORATION: none;font-weight:bold;font-size:12px; color:#949494;}
+.pager a:active {TEXT-DECORATION: none;font-weight:bold;font-size:12px; color:#949494;}	
+
+.grpTR{BACKGROUND-COLOR: #ffffcc; cursor:pointer; font-size:10px;}
+.grpTD{text-align:right;border:0px none; border-left:0px none;white-space:nowrap;}
+
+tbody.on { display:table-row-group; }
+tbody.off { display:none; }
+
+.PrintHeading {FONT-WEIGHT: bold; FONT-SIZE: 29px;font-family:Arial Black}
+.Heading {FONT-WEIGHT: bold; FONT-SIZE: 16px}
+.smallHeading {FONT-WEIGHT: bold; FONT-SIZE: 14px}
+.SubHeading {FONT-WEIGHT: bold; FONT-SIZE: 12px}
+.thinHead {FONT-SIZE: 12px}
+.small {FONT-SIZE: 10px}
+.smaller {FONT-SIZE: 8px}
+.smallBold {FONT-SIZE: 10px; FONT-WEIGHT:BOLD}
+.smallHeader {FONT-SIZE: 11px}
+.blackLabel {color:Black;}
+.bold {FONT-WEIGHT:BOLD}
+
+.deletedTR { text-decoration: line-through; color:#8B8B8B; font-style: italic; }
+.deletedTR td{ text-decoration: line-through; color:#8B8B8B; font-style: italic; }
+.deletedTR input{ text-decoration: line-through; color:#8B8B8B; font-style: italic; }
+.deletedTR_NO {text-decoration: none; color:#505050; font-style:normal; }
+.deletedTR_NO td{text-decoration: none; color:#505050; font-style:normal; }
+.deletedTR_NO input{text-decoration: none; color:#505050; font-style:normal; }
+
+.lookup { border:0px; vertical-align:middle;cursor:pointer;} /* background-color:#D5DFF4; */
+.dDialog { cursor:pointer;display:inline;} .uline { /*text-decoration:underline;*/ border-bottom:dotted 1px;}
+.note {BACKGROUND-COLOR: #ffffcc}
+.w100{width:99%}
+.sqz{width:1%; white-space:nowrap;}
+.noBullet li {list-style-image: none;list-style-type: none;}
+.rtsqz{width:1%; white-space:nowrap;text-align:right}
+.data{/*color:Navy;*/}
+/* ====================================================== */
+input[type="text"] 
+{
+    BORDER: #A3A3A3 1px solid; FONT-SIZE: 12px; COLOR: #000000; FONT-FAMILY: Verdana, Arial, Helvetica
+    /*border: 1px solid #CCC;*/
+}
+input[type="password"] 
+{
+    BORDER: #A3A3A3 1px solid; FONT-SIZE: 12px; COLOR: #000000; FONT-FAMILY: Verdana, Arial, Helvetica
+    /*border: 1px solid #CCC;*/
+}
+input[type="submit"] {FONT-SIZE: 12px;font-family:Verdana}
+input[type="button"] {FONT-SIZE: 12px;font-family:Verdana}
+/* TABLE
+----------------------------------------------------------*/
+table {  border-collapse: collapse;}
+table td {  padding: 2px 2px 2px 2px; } 
+
+fieldset { margin: 0px 0px 0px 0px; border:1px solid #D5D0B5; }
+/* ====================================================== */
+
+a:link{    color: #505050;    text-decoration: underline;}
+a:visited{    color: #505050;}
+a:hover{    color: #505050;    text-decoration: none;}
+a:active{    color: #505050;}
+/* MISC  
+----------------------------------------------------------*/
+.clear{    clear: both;}
+.error{    color:Red;}
+/* Styles for validation helpers
+-----------------------------------------------------------*/
+.field-validation-error{    color: #ff0000;}
+.field-validation-valid{    display: none;}
+.input-validation-error, input.error, textarea.error{    border: 1px solid #ff0000;    background-color: #ffeeee;}
+.validation-summary-errors ul
+{
+    /*font-weight: bold;*/
+    color: #ff0000;
+    /* http://css.maxdesign.com.au/listutorial/horizontal_master.htm */
+    display:inline;padding:0;margin:0; list-style-type: none; /* For inline display */
+}
+.validation-summary-errors ul li  {display:inline;}
+.validation-summary-valid{    display: none;}
+/* Styles for editor and display helpers
+----------------------------------------------------------*/

@@ -1,0 +1,44 @@
+﻿@model IEnumerable<CPM.DAL.vw_Claim_Dashboard>
+@using System.Collections
+@using CPM.Helper
+@{Layout = ""; /* Master page is NOT needed here */}
+<style>
+table {font-size: 12px;font-family: Calibri, Verdana, Helvetica, Sans-Serif;border: solid 1px #BFB88E;border-collapse: collapse;}
+td,th{text-align: center;background-color:#EEECE1;}
+tbody tr td{background-color:#ffffff;}
+</style>
+<table border="1">
+    <thead>
+    <tr>
+        <th>Claim #</th>
+        <th>Claim Date</th>
+        <th>Customer<br /> Ref #</th>
+        <th>Brand</th>
+        <th>Location</th>        
+        @if (!_Session.IsOnlyCustomer){
+        <th>Customer</th>        
+        <th>Salesperson</th>
+        <th>Assign to</th>
+        } 
+        <th>Status</th>        
+    </tr>
+    </thead>
+    <tbody>
+    @foreach (var item in Model){ 
+    <tr>
+        <td align="center">@item.ClaimNo</td>
+        <td align="center">@item.ClaimDate.ToString(Defaults.dtFormat, Defaults.ci)</td>
+        <td align="center">@item.CustRefNo</td>
+        <td align="center">@item.BrandName</td>
+        <td align="center">@item.ShipToLoc</td>        
+        @if (!_Session.IsOnlyCustomer)
+        {
+        <td align="center">@item.CustOrg</td>        
+        <td align="center">@item.Salesperson</td>
+        <td align="center">@item.AssignToName</td>
+        } 
+        <td align="center">@item.Status</td>        
+    </tr>
+     }
+    </tbody>
+</table>

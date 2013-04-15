@@ -1,0 +1,271 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Linq.Dynamic;
+using System.Data.Linq.SqlClient;
+using CPM.DAL;
+using CPM.Helper;
+using Webdiyer.WebControls.Mvc;
+
+namespace CPM.Services
+{
+    public class FileDetailService : _ServiceBase
+    {
+        #region Variables & Constructor
+
+        public FileDetailService() : base() {;}
+        public FileDetailService(CPMmodel dbcExisting) : base(dbcExisting) { ;}
+
+        public readonly FileDetail newObj = new FileDetail() { ID = Defaults.Integer };
+
+        #endregion
+
+        #region Search / Fetch
+
+        public List<FileDetail> Search(int claimID, int claimDetailID)
+        {
+            //using (dbc)//HT: DON'T coz we're sending IQueryable
+            IQueryable<FileDetail> cQuery = from f in dbc.FileDetails
+
+                                            #region LEFT OUTER JOINs
+
+                                            //LEFT OUTER JOIN For User
+                                            join u in dbc.Users on new { UserID = f.UserID } equals
+                                            new { UserID = u.ID } into u_join
+                                            from u in u_join.DefaultIfEmpty()
+                                            //LEFT OUTER JOIN For User
+                                            join t in dbc.MasterFileTypeDetails on
+                                         new { TypID = f.FileType } equals new { TypID = t.ID } into t_join
+                                            from t in t_join.DefaultIfEmpty()
+                                            
+                                            #endregion
+
+                                            where (f.ClaimID == claimID && f.ClaimDetailID == claimDetailID)
+                                            orderby f.UploadedOn descending
+                                            select Transform(f, u.Name, t.Title);
+
+            return cQuery.ToList<FileDetail>();
+        }
+
+        FileDetail Transform(FileDetail f, string fileDetailBy, string fileTypeTitle)
+        {
+            return f.Set(f1 => { f1.UploadedBy = fileDetailBy; f1.FileTypeTitle = fileTypeTitle; f1.ClaimGUID = f1.ClaimID.ToString(); });
+        }
+                
+        public FileDetail GetFileDetailById(int id)
+        {
+            using (dbc)
+            {
+                FileDetail cmt = (from f in dbc.FileDetails where f.ID == id select f).SingleOrDefault<FileDetail>();
+                //cmt.Claim = new Claim();//HT: So that it doesn't complain NULL later
+                return cmt;
+            }
+        }
+
+        #endregion
+
+        #region Add / Edit / Delete
+                
+        public int Add(FileDetail fileDetailObj, bool doSubmit)
+        {
+            //Set lastmodified fields
+            fileDetailObj.LastModifiedBy = _SessionUsr.ID;            
+            fileDetailObj.LastModifiedDate = DateTime.Now;            
+
+            dbc.FileDetails.InsertOnSubmit(fileDetailObj);
+            if(doSubmit) dbc.SubmitChanges();
+
+            return fileDetailObj.ID; // Return the 'newly inserted id'
+        }
+                
+        public int AddEdit(FileDetail fileDetailObj, bool doSubmit)
+        {
+            fileDetailObj.UploadedOn = Defaults.getValidDate(fileDetailObj.UploadedOn); // special case to ensure valid SQLDate
+            if (fileDetailObj.ID <= Defaults.Integer) // Insert
+                return Add(fileDetailObj, doSubmit);
+
+            else
+            {
+                #region Update
+                //Set lastmodified fields
+                fileDetailObj.LastModifiedBy = _SessionUsr.ID;                
+                fileDetailObj.LastModifiedDate = DateTime.Now;                
+
+                dbc.FileDetails.Attach(fileDetailObj);//attach the object as modified
+                dbc.Refresh(System.Data.Linq.RefreshMode.KeepCurrentValues, fileDetailObj);//Optimistic-concurrency (simplest solution)
+                #endregion
+
+                if(doSubmit) dbc.SubmitChanges();
+            }
+
+            return fileDetailObj.ID;
+        }
+                
+        public void Delete(FileDetail fileDetailObj, bool doSubmit)
+        {
+            dbc.FileDetails.DeleteOnSubmit(dbc.FileDetails.Single(f => f.ID == fileDetailObj.ID));
+            if(doSubmit) dbc.SubmitChanges();
+        }
+
+        public void BulkAddEditDel(List<FileDetail> records, Claim claimObj, int oldclaimDetailId, int claimDetailId, bool doSubmit, 
+            CPMmodel dbcContext)
+        {
+            //using{dbc}, try-catch and transaction must be handled in callee function
+            foreach (FileDetail item in records)
+            {
+                #region Perform Db operations
+                item.LastModifiedBy = _SessionUsr.ID;
+                item.LastModifiedDate = DateTime.Now;
+                item.UploadedOn = DateTime.Now;// double ensure dates are not null !
+                //HT: MUST: MAke sure this is set (i.e. the newly added Claimetail ID or it'll give FK err)
+                item.ClaimDetailID = claimDetailId;
+                item.ClaimID = claimObj.ID;
+
+                if (item._Deleted)
+                    Delete(item, false);
+                else if (item._Edited)//Make sure Delete is LAST
+                    AddEdit(item, false);
+                else if (item._Added)
+                    Add(item, false);
+                #endregion
+
+                #region Log Activity (finally when the uploaded file data is entered in the DB
+                if (item._Added || item._Edited)
+                {//Special case: Call the econd overload which has "doSubmit" parameter
+                    new ActivityLogService(ActivityLogService.Activity.ClaimFileUpload, dbcContext).Add(
+                        new ActivityHistory() { FileName = item.FileName, ClaimID = item.ClaimID, ClaimDetailID = item.ClaimDetailID,
+                                                ClaimText = claimObj.ClaimNo.ToString()
+                        }, doSubmit);
+                }
+                #endregion
+            }
+            if (doSubmit) dbc.SubmitChanges(); //Make a FINAL submit instead of periodic updates
+            //Move Item detail files
+            ProcessFiles(records, claimObj.ID, claimObj.ClaimGUID, oldclaimDetailId, claimDetailId);
+        }
+
+        #endregion
+
+        #region Extra functions
+
+        void ProcessFiles(List<FileDetail> records, int claimId, string ClaimGUID, int oldclaimDetailId, int claimDetailId)
+        {
+            if (records == null || records.Count < 1) return;
+
+            foreach (FileDetail item in records)
+                if (item._Deleted)//Delete will always be for existing not Async(so use ClaimID)
+                    FileIO.DeleteClaimFile(item.FileName, item.ClaimID, claimDetailId, FileIO.mode.detail);//HT:CAUTION: Don't use the item.ID
+
+            if (records.Count > 0)//finally copy all the files from D_Temp to D
+            FileIO.MoveAsyncClaimFiles(claimId, ClaimGUID, oldclaimDetailId, claimDetailId, false);
+        }
+
+        #endregion
+    }
+
+    public class CAWdFile : CAWBase
+    {
+        #region Variables & Constructor
+
+        public CAWdFile(bool Async) : base(Async) { ;}
+
+        public static readonly FileDetail newObj = new FileDetail() { ID = Defaults.Integer };
+
+        #endregion
+
+        #region Search / Fetch
+
+        public ClaimDetail PullItem(int claimDetailID, Claim claimObj)
+        {
+            ClaimDetail item = new ClaimDetail() { ID = claimDetailID, aDFiles = new List<FileDetail>() };
+            if (IsAsync && claimObj != null)
+                item = claimObj.aItems.SingleOrDefault(p => p.ID == claimDetailID);
+            //else//Empty object
+                return item??new ClaimDetail() { ID = claimDetailID, aDFiles = new List<FileDetail>() };
+        }
+
+        public List<FileDetail> Search(int claimID, int claimDetailID, string claimGUID)
+        {
+            Claim clmObj = _Session.Claims[claimGUID];
+            ClaimDetail itm = PullItem(claimDetailID, clmObj);//NOTE: For sync mode it'll fetch empty
+            List<FileDetail> result = new List<FileDetail>();
+            
+            int sessionFileDetailCount = ((itm?? new ClaimDetail()).aDFiles??new List<FileDetail>()).Count;
+
+            if (!IsAsync || sessionFileDetailCount < 1)
+            {// Sync or first time Async
+                if (claimDetailID > 0)// SPECIAL case: because ClaimDetail might be still in memory for Async 
+                    result = new FileDetailService().Search(claimID, claimDetailID);
+                if (itm != null)
+                {// Special case for archived view when FileDetails is directly accessible from Item List
+                    itm.aDFiles.AddRange(result);
+                    _Session.Claims[claimGUID] = clmObj;
+                }
+            }
+
+            return IsAsync ? ((itm ?? new ClaimDetail()).aDFiles ?? new List<FileDetail>()) : result;//itm.aDFiles
+        }
+
+        public FileDetail GetFileDetailById(int? id, int claimDetailID, Claim claimobj)
+        {            
+            // IMP: It cn have -ve values for newly inserted records which are in session
+            FileDetail newObj = new FileDetailService().newObj;
+            ClaimDetail itm = PullItem(claimDetailID, claimobj);//NOTE: For sync mode it'll fetch empty   
+
+            if (id.HasValue)
+            {
+                if (IsAsync)
+                    newObj = (itm.aDFiles.SingleOrDefault(c => c.ID == id)) ?? newObj;//NOTE: For sync mode it'll fetch empty
+                else newObj = new FileDetailService().GetFileDetailById(id.Value);
+            }
+
+            //HT: Make sure ClaimId is assigned after the above Claim obj is created
+            newObj.ClaimID = claimobj.ID;
+            newObj.ClaimGUID = claimobj.ClaimGUID;
+            newObj.Archived = claimobj.Archived;
+
+            return newObj;
+
+            //if (id == null) return new FileDetailService().newObj;
+            //FileDetail newObj = new FileDetailService().newObj;
+            //if (IsAsync)    newObj = PullItem(claimDetailID).aDFiles.SingleOrDefault(c => c.ID == id);
+            //else            newObj = new FileDetailService().GetFileDetailById(id.Value);
+            //return newObj ?? new FileDetailService().newObj;
+        }
+
+        #endregion
+
+        #region Add / Edit / Delete
+
+        public int AddEdit(FileDetail fileDetailObj, int claimDetailID)
+        {
+            if (IsAsync)// Do Async add/edit
+            {
+                Claim claimObj = _Session.Claims[fileDetailObj.ClaimGUID];
+                ClaimDetail item = PullItem(fileDetailObj.ClaimDetailID, claimObj);// claimObj.aItems.Single(i => i.ID == claimDetailID);
+                item.aDFiles = fileDetailObj.setProp(IsAsync).doOpr(item.aDFiles);
+                _Session.Claims[fileDetailObj.ClaimGUID] = claimObj;
+                return fileDetailObj.ID;
+            }
+            else
+                return new FileDetailService().AddEdit(fileDetailObj.setProp(IsAsync), true);
+        }
+                
+        public void Delete(FileDetail fileDetailObj)
+        {
+            fileDetailObj._Deleted = true; fileDetailObj._Added = fileDetailObj._Edited = false;
+
+            if (IsAsync)// Do delete
+            {
+                Claim claimObj = _Session.Claims[fileDetailObj.ClaimGUID];
+                ClaimDetail item = PullItem(fileDetailObj.ClaimDetailID, claimObj); //claimObj.aItems.Single(i => i.ID == claimDetailID);
+                item.aDFiles = fileDetailObj.doOpr(item.aDFiles);
+                _Session.Claims[fileDetailObj.ClaimGUID] = claimObj;
+            }
+            else
+                new FileDetailService().Delete(fileDetailObj, true);
+        }
+
+        #endregion
+    }
+}

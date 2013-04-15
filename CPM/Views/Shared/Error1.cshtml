@@ -1,0 +1,4 @@
+﻿@model System.Web.Mvc.HandleErrorInfo
+@*Special case error page for Master themed pages*@
+@{ ViewBag.Title = "Error";    Layout = CPM.Helper.Defaults.masterLayout;}
+@{Html.RenderPartial("ErrUserControl", Model.Exception);}    

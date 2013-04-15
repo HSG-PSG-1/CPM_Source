@@ -1,0 +1,130 @@
+﻿@model IEnumerable<CPM.DAL.Comment>
+@using CPM.Helper
+@using System.Collections
+@{ CPM.DAL.Comment commentObj = ((CPM.DAL.Comment)ViewData["commentObj"]);
+   CPM.DAL.Claim claimObj = (ViewData["claimObj"] as CPM.DAL.Claim);
+   int AssignTo = claimObj.AssignedTo;
+   string AssignToVal = claimObj.AssignToVal;
+   string ClaimGUID = claimObj.ClaimGUID;
+}       
+<div id="divComments">
+    <table style="width:100%" border="0">@if (!commentObj.Archived)
+                                         {<tr>@*Add \ Edit Comment : START*@
+            <td>@using (Html.BeginForm("Comments", "Claim", new {ClaimGUID = ClaimGUID}, FormMethod.Post, new { id = "frmComments", name="frmComments",
+                style = "display:inline" })) {<table cellpadding="2" cellspacing="2" style="width:100%" border="0">
+                    <tr>
+                        <td colspan="4" align="center">                            
+                        <div id="cmtOprMsg" style="text-align:center">&nbsp;</div>
+                            @Html.ValidationSummary(true)
+                            @Html.Hidden("ID", commentObj.ID)
+                            @Html.Hidden("ClaimID", commentObj.ClaimID)                            
+                            @Html.Hidden("UserID", commentObj.UserID)
+                            @Html.Hidden("PostedOn", commentObj.PostedOn)
+                            @Html.ValidationMessage("Comment1")
+                        </td>
+                    </tr>
+                    <tr>
+                        <td valign="top" rowspan="2" align="right" width="5%">Comment</td>
+                        <td rowspan="2" valign="top"  width="80%">
+                            @Html.TextArea("Comment1", commentObj.Comment1, 3, 40, new { @class = "textbox required", @style = "width:98%", @onblur = "return trimTextAreaMaxLen(this,4000);" })
+                            <br />@Html.ValidationMessage("Comment1")
+                        </td>
+                        <td valign="top" nowrap="nowrap" align="right" width="5%">Assign To</td>
+                        <td valign="top" align="right" width="10%">
+                            @Html.DropDownList("AssignTo", new SelectList((IEnumerable)ViewData["Users"], "id", "value", AssignTo), new { @class = "dropDown required" })
+                            @Html.ValidationMessage("AssignTo")
+                            @Html.Hidden("AssignToOLD", AssignTo)
+                            @Html.Hidden("AssignToVal", AssignToVal)
+                        </td>
+                    </tr>
+                    <tr>
+                        <td align="right" nowrap="nowrap" colspan="2" valign="top">
+                        @Html.Hidden("ClaimGUID", commentObj.ClaimGUID)
+                         <input id="btnSubmit" type="submit" value="Save" class="button" onclick="setDDLtext('AssignTo','AssignToVal');" />&nbsp;<input id="btnReset" type="reset" value="Cancel" class="button" onclick="reloadCmt();" />
+                        </td>
+        </tr>
+                </table>
+                @*Add \ Edit Comment : END*@
+                 } 
+    </td> </tr>
+     }else{
+    <tr>
+    <td align="right">Assign To : @AssignToVal&nbsp;</td>
+    @*HT: commentObj.CommentBy won't work!*@
+    </tr> 
+    } 
+    <tr>
+        <td align="center">
+        @* Comments : START *@
+            <table class="thinBorder" width="99%">
+                <thead class="header">
+                    <tr>
+                        @if (!commentObj.Archived){ <th width="3%"></th>} 
+                        <th nowrap="nowrap" width="10%">Comment By</th>
+                        <th nowrap="nowrap" width="10%">Posted On</th>
+                        <th>Comment</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model){
+                        if (!item._Deleted){ //Avoid deleted records 
+                    <tr>
+                        @if (!commentObj.Archived)
+                        { 
+                        <td nowrap="nowrap">
+                            <div class="dDialog" onclick="reloadCmt('@Url.Action("Comments", new { ClaimID = item.ClaimID, CommentID = item.ID, ClaimGUID = ClaimGUID })');">@Html.Raw(@Defaults.editImg)</div>&nbsp;
+                            @* HttpPost Delete - Kept for ref: @string.Format(Defaults.delImgLink, " reloadCmt('" + Url.Action("CommentDelete", new { CommentID = item.ID }) + "');") *@
+                            @Html.Raw(Defaults.delPOSTImgTACO("CommentID", item.ID, "doCmtDelPost"))
+                        </td>} 
+                        <td>@item.CommentBy</td>
+                        <td>@item.PostedOn.ToString(Defaults.dtFormat, Defaults.ci)</td>
+                        <td>@item.Comment1</td>
+                    </tr>
+                     } }
+                </tbody>
+                <tfoot>
+                    @Html.Raw(Defaults.chkNoRecords(Model.Count(), 4))</tfoot>
+            </table>
+        @* Comments : END *@
+        </td>
+    </tr>
+    </table>
+</div>
+@if (!commentObj.Archived)
+{ <text>
+<script type="text/javascript" language="javascript" defer="defer">
+    // Put script at bottom to avoid early-references
+    $(document).ready(function () {
+        doAjaxForm('#frmComments', '#divComments', null); //AJAXify form
+        $("#frmComments").validate({@Defaults.validatorJQsetting});
+        setFocus("Comment1");
+    });
+ 
+    function reloadCmt(url) {//$("#divComments").html(loading);
+        reload(url, $('#frmComments').attr('action'), "#divComments"); return false;
+    }
+
+    function doCmtDelPost(txtId, txtVal) {
+        var data = {}; data[txtId] = txtVal;
+        var url = '@Url.Action("CommentDelete", "Claim", new { ClaimGUID = commentObj.ClaimGUID })';
+        $.post(url, data);
+        return false; // prevent any postback
+    }
+    
+    
+                /* HT: OLD code kept for jQ ref
+                // http://jquery.malsup.com/form/#options-object
+                $('#frmComments').ajaxForm({
+                target: '#divComments'
+                , success: function() { checksession(); } //showResponse
+                //http://stackoverflow.com/questions/199099/how-to-manage-a-redirect-request-after-a-jquery-ajax-call
+                , beforeSubmit: function(arr, $form, options) {
+                // The array of form data takes the following form: 
+                // [ { name: 'username', value: 'jresig' }, { name: 'password', value: 'secret' } ]
+                $("#divComments").html(loading);
+                // return false to cancel submit
+                }
+                }); */   
+</script>
+</text>
+} 

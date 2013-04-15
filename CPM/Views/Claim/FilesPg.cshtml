@@ -1,0 +1,6 @@
+﻿    <!-- FILES-START: ONLY this is required if its  Claim Entry -->
+    @if (true/* || CPM.Helper._Session.Claims[ViewData["ClaimGUID"].ToString()].ID > CPM.Helper.Defaults.Integer*/)
+    {
+    <text> @{ Html.RenderAction("Files", "Claim", new{ClaimGUID = ViewData["ClaimGUID"]}); }</text> } 
+     else {   <div style="text-align:center"> Please save the claim before  you start managing files</div> }     
+    <!-- FILES-END: ONLY this is required if its  Claim Entry -->

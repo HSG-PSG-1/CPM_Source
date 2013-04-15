@@ -1,0 +1,7 @@
+﻿@{ ViewBag.Title = "Data not found"; Layout = CPM.Helper.Defaults.masterLayout;}
+    <h3>
+        Data not found or deleted by user!
+    </h3>
+    <span class="note error"><b>MESSAGE:</b>
+        @((ViewData["Message"]??"").ToString())
+    </span> 

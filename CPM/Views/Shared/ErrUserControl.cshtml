@@ -1,0 +1,16 @@
+﻿@model Exception
+@using CPM.Helper
+@{
+    string errMsgDetails = "", errMsg = Defaults.formatExceptionDetails(Model, ref errMsgDetails);
+    //bool mailSent = false;
+    ////Send App error email
+    // try { MailManager.ApplicationErrorMail(errMsg + errMsgDetails); mailSent = true; }
+    // catch { mailSent = false; }
+    //Set details as per Error level to be displayed
+    if (Config.ErrorLevelDetail != "1") { errMsgDetails = ""; }    
+}
+<b class="error note">EXCEPTION OCCURRED</b><br />
+@Html.Raw(errMsg + errMsgDetails)
+<br />
+@*@if (!mailSent)
+{  <span>Unable to send mail to support due to incorrect SMTP settings</span> } *@

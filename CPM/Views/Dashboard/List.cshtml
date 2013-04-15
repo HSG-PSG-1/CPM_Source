@@ -1,0 +1,214 @@
+﻿@model PagedList<CPM.DAL.vw_Claim_Dashboard>
+@using Webdiyer.WebControls.Mvc
+@using CPM.Services
+@using CPM.Helper
+@using System.Collections
+@{ ViewBag.Title = "Dashboard"; Layout = Defaults.masterLayout;}
+@section HeadContent { <script type="text/javascript" language="javascript"></script> }
+
+@{ CPM.DAL.vw_Claim_Dashboard dSearch = ((CPM.DAL.vw_Claim_Dashboard)(ViewData["SearchData"]));
+       object routeValues = new { qData = Request["qData"] };
+       Dictionary<string, object> txtAttr = new Dictionary<string, object>();
+       txtAttr.Add("class", "hdrTxt textBox");
+       txtAttr.Add("onchange", "setFiltered(1,this);");
+       bool isCustomer = _Session.IsOnlyCustomer, isSales = _Session.IsOnlySales;
+       string userType = isCustomer ? "Customer" : "Internal";
+       string brandLookup = !_Session.IsOnlyVendor ?LookupService.Source.Brand.ToString():
+       LookupService.Source.BrandVendor.ToString() + "&extras=" + _SessionUsr.OrgID.ToString();
+   }
+       <form action="@Url.Content("~/Dashboard/Excel")" method="post" id="frmExcel" style="display:none"><input type="submit" value="Export to Excel" class="button" id="btnExcel" /></form>       
+    <table width="100%">
+    <tr>
+    <td><b class="smallHeading">Dashboard</b></td>
+    <td class="sqz" align="right">@Html.ActionLink("New Claim", "Manage", "Claim", new { ClaimId = 0}, null)&nbsp;</td>
+    </tr>
+        <tr>
+            <td colspan="2">
+            <!-- START: Search Panel -->
+                <form action="@Url.Content("~/Dashboard/List")" method="post" id="frm" style="display:inline">                
+                <fieldset>
+                    <legend onclick="showHideDiv('tblSearch')" style="cursor:pointer">
+                    &nbsp;<img id="tblSearchImg" src="@Url.Content("~/Content/Images/aroB.gif")" alt="Show/Hide panel" />
+                    &nbsp;Search&nbsp;</legend>
+                <table id="tblSearch" width="100%" cellpadding="5" cellspacing="5">
+                    <tr>
+                        <td nowrap="nowrap" width="5%">Claim #</td>
+                        <td>
+                            @*<%= Html.TextBox("ClaimNo1", dSearch.ClaimNo1)%>*@
+                            @Html.TextBox("ClaimNos", dSearch.ClaimNos, new{title="Enter single or comma separated multiple values"})
+                        </td>
+                        <td nowrap="nowrap" width="5%">Status</td>
+                        <td>
+                            @Html.DropDownList("StatusID", new SelectList((IEnumerable)ViewData["Status"], "id", "value", dSearch.StatusID), " ", new { @class = "dropDown" })
+                        </td>
+                        @if (!isCustomer) { 
+                        <td nowrap="nowrap" width="5%">Assigned To</td>
+                        <td valign="bottom" nowrap="nowrap">
+                            @Html.TextBox("AssignToName", dSearch.AssignToName,new {@style="width:200px"})&nbsp;@Html.Raw(string.Format(Defaults.lookupImgBtn, "AssignToName"))@Html.Hidden("AssignedTo", dSearch.AssignedTo)
+                        </td> 
+                        } else { <td colspan="2"></td>   } 
+                    </tr>
+                    <tr>
+                        <td nowrap="nowrap">Customer Ref #</td>
+                        <td>
+                            @Html.TextBox("CustRefNo", dSearch.CustRefNo, txtAttr)
+                        </td>
+                        <td nowrap="nowrap">Brand</td>
+                        <td valign="top" nowrap="nowrap">
+                        @Html.TextBox("BrandName", dSearch.BrandName)&nbsp;@Html.Raw(string.Format(Defaults.lookupImgBtn, "BrandName"))@Html.Hidden("BrandID", dSearch.BrandID)
+                        </td>
+                        @if (!isCustomer) { 
+                        <td nowrap="nowrap">Customer</td>
+                        <td valign="middle" nowrap="nowrap">
+                        @Html.TextBox("CustOrg", dSearch.CustOrg,new {@style="width:200px"})&nbsp;@Html.Raw(string.Format(Defaults.lookupImgBtn, "CustOrg"))@Html.Hidden("CustID", dSearch.CustID)
+                        </td>
+                        } else { <td colspan="2"></td>   }
+                    </tr>
+                    <tr>
+                        <td nowrap="nowrap">Claim Date From</td>
+                        <td>
+                            @Html.TextBox("ClaimDateFrom1", dSearch.ClaimDateFrom.HasValue ? dSearch.ClaimDateFrom.Value.ToString(Defaults.dtFormat, Defaults.ci) : "")
+                            @Html.Hidden("ClaimDateFrom", dSearch.ClaimDateFrom.HasValue ? dSearch.ClaimDateFrom.Value.ToString(Defaults.dtFormat, Defaults.ci) : "")
+                        </td>
+                        <td nowrap="nowrap">Claim Date To</td>
+                        <td>
+                            @Html.TextBox("ClaimDateTo1", dSearch.ClaimDateTo.HasValue ? dSearch.ClaimDateTo.Value.ToString(Defaults.dtFormat, Defaults.ci) : "")
+                            @Html.Hidden("ClaimDateTo", dSearch.ClaimDateTo.HasValue ? dSearch.ClaimDateTo.Value.ToString(Defaults.dtFormat, Defaults.ci) : "")
+                        </td>
+                        @if (!isCustomer && !isSales) { 
+                        <td nowrap="nowrap">Salesperson</td>
+                        <td valign="top" nowrap="nowrap">
+                            @Html.TextBox("Salesperson", dSearch.Salesperson,new {@style="width:200px"})&nbsp;@Html.Raw(string.Format(Defaults.lookupImgBtn, "Salesperson"))@Html.Hidden("SalespersonID", dSearch.SalespersonID)
+                        </td>
+                        } else { <td colspan="2"></td>   } 
+                    </tr>
+                    <tr>
+                        <td colspan="6" align="right">
+                        Search Archived Claims @Html.CheckBox("Archived", dSearch.Archived)&nbsp;&nbsp;
+                        <input type="submit" value="Search" class="button" />
+                <input type="submit" value="Reset" class="button" onclick="clearForm(document.getElementById('frm')); document.getElementById('doReset').checked = true;resetDatepicker('#ClaimDateFrom1, #ClaimDateTo1');" />                
+                <input type="checkbox" name="doReset" id="doReset" style="display: none;" />                
+                @if (true || Model.Count > 0) {//Kept for ref 
+                <input type="button" value="Export to Excel" class="button" onclick="document.getElementById('btnExcel').click();return false;" />  
+                }               
+                        </td>
+                    </tr>
+                </table>                
+                </fieldset>
+                </form>
+            <!-- END: Search Panel -->
+            </td>
+        </tr>        
+        <tr>
+            <td colspan="2">  
+            <div id="tdGrid">
+                @*@Html.RenderPartial("./EditorTemplates/ListCustomer", Model); *@
+                        @{ Html.RenderAction("ClaimList", "Dashboard"); }
+             </div>
+            </td>
+        </tr>
+    </table>    
+    
+<script language="javascript" type="text/javascript" defer="defer">    setFocus("ClaimNo1");
+    // For future manipulation: $('div.pager').children('a').click(function () {@Defaults.chkCollapse }); // Add event to each page link to check & persist collapse search panel
+
+        //var autoCompMinLen = 2; - now available in common.js
+        function callAutoComplete(source, ctrl, IDctrl) {
+            //Invoke auto-complete
+            renderAutoComplete("@Defaults.commonRoot/Lookup?id=" + source, IDctrl, ctrl);// idBox, txtBox);
+        }
+
+    $().ready(function() {
+    doCollapse(); //If url has collapse
+        
+        //AJAXify form
+        doAjaxForm('#frm', '#tdGrid', '#doReset');
+
+        callAutoComplete("@Html.Raw(brandLookup)", "#BrandName", "#BrandID");
+        //callAutoComplete("ShipLoc", "#ShipToLoc", "#ShipToLocationID");
+
+        callAutoComplete("Customer", "#CustOrg", "#CustID");
+        callAutoComplete("User", "#AssignToName", "#AssignedTo");
+        callAutoComplete("Salesperson", "#Salesperson", "#SalespersonID");                        
+        //Ref: $("#SalesPerson").autocomplete({ source: ['this', 'is', 'easy', 'to', 'have', 'an', 'auto', 'complete'] });
+        
+        // Configure Date picker plugin
+        //http://jqueryui.com/demos/datepicker/date-range.html
+        var dates = $("#ClaimDateFrom1, #ClaimDateTo1").datepicker({
+            defaultDate: "+1w",
+            minDate:minSQLDate,
+            maxDate:maxSQLDate,            
+            changeMonth: true,
+            numberOfMonths: 3,
+            onSelect: function(selectedDate) {
+                var option = this.id == "ClaimDateFrom1" ? "minDate" : "maxDate",
+					instance = $(this).data("datepicker"),
+					date = $.datepicker.parseDate(
+						instance.settings.dateFormat ||
+						$.datepicker._defaults.dateFormat,
+						selectedDate, instance.settings);
+                dates.not(this).datepicker("option", option, date);
+            }
+        });
+            // Set format to be used by alt date field
+            $("#ClaimDateFrom1").datepicker("option", "altField", '#ClaimDateFrom');
+            $("#ClaimDateFrom1").datepicker("option", "altFormat", 'dd-M-yy');
+
+            $("#ClaimDateTo1").datepicker("option", "altField", '#ClaimDateTo');
+            $("#ClaimDateTo1").datepicker("option", "altFormat", 'dd-M-yy');
+    });
+    
+    //Required to show/hide search-panel
+     var showImgPath = "@Url.Content("~/Content/Images/aroL.gif")"; //"../../Resources/images/aroL.gif";
+     var hideImgPath = "@Url.Content("~/Content/Images/aroB.gif")";// "../../Resources/images/aroB.gif";
+        
+    function showDialog(action, claimID, archived) {
+        var containerID = "#dialog" + claimID;
+        $(containerID).dialog({
+            modal: false,
+            open: function() {
+             $(this).html(loading);
+             $(this).load('@Url.Content("~/Dashboard/")' + action + '?ClaimID=' + claimID + '&Archived=' + archived);
+            },
+            height: 360,
+            width: 650,
+            title: action,
+            close: function(event, ui) { //NOTE: Required so that multiple dialog controls can be references with the same id
+            $(this).dialog("destroy").empty();}//Can't use .remove() as in SO: 6515052 so we empty the html.
+        });
+    }
+    
+   var lastTR = "#tblStatusHistory tbody>tr:last";
+   var oldStat = "#OldStatus", oldStatID = "#OldStatusID", newStat = "#NewStatus", newStatID = "#NewStatusID";
+   function changeClaimStatusPost(ClaimId, OldStatusID, NewStatusID) {
+            var data = {}; //Set data to be posted back
+            data["ClaimId"] = ClaimId;  data["OldStatusID"] = OldStatusID;  data["NewStatusID"] = NewStatusID;
+            
+            var url = '@Url.Action("ChangeClaimStatus", "Claim", new { ClaimID = -99 })'.replace('-99',ClaimId);
+            $.post(url, data);
+                         
+            return false; // prevent any postback
+        }
+        var statTDdiv = "";//will be set whn the cell is clicked
+   function updateStatusHistory(){
+        //clone and insert the tr after the table
+        $(lastTR).clone(true).insertAfter(lastTR);        
+        //Update data
+        $(lastTR).find('td:first').html('@_SessionUsr.UserName');
+        
+        $(lastTR).find('td:first').next().html('@DateTime.Now.ToString(Defaults.dtFormat, Defaults.ci)');
+        $(lastTR).find('td:last').prev().html($(oldStat).val());
+        $(lastTR).find('td:last').html($(newStatID).children("option:selected").text());
+        
+        $(lastTR).effect('highlight', {}, 1000); //highlight
+        
+        //persist updated status in textbox
+        $(oldStatID).val($(newStatID).val());
+        $(oldStat).val($(newStatID).children("option:selected").text());
+        //update in Grid (NOTE: make sure 'statTDdiv' is set when td is clicked
+        $(statTDdiv).html($(oldStat).val()); $(statTDdiv).effect('highlight', {}, 2000); //highlight
+   }    
+</script>
+@*HT: Set min width required by Dashboard*@
+<img src="@Url.Content("~/Content/Images/spacer.gif")" height="1px" width="900px" />
+<script src="@Url.Content("~/Content/Scripts/jquery.taconite.js")" type="text/javascript" ></script>

@@ -1,0 +1,69 @@
+﻿@model PagedList<CPM.DAL.vw_Users_Role_Org>
+@using Webdiyer.WebControls.Mvc
+@using CPM.Services
+@using CPM.Helper
+@{  object routeValues = new { qData = Request["qData"] };
+    string reload = "return reloadList(this.href);";// Defaults.chkCollapse;    
+    bool? oprSuccess = ((bool?)ViewData["oprSuccess"]);}    
+<table width="100%" class="thinBorder" border="0">
+    <thead class="header">
+        <tr>
+            <th nowrap="nowrap" width="2%"></th>
+            <th nowrap="nowrap">@Html.Raw(Html.SortableColumn("Org Type", "OrgType", reload, routeValues))</th>
+            <th>@Html.Raw(Html.SortableColumn("Name", "UserName", reload, routeValues, true, true))</th>
+            <th>@Html.Raw(Html.SortableColumn("Email", "Email", reload, routeValues))</th>
+            <th>@Html.Raw(Html.SortableColumn("Role", "RoleName", reload, routeValues))</th>            
+        </tr>
+    </thead>
+    @*<tbody> - DON'T because we'll add multiple tbody for group by *@
+        @{ string prevTxt = "", val = ""; int i = 0; string prevID = ""; }
+           @foreach (var item in Model){ i = 0;
+           @Html.Raw(Defaults.getGroupOnSortTbody(item, prevTxt, 
+           new System.Collections.Specialized.StringDictionary() { {"OrgType","Org Type"},{"RoleName","Role"}},
+           out val, item.ID,ref i, 5, ref prevID))
+        <tr>
+            <td nowrap="nowrap">
+                <a href='@Html.Raw(Url.Action("AddEdit", new { id = item.ID }))'>
+                    @Html.Raw(Defaults.editImg)</a>
+                    @* Old HttpPost Delete : needed for future ref
+                    @using (Html.BeginForm("Delete", "User", new { id = item.ID }, FormMethod.Post, new { @style = "display:inline;border:none 0px" }))
+                       { @Html.Raw(Defaults.delPOSTImg) }*@
+                       @if (!(item.ID == _SessionUsr.ID))
+                       {
+                            @Html.Raw(Defaults.delPOSTImgTACO("UserId", item.ID))
+                       }                       
+            </td>
+            <td>@item.OrgType</td>
+            <td>@item.UserName</td>
+            <td>@item.Email</td>
+            <td>@item.RoleName</td>            
+        </tr>
+          prevTxt = val; } @if(!string.IsNullOrEmpty(val)){@*SPECIAL CASE js function for grouped data counter*@
+@Html.Raw("</tbody>")<script defer="defer">reviseLastGrpCount('@prevID');</script>}
+        <tfoot>
+        <tr>
+            <td colspan="8" align="center">
+                <table cellpadding="0" cellspacing="0" class="pager">
+                    <tr>
+                        <td nowrap="nowrap">&nbsp;Record count : </td>
+                        <td id="usrCount">@Model.TotalItemCount</td>
+                        <td align="center" width="98%" nowrap="nowrap">
+                            @(Html.Pager(Model,new PagerOptions { PageIndexParameterName = "index", CssClass="pager",
+                                            FirstPageText = "&nbsp;|<&nbsp;",
+                                            PrevPageText = "&nbsp;<<&nbsp;",
+                                            NextPageText = "&nbsp;>>&nbsp;",
+                                            LastPageText = "&nbsp;>|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;",
+                            PageIndexBoxType = PageIndexBoxType.DropDownList,  /*, ContainerTagName="span"*/ }))
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </tfoot>
+</table>
+@*@{ QryString.SetSecondarySort(ViewData["SetPrevSort"]); }
+*@<script language="javascript" type="text/javascript" defer="defer">
+ $('div.pager').children('a').click(function() { @Html.Raw(reload) });
+        function reloadList(url) {$("#messages").hide(); return reload(url, '', "#tdGrid");} 
+        var usrCountTD = $("table tfoot tr td #usrCount");
+    </script>

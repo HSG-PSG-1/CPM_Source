@@ -1,0 +1,85 @@
+﻿@model PagedList<CPM.DAL.vw_ActivityLog>           
+@using Webdiyer.WebControls.Mvc
+@using CPM.Services
+@using CPM.Helper           
+@{  object routeValues = new { qData = Request["qData"] };
+    string reload = "return reloadList(this.href);"; /* Defaults.chkCollapse; */   }
+<table width="100%" class="thinBorder" id="tbl">
+    <thead class="header">
+        <tr>
+            <th>@Html.Raw(Html.SortableColumn("Activity", "Activity", reload, routeValues))</th>
+            <th>@Html.Raw(Html.SortableColumn("User", "UserText",reload, routeValues))</th>
+            <th>@Html.Raw(Html.SortableColumn("Date Time", "ActDateTime", reload, routeValues, true, false))</th>
+            <th>@Html.Raw(Html.SortableColumn("Claim", "ClaimText", reload, routeValues))</th>
+            <th>@Html.Raw(Html.SortableColumn("File", "FileName", reload, routeValues))</th>
+        </tr>
+    </thead>
+    @*<tbody> - DON'T because we'll add multiple tbody for group by *@
+    @{ string prevTxt = "", val = ""; int i = 0; string prevID = "";}
+       @foreach (var item in Model)
+       { i = 0; 
+       @Html.Raw(Defaults.getGroupOnSortTbody(item, prevTxt, new System.Collections.Specialized.StringDictionary() {
+{ "Activity", "Activity" }, { "UserText", "User" }, { "ActDateTime", "Date" }, { "ClaimText", "Claim" } },
+       out val, item.ID, ref i, 5, ref prevID))
+    <tr>
+        <td>@item.Activity</td>
+        <td>@item.UserText</td>
+        <td>@item.ActDateTime.ToString(Defaults.dtTFormat, Defaults.ci)</td>
+        <td>@if (!string.IsNullOrEmpty(item.ClaimText)){
+            @(Html.ActionLink(item.ClaimText, "Manage", "Claim", new { ClaimId = item.ClaimID }, new { @title = "Click to view this claim" }))
+            } 
+        </td>
+        <td>@item.FileName
+            @if (!string.IsNullOrEmpty(item.FileName) && item.ClaimID.HasValue){ 
+                string actionCodeStr = FileIO.getFileDownloadActionCode(item.FileName, item.ClaimID.Value, item.ClaimDetailID);
+                string clipImgLink = string.Format(Defaults.clipImgLink,
+                   //HT: Make sure the url is decoded
+                   HttpUtility.UrlDecode(Url.Action(actionCodeStr, "Claim", new { ClaimID = item.ClaimID })));
+                 @Html.Raw("&nbsp;" + clipImgLink)                
+            }
+        </td>
+    </tr>    
+      prevTxt = val;}
+      @if (!string.IsNullOrEmpty(val)){@*SPECIAL CASE js function for grouped data counter*@
+         @Html.Raw("</tbody>")<script defer=\"defer\"> reviseLastGrpCount('+@prevID+');</script>
+    }                                                                                                                        
+    <tfoot>
+        <tr>
+            <td colspan="9" align="center">
+                <table cellpadding="0" cellspacing="0" class="pager">
+                    <tr>
+                        <td nowrap="nowrap">
+                            &nbsp;Record count :
+                            @Model.TotalItemCount&nbsp;
+                        </td>
+                        <td align="center" width="98%" nowrap="nowrap">
+                            @(Html.Pager(Model, new PagerOptions
+{   AutoHide = true,
+    PageIndexParameterName = "index",
+    CssClass = "pager",
+    FirstPageText = "&nbsp;|<&nbsp;",
+    PrevPageText = "&nbsp;<<&nbsp;",
+    NextPageText = "&nbsp;>>&nbsp;",
+    LastPageText = "&nbsp;>|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;",
+    PageIndexBoxType = PageIndexBoxType.DropDownList,  /*, ContainerTagName="span"*/
+}))@*, new {@onclick= Defaults.chkCollapse } - WON'T work because it adds so at the riw level*@
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </tfoot>
+</table>
+@*@{ QryString.SetSecondarySort(ViewData["SetPrevSort"]); }*@
+<script language="javascript" type="text/javascript" defer="defer">
+ $('div.pager').children('a').click(function() { @reload });
+        var loading = '<div style="text-align:center;display:block;"><img src=" @Url.Content("~/Content/Images/loading.gif") " title="" alt="Loading" /></div>';
+        function reloadList(url) {
+            try {
+                $("#tdGrid").html(loading);
+                return reload(url, '', "#tdGrid");
+            } catch (ex) { return false; } 
+        } 
+</script>
+
+

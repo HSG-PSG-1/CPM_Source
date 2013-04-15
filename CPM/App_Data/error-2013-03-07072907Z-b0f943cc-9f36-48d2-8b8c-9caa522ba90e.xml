@@ -1,0 +1,233 @@
+﻿<error errorId="b0f943cc-9f36-48d2-8b8c-9caa522ba90e" application="/" host="HSM05" type="System.Data.SqlClient.SqlException" message="SQL Server service has been paused. No new connections will be allowed. To resume the service, use SQL Computer Manager or the Services application in Control Panel.&#xD;&#xA;Login failed for user 'sa'.&#xD;&#xA;A severe error occurred on the current command.  The results, if any, should be discarded." source=".Net SqlClient Data Provider" detail="System.Data.SqlClient.SqlException (0x80131904): SQL Server service has been paused. No new connections will be allowed. To resume the service, use SQL Computer Manager or the Services application in Control Panel.&#xD;&#xA;Login failed for user 'sa'.&#xD;&#xA;A severe error occurred on the current command.  The results, if any, should be discarded.&#xD;&#xA;   at System.Data.SqlClient.SqlConnection.OnError(SqlException exception, Boolean breakConnection)&#xD;&#xA;   at System.Data.SqlClient.SqlInternalConnection.OnError(SqlException exception, Boolean breakConnection)&#xD;&#xA;   at System.Data.SqlClient.TdsParser.ThrowExceptionAndWarning()&#xD;&#xA;   at System.Data.SqlClient.TdsParser.Run(RunBehavior runBehavior, SqlCommand cmdHandler, SqlDataReader dataStream, BulkCopySimpleResultSet bulkCopyHandler, TdsParserStateObject stateObj)&#xD;&#xA;   at System.Data.SqlClient.TdsParser.TdsExecuteTransactionManagerRequest(Byte[] buffer, TransactionManagerRequestType request, String transactionName, TransactionManagerIsolationLevel isoLevel, Int32 timeout, SqlInternalTransaction transaction, TdsParserStateObject stateObj, Boolean isDelegateControlRequest)&#xD;&#xA;   at System.Data.SqlClient.SqlInternalConnectionTds.ExecuteTransactionYukon(TransactionRequest transactionRequest, String transactionName, IsolationLevel iso, SqlInternalTransaction internalTransaction, Boolean isDelegateControlRequest)&#xD;&#xA;   at System.Data.SqlClient.SqlInternalConnectionTds.ExecuteTransaction(TransactionRequest transactionRequest, String name, IsolationLevel iso, SqlInternalTransaction internalTransaction, Boolean isDelegateControlRequest)&#xD;&#xA;   at System.Data.SqlClient.SqlInternalConnection.BeginSqlTransaction(IsolationLevel iso, String transactionName)&#xD;&#xA;   at System.Data.SqlClient.SqlInternalConnection.BeginTransaction(IsolationLevel iso)&#xD;&#xA;   at System.Data.SqlClient.SqlConnection.BeginDbTransaction(IsolationLevel isolationLevel)&#xD;&#xA;   at System.Data.Common.DbConnection.BeginTransaction()&#xD;&#xA;   at CPM.Services.CAWclaim.AsyncBulkAddEditDel(Claim claimObj, Int32 StatusIDold) in F:\s_Company\Projects\AOT\Development\Source\CPM\CPM\Code\Services\ClaimService.cs:line 334&#xD;&#xA;   at CPM.Services.CAWclaim.AddEdit(vw_Claim_Master_User_Loc vwObj, Int32 StatusIDold) in F:\s_Company\Projects\AOT\Development\Source\CPM\CPM\Code\Services\ClaimService.cs:line 320&#xD;&#xA;   at CPM.Controllers.ClaimController.Manage(Int32 ClaimID, vw_Claim_Master_User_Loc claimObj, Boolean isAddMode) in F:\s_Company\Projects\AOT\Development\Source\CPM\CPM\Controllers\ClaimController.cs:line 141&#xD;&#xA;   at lambda_method(Closure , ControllerBase , Object[] )&#xD;&#xA;   at System.Web.Mvc.ActionMethodDispatcher.Execute(ControllerBase controller, Object[] parameters)&#xD;&#xA;   at System.Web.Mvc.ReflectedActionDescriptor.Execute(ControllerContext controllerContext, IDictionary`2 parameters)&#xD;&#xA;   at System.Web.Mvc.ControllerActionInvoker.InvokeActionMethod(ControllerContext controllerContext, ActionDescriptor actionDescriptor, IDictionary`2 parameters)&#xD;&#xA;   at System.Web.Mvc.ControllerActionInvoker.&lt;&gt;c__DisplayClass15.&lt;InvokeActionMethodWithFilters&gt;b__12()&#xD;&#xA;   at System.Web.Mvc.ControllerActionInvoker.InvokeActionMethodFilter(IActionFilter filter, ActionExecutingContext preContext, Func`1 continuation)&#xD;&#xA;   at System.Web.Mvc.ControllerActionInvoker.&lt;&gt;c__DisplayClass15.&lt;&gt;c__DisplayClass17.&lt;InvokeActionMethodWithFilters&gt;b__14()&#xD;&#xA;   at System.Web.Mvc.ControllerActionInvoker.InvokeActionMethodFilter(IActionFilter filter, ActionExecutingContext preContext, Func`1 continuation)&#xD;&#xA;   at System.Web.Mvc.ControllerActionInvoker.&lt;&gt;c__DisplayClass15.&lt;&gt;c__DisplayClass17.&lt;InvokeActionMethodWithFilters&gt;b__14()&#xD;&#xA;   at System.Web.Mvc.ControllerActionInvoker.InvokeActionMethodFilter(IActionFilter filter, ActionExecutingContext preContext, Func`1 continuation)&#xD;&#xA;   at System.Web.Mvc.ControllerActionInvoker.&lt;&gt;c__DisplayClass15.&lt;&gt;c__DisplayClass17.&lt;InvokeActionMethodWithFilters&gt;b__14()&#xD;&#xA;   at System.Web.Mvc.ControllerActionInvoker.InvokeActionMethodWithFilters(ControllerContext controllerContext, IList`1 filters, ActionDescriptor actionDescriptor, IDictionary`2 parameters)&#xD;&#xA;   at System.Web.Mvc.ControllerActionInvoker.InvokeAction(ControllerContext controllerContext, String actionName)&#xD;&#xA;   at System.Web.Mvc.Controller.ExecuteCore()&#xD;&#xA;   at System.Web.Mvc.ControllerBase.Execute(RequestContext requestContext)&#xD;&#xA;   at System.Web.Mvc.ControllerBase.System.Web.Mvc.IController.Execute(RequestContext requestContext)&#xD;&#xA;   at System.Web.Mvc.MvcHandler.&lt;&gt;c__DisplayClass6.&lt;&gt;c__DisplayClassb.&lt;BeginProcessRequest&gt;b__5()&#xD;&#xA;   at System.Web.Mvc.Async.AsyncResultWrapper.&lt;&gt;c__DisplayClass1.&lt;MakeVoidDelegate&gt;b__0()&#xD;&#xA;   at System.Web.Mvc.Async.AsyncResultWrapper.&lt;&gt;c__DisplayClass8`1.&lt;BeginSynchronous&gt;b__7(IAsyncResult _)&#xD;&#xA;   at System.Web.Mvc.Async.AsyncResultWrapper.WrappedAsyncResult`1.End()&#xD;&#xA;   at System.Web.Mvc.MvcHandler.&lt;&gt;c__DisplayClasse.&lt;EndProcessRequest&gt;b__d()&#xD;&#xA;   at System.Web.Mvc.SecurityUtil.&lt;GetCallInAppTrustThunk&gt;b__0(Action f)&#xD;&#xA;   at System.Web.Mvc.SecurityUtil.ProcessInApplicationTrust(Action action)&#xD;&#xA;   at System.Web.Mvc.MvcHandler.EndProcessRequest(IAsyncResult asyncResult)&#xD;&#xA;   at System.Web.Mvc.MvcHandler.System.Web.IHttpAsyncHandler.EndProcessRequest(IAsyncResult result)&#xD;&#xA;   at System.Web.HttpApplication.CallHandlerExecutionStep.System.Web.HttpApplication.IExecutionStep.Execute()&#xD;&#xA;   at System.Web.HttpApplication.ExecuteStep(IExecutionStep step, Boolean&amp; completedSynchronously)" user="ht@hughessg.com" time="2013-03-07T07:29:07.5937500Z">
+  <serverVariables>
+    <item name="ALL_HTTP">
+      <value string="HTTP_CACHE_CONTROL:no-cache&#xD;&#xA;HTTP_CONNECTION:Keep-Alive&#xD;&#xA;HTTP_CONTENT_LENGTH:344&#xD;&#xA;HTTP_CONTENT_TYPE:application/x-www-form-urlencoded&#xD;&#xA;HTTP_ACCEPT:image/gif, image/x-xbitmap, image/jpeg, image/pjpeg, application/x-shockwave-flash, application/x-ms-application, application/x-ms-xbap, application/vnd.ms-xpsdocument, application/xaml+xml, application/vnd.ms-excel, application/vnd.ms-powerpoint, application/msword, */*&#xD;&#xA;HTTP_ACCEPT_ENCODING:gzip, deflate&#xD;&#xA;HTTP_ACCEPT_LANGUAGE:en-us&#xD;&#xA;HTTP_COOKIE:CPMcookie=CY7-ZH6PVQW7OCccpXNBYAsGr6TlOlTbTaSQC32DjjYkznfCWp4NpNnNVAQpGiNWu6Uy3J_YzJJdhk7pxlrXA2GwUZGx918eaqIRQqKJeRE1; ASP.NET_SessionId=51kfer0lrdf5h5d3qw5ohdhp; .ASPXAUTH=65F4B6ACB58C68AF4F0FBB1D1233153E86918FBBBB1B3184B3C4778DB1D931B21A258D8A905781446FF9FFA7D6C7E56F0E51607E41862DDEAA4B2C85A8732DE150C6568315007DD42E5ED8369CC46CC12D633E3DACC7BCFDB0B7BAB614C79D5C8720F79748A06B90B86E66C68CC514B7&#xD;&#xA;HTTP_HOST:localhost:4915&#xD;&#xA;HTTP_REFERER:http://localhost:4915/Claim/82&#xD;&#xA;HTTP_USER_AGENT:Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 5.1; GTB6; .NET CLR 2.0.50727; .NET CLR 3.0.04506.648; .NET CLR 3.5.21022; .NET CLR 3.0.4506.2152; .NET CLR 3.5.30729; .NET4.0C; .NET4.0E)&#xD;&#xA;HTTP_UA_CPU:x86&#xD;&#xA;" />
+    </item>
+    <item name="ALL_RAW">
+      <value string="Cache-Control: no-cache&#xD;&#xA;Connection: Keep-Alive&#xD;&#xA;Content-Length: 344&#xD;&#xA;Content-Type: application/x-www-form-urlencoded&#xD;&#xA;Accept: image/gif, image/x-xbitmap, image/jpeg, image/pjpeg, application/x-shockwave-flash, application/x-ms-application, application/x-ms-xbap, application/vnd.ms-xpsdocument, application/xaml+xml, application/vnd.ms-excel, application/vnd.ms-powerpoint, application/msword, */*&#xD;&#xA;Accept-Encoding: gzip, deflate&#xD;&#xA;Accept-Language: en-us&#xD;&#xA;Cookie: CPMcookie=CY7-ZH6PVQW7OCccpXNBYAsGr6TlOlTbTaSQC32DjjYkznfCWp4NpNnNVAQpGiNWu6Uy3J_YzJJdhk7pxlrXA2GwUZGx918eaqIRQqKJeRE1; ASP.NET_SessionId=51kfer0lrdf5h5d3qw5ohdhp; .ASPXAUTH=65F4B6ACB58C68AF4F0FBB1D1233153E86918FBBBB1B3184B3C4778DB1D931B21A258D8A905781446FF9FFA7D6C7E56F0E51607E41862DDEAA4B2C85A8732DE150C6568315007DD42E5ED8369CC46CC12D633E3DACC7BCFDB0B7BAB614C79D5C8720F79748A06B90B86E66C68CC514B7&#xD;&#xA;Host: localhost:4915&#xD;&#xA;Referer: http://localhost:4915/Claim/82&#xD;&#xA;User-Agent: Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 5.1; GTB6; .NET CLR 2.0.50727; .NET CLR 3.0.04506.648; .NET CLR 3.5.21022; .NET CLR 3.0.4506.2152; .NET CLR 3.5.30729; .NET4.0C; .NET4.0E)&#xD;&#xA;UA-CPU: x86&#xD;&#xA;" />
+    </item>
+    <item name="APPL_MD_PATH">
+      <value string="" />
+    </item>
+    <item name="APPL_PHYSICAL_PATH">
+      <value string="F:\s_Company\Projects\AOT\Development\Source\CPM\CPM\" />
+    </item>
+    <item name="AUTH_TYPE">
+      <value string="Forms" />
+    </item>
+    <item name="AUTH_USER">
+      <value string="ht@hughessg.com" />
+    </item>
+    <item name="AUTH_PASSWORD">
+      <value string="*****" />
+    </item>
+    <item name="LOGON_USER">
+      <value string="HSM05\Hemant" />
+    </item>
+    <item name="REMOTE_USER">
+      <value string="ht@hughessg.com" />
+    </item>
+    <item name="CERT_COOKIE">
+      <value string="" />
+    </item>
+    <item name="CERT_FLAGS">
+      <value string="" />
+    </item>
+    <item name="CERT_ISSUER">
+      <value string="" />
+    </item>
+    <item name="CERT_KEYSIZE">
+      <value string="" />
+    </item>
+    <item name="CERT_SECRETKEYSIZE">
+      <value string="" />
+    </item>
+    <item name="CERT_SERIALNUMBER">
+      <value string="" />
+    </item>
+    <item name="CERT_SERVER_ISSUER">
+      <value string="" />
+    </item>
+    <item name="CERT_SERVER_SUBJECT">
+      <value string="" />
+    </item>
+    <item name="CERT_SUBJECT">
+      <value string="" />
+    </item>
+    <item name="CONTENT_LENGTH">
+      <value string="344" />
+    </item>
+    <item name="CONTENT_TYPE">
+      <value string="application/x-www-form-urlencoded" />
+    </item>
+    <item name="GATEWAY_INTERFACE">
+      <value string="" />
+    </item>
+    <item name="HTTPS">
+      <value string="" />
+    </item>
+    <item name="HTTPS_KEYSIZE">
+      <value string="" />
+    </item>
+    <item name="HTTPS_SECRETKEYSIZE">
+      <value string="" />
+    </item>
+    <item name="HTTPS_SERVER_ISSUER">
+      <value string="" />
+    </item>
+    <item name="HTTPS_SERVER_SUBJECT">
+      <value string="" />
+    </item>
+    <item name="INSTANCE_ID">
+      <value string="" />
+    </item>
+    <item name="INSTANCE_META_PATH">
+      <value string="" />
+    </item>
+    <item name="LOCAL_ADDR">
+      <value string="127.0.0.1" />
+    </item>
+    <item name="PATH_INFO">
+      <value string="/Claim/82" />
+    </item>
+    <item name="PATH_TRANSLATED">
+      <value string="F:\s_Company\Projects\AOT\Development\Source\CPM\CPM\Claim\82" />
+    </item>
+    <item name="QUERY_STRING">
+      <value string="" />
+    </item>
+    <item name="REMOTE_ADDR">
+      <value string="127.0.0.1" />
+    </item>
+    <item name="REMOTE_HOST">
+      <value string="127.0.0.1" />
+    </item>
+    <item name="REMOTE_PORT">
+      <value string="" />
+    </item>
+    <item name="REQUEST_METHOD">
+      <value string="POST" />
+    </item>
+    <item name="SCRIPT_NAME">
+      <value string="/Claim/82" />
+    </item>
+    <item name="SERVER_NAME">
+      <value string="localhost" />
+    </item>
+    <item name="SERVER_PORT">
+      <value string="4915" />
+    </item>
+    <item name="SERVER_PORT_SECURE">
+      <value string="0" />
+    </item>
+    <item name="SERVER_PROTOCOL">
+      <value string="HTTP/1.1" />
+    </item>
+    <item name="SERVER_SOFTWARE">
+      <value string="" />
+    </item>
+    <item name="URL">
+      <value string="/Claim/82" />
+    </item>
+    <item name="HTTP_CACHE_CONTROL">
+      <value string="no-cache" />
+    </item>
+    <item name="HTTP_CONNECTION">
+      <value string="Keep-Alive" />
+    </item>
+    <item name="HTTP_CONTENT_LENGTH">
+      <value string="344" />
+    </item>
+    <item name="HTTP_CONTENT_TYPE">
+      <value string="application/x-www-form-urlencoded" />
+    </item>
+    <item name="HTTP_ACCEPT">
+      <value string="image/gif, image/x-xbitmap, image/jpeg, image/pjpeg, application/x-shockwave-flash, application/x-ms-application, application/x-ms-xbap, application/vnd.ms-xpsdocument, application/xaml+xml, application/vnd.ms-excel, application/vnd.ms-powerpoint, application/msword, */*" />
+    </item>
+    <item name="HTTP_ACCEPT_ENCODING">
+      <value string="gzip, deflate" />
+    </item>
+    <item name="HTTP_ACCEPT_LANGUAGE">
+      <value string="en-us" />
+    </item>
+    <item name="HTTP_COOKIE">
+      <value string="CPMcookie=CY7-ZH6PVQW7OCccpXNBYAsGr6TlOlTbTaSQC32DjjYkznfCWp4NpNnNVAQpGiNWu6Uy3J_YzJJdhk7pxlrXA2GwUZGx918eaqIRQqKJeRE1; ASP.NET_SessionId=51kfer0lrdf5h5d3qw5ohdhp; .ASPXAUTH=65F4B6ACB58C68AF4F0FBB1D1233153E86918FBBBB1B3184B3C4778DB1D931B21A258D8A905781446FF9FFA7D6C7E56F0E51607E41862DDEAA4B2C85A8732DE150C6568315007DD42E5ED8369CC46CC12D633E3DACC7BCFDB0B7BAB614C79D5C8720F79748A06B90B86E66C68CC514B7" />
+    </item>
+    <item name="HTTP_HOST">
+      <value string="localhost:4915" />
+    </item>
+    <item name="HTTP_REFERER">
+      <value string="http://localhost:4915/Claim/82" />
+    </item>
+    <item name="HTTP_USER_AGENT">
+      <value string="Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 5.1; GTB6; .NET CLR 2.0.50727; .NET CLR 3.0.04506.648; .NET CLR 3.5.21022; .NET CLR 3.0.4506.2152; .NET CLR 3.5.30729; .NET4.0C; .NET4.0E)" />
+    </item>
+    <item name="HTTP_UA_CPU">
+      <value string="x86" />
+    </item>
+  </serverVariables>
+  <form>
+    <item name="ID">
+      <value string="82" />
+    </item>
+    <item name="isAddMode">
+      <value string="false" />
+    </item>
+    <item name="ClaimNo">
+      <value string="82" />
+    </item>
+    <item name="StatusID">
+      <value string="4" />
+    </item>
+    <item name="StatusIDold">
+      <value string="4" />
+    </item>
+    <item name="ClaimDate">
+      <value string="05-Mar-2013 12:05:21 AM" />
+    </item>
+    <item name="BrandID">
+      <value string="349" />
+    </item>
+    <item name="CustOrg">
+      <value string="Ravico of Puerto Rico" />
+    </item>
+    <item name="CustID">
+      <value string="1328" />
+    </item>
+    <item name="CustRefNo">
+      <value string="" />
+    </item>
+    <item name="Location">
+      <value string="Ravico of Purerto Rico (PR)" />
+    </item>
+    <item name="ShipToLocationID">
+      <value string="2895" />
+    </item>
+    <item name="SalespersonName">
+      <value string="House" />
+    </item>
+    <item name="SalespersonID">
+      <value string="27" />
+    </item>
+    <item name="VendorID">
+      <value string="1523" />
+    </item>
+    <item name="ClaimGUID">
+      <value string="45d199d2-72d9-491f-9fee-515481346a16" />
+    </item>
+    <item name="btnCommit">
+      <value string="Commit all" />
+    </item>
+  </form>
+  <cookies>
+    <item name="CPMcookie">
+      <value string="CY7-ZH6PVQW7OCccpXNBYAsGr6TlOlTbTaSQC32DjjYkznfCWp4NpNnNVAQpGiNWu6Uy3J_YzJJdhk7pxlrXA2GwUZGx918eaqIRQqKJeRE1" />
+    </item>
+    <item name="ASP.NET_SessionId">
+      <value string="51kfer0lrdf5h5d3qw5ohdhp" />
+    </item>
+    <item name=".ASPXAUTH">
+      <value string="65F4B6ACB58C68AF4F0FBB1D1233153E86918FBBBB1B3184B3C4778DB1D931B21A258D8A905781446FF9FFA7D6C7E56F0E51607E41862DDEAA4B2C85A8732DE150C6568315007DD42E5ED8369CC46CC12D633E3DACC7BCFDB0B7BAB614C79D5C8720F79748A06B90B86E66C68CC514B7" />
+    </item>
+  </cookies>
+</error>

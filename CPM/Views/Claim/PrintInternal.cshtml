@@ -1,0 +1,11 @@
+﻿@*No cache headers*@
+@{ Response.CacheControl = "no-cache"; }
+@{ Response.AddHeader("Pragma", "no-cache"); }
+@{ Response.Expires = -1; }
+@model CPM.DAL.ClaimInternalPrint
+@using CPM.DAL
+@using CPM.Helper
+@{Html.RenderPartial("PrintCustomer", Model);}
+<br />
+@*<div style="page-break-before: always">&nbsp;</div>*@<div style="page-break-after: always">&nbsp;</div>
+@{Html.RenderPartial("PrintVendor", Model);}

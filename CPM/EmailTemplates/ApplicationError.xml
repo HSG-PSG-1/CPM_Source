@@ -1,0 +1,18 @@
+<email>
+	<subject>CPM: Application Error</subject>
+	<body>
+		<![CDATA[
+      <style>
+      .error{    color:Red;}
+      .smallHeader {FONT-SIZE: 12px;}
+      .blackLabel {color:Black;}
+      .note {BACKGROUND-COLOR: #ffffcc;}
+      </style>
+			<FONT SIZE="2" COLOR="" FACE="Verdana">
+			<b class="error note">EXCEPTION OCCURRED</b>
+      <br/>
+			[ERRORDETAILS]
+			</FONT>
+		]]>
+	</body>
+</email>

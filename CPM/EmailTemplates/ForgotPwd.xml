@@ -1,0 +1,14 @@
+<email>
+  <subject>AOT login details</subject>
+  <body>
+    <![CDATA[
+<FONT SIZE="2" COLOR="" FACE="Verdana">
+<br/>
+	Your AOT login details:<br>
+Email:<b>[EMAIL]</b><br/>
+Password:<b>[PASSWORD]</b>
+<br/>
+</FONT>
+]]>
+  </body>
+</email>

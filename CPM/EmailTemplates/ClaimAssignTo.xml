@@ -1,0 +1,15 @@
+<email>
+  <subject>AOT Claim #: [CLAIM#] was assigned to you</subject>
+  <body>
+    <![CDATA[
+<FONT SIZE="2" COLOR="" FACE="Verdana">
+<!--[FIRSTNAME] - <br/>-->
+	AOT Claim #: [CLAIM#] was assigned to you by [ASSIGNER]<br/><br/>
+The last comment entered was:<br><br>
+"[COMMENT]"<br/><br/>
+To access this claim, use this link:<br/>
+<a href="[LINK]" title="Go to this Claim">[LINK]</a><br/>
+</FONT>
+]]>
+  </body>
+</email>

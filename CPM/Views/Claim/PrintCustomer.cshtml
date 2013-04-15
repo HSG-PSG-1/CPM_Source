@@ -1,0 +1,198 @@
+﻿@*No cache headers*@
+@{ Response.CacheControl = "no-cache"; }
+@{ Response.AddHeader("Pragma", "no-cache"); }
+@{ Response.Expires = -1; }
+@model CPM.DAL.ClaimInternalPrint
+@using CPM.DAL
+@using CPM.Helper
+@{
+    vw_Claim_Master_User_Loc view = @Model.view;
+    List<Comment> comments = @Model.comments;
+    List<FileHeader> filesH = @Model.filesH;
+    List<ClaimDetail> items = @Model.items;
+
+    string root = Defaults.getAbsSiteURL(Request.Url.ToString());
+}
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>Claim Print - Customer</title>
+    <link href="@root@Url.Content("~/Content/Site.css")" rel="stylesheet" type="text/css" />
+    <style>
+        .spacing { margin: 5px 5px 5px 5px; }
+        .spacing td { text-align: center; }
+        html { overflow:scroll;}
+    </style>
+</head>
+<body style="background-color: #ffffff; margin: 1px 1px 1px 1px;">
+    <div style="text-align: right" onclick="window.print();">
+        [ <a href="#">Print</a> ]</div>
+    <table width="100%" cellpadding="1" cellspacing="1">
+        <tr>
+            <td>
+                @*Report Header 1 : START*@
+                <table cellpadding="0" cellspacing="0" width="100%">
+                    <tr>
+                        <td>
+                            &nbsp;<img src="@root@Url.Content("~/Content/Images/AOT Logo.jpg")" alt="We make importing Tires easy!" />
+                        </td>
+                    </tr>
+                    <tr>
+                        <td align="center" class="small">
+                            <i>We make importing Tires easy!</i><br />
+                            &nbsp;
+                            <table align="center" cellpadding="0" cellspacing="0" border="0">
+                                <tr>
+                                    <td nowrap="nowrap" align="center" colspan="3">
+                                        Houston, texas U.S.A.
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td nowrap="nowrap">
+                                        Tel. 281/600-8473
+                                    </td>
+                                    <td>
+                                        &nbsp;&nbsp;&nbsp;&nbsp;
+                                    </td>
+                                    <td nowrap="nowrap">
+                                        Fax.281/600-8475
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td nowrap="nowrap" align="center" colspan="3">
+                                        www.american-omni.com
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                </table>
+                @*Report Header 1 : END*@
+            </td>
+            <td width="50%">
+            </td>
+            <td align="center" nowrap="nowrap" align="right" valign="top">
+                @*Report Header 2 : START*@
+                <br />
+                <b class="PrintHeading">TIRE CLAIM FORM</b><br />
+                <table align="right">
+                    <tr>
+                        <td>
+                            <table width="90%" class="thinBorder" cellpadding="6" cellspacing="2">
+                                <tr>
+                                    <td nowrap="nowrap">Claim Date</td>
+                                    <td nowrap="nowrap">Customer Ref #</td>
+                                    <td nowrap="nowrap">Salesperson</td>
+                                    <td nowrap="nowrap">Claim #</td>
+                                </tr>
+                                <tr>
+                                    <td nowrap="nowrap">@view.ClaimDate.ToString(Defaults.dtFormat, Defaults.ci)</td>
+                                    <td nowrap="nowrap">@view.CustRefNo</td>
+                                    <td nowrap="nowrap">@view.SalespersonName</td>
+                                    <td nowrap="nowrap">@view.ClaimNo</td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                </table>
+                @*Report Header 2 : END*@
+            </td>
+        </tr>
+    </table>
+    <br />
+    <table width="100%" cellpadding="2" cellspacing="2">
+        <tr>
+            <td>
+            @* User, Brand : START *@
+                <table>
+                <tr>                   
+                        <td width="5%"></td>
+                        <td class1="uline" width="30%" style="text-decoration: none" nowrap="nowrap"></td>
+                        <td width="30%" align="right">Customer:</td>
+                        <td width="30%" class="uline" style="text-decoration: none" nowrap="nowrap">@view.CustOrg</td>
+                    </tr>
+                    <tr>                        
+                        <td width="5%">Brand:</td>
+                        <td class="uline" width="30%" style="text-decoration: none" nowrap="nowrap">@view.Brand</td>
+                        <td width="30%" align="right">Location:</td>
+                        <td width="30%" class="uline" style="text-decoration: none" nowrap="nowrap">@view.LocationAndCode</td>
+                    </tr>
+                </table>
+            @* User, Brand : END *@
+            </td>
+        </tr>
+        <tr>
+            <td>
+                @*<div style="text-align: right"> Total Items :<%= items.Count.ToString() %></div>*@
+                <span class="small">&nbsp;</span>
+                @if (items.Count > 0 || true) {
+                @*Items : START *@
+                <table class="thinBorder" width="99%" cellpadding="1" cellspacing="1">
+                    <thead class="header">
+                        <tr class="small">
+                            <th width="1%">#</th>
+                            <th width="1%">Item</th>
+                            <th nowrap="nowrap">SIZE / PLY / DESCRIPTION</th>
+                            <th nowrap="nowrap">SERIAL NO.</th>
+                            <th>D.O.T. NO.</th>
+                            <th nowrap="nowrap" class1="smaller">32NDS<br />REMAINING</th>
+                            <th nowrap="nowrap">NATURE OF DEFECT</th>
+                            <th nowrap="nowrap">ORIGINAL<br />T.D.(32NDS)</th>
+                            <th nowrap="nowrap">REMAINING<br />TREAD %</th>
+                            <th nowrap="nowrap">CURRENT<br />PRICE</th>
+                            <th nowrap="nowrap">CREDIT<br />AMOUNT</th>
+                        </tr>
+                    </thead>
+                    <tbody align="center">
+                        @{int pos = 1;} 
+                        @foreach (var item in items){
+                        <tr>
+                            <td rowspan="2">@(pos++)</td>
+                            <td nowrap="nowrap">@item.ItemCode</td>
+                            <td>&nbsp;@item.Size / @item.Ply / @item.Description</td>
+                            <td nowrap="nowrap">@item.Serial</td>
+                            <td>@item.DOT</td>
+                            <td nowrap="nowrap">@item.TDRemaining.ToString("#0")</td>
+                            <td>@item.Defect</td>
+                            <td nowrap="nowrap">@item.TDOriginal1.ToString("#0")</td>
+                            <td nowrap="nowrap" align="right">@item.RemainingTread1.ToString("#0.00")%</td>
+                            <td nowrap="nowrap" align="right">$@item.CurrentPrice.ToString("#0.00")</td>
+                            <td nowrap="nowrap" align="right">$@item.CreditAmt1.ToString("#0.00")</td>
+                        </tr>
+                            <tr>                            
+                            <td colspan="10" align="left"><i>&nbsp;Claim Status: @item.Note</i></td>
+                            </tr>
+                        } 
+                    </tbody>
+                </table>
+                @*Items : END *@
+                } 
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <span class="small">&nbsp;</span>
+                @*Report Footer : START*@
+                <table width="98%" align="right">
+                    <tr>
+                        <td width="30%" class="uline">@view.SalespersonName</td>
+                        <td width="1%"></td>
+                        <td width="30%" class1="uline"></td>
+                        <td width="20%"></td>
+                        <td width="10%" nowrap="nowrap" align="right">Total</td>
+                <td class="thinBorder" width="7%" align="right">$@items.Where(c => !c._Deleted).Sum(c => Math.Round(c.CreditAmt1, 2)).ToString("#0.00")</td>
+                    </tr>
+                    <tr>
+                        <td class="small">&nbsp;Salesperson</td>
+                        <td width="1%" colspan="5"></td>
+                        @*<td class="small">&nbsp;Claim Submitted By</td>
+                        <td colspan="3">&nbsp;</td>*@
+                    </tr>
+                </table>
+                @*Report Footer : END*@
+            </td>
+        </tr>
+    </table>
+</body>
+</html>
+

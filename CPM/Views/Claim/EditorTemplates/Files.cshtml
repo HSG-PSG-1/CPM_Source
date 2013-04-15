@@ -1,0 +1,130 @@
+﻿@model IEnumerable<CPM.DAL.FileHeader>
+@using CPM.Helper
+@using System.Collections
+@{ CPM.DAL.FileHeader FileHeaderObj = ((CPM.DAL.FileHeader)ViewData["FileHeaderObj"]);
+   bool isArchived = FileHeaderObj.Archived;
+   string ClaimGUID = FileHeaderObj.ClaimGUID;
+   string maxFileSizMB = "(" + Config.MaxFileSizMB + " MB max)";
+ }
+<div id="divFiles">
+    <table style="width:100%" border="0">@if (!isArchived){<tr>
+    @* File upload solution with AJAX http://stackoverflow.com/questions/166221/how-can-i-upload-files-asynchronously-with-jquery*@ <td>@using (Html.BeginForm("Files", "Claim", new {ClaimGUID = ClaimGUID}, FormMethod.Post, new { id = "frmFiles", enctype = "multipart/form-data", style = "display:inline" })){<table cellpadding="2" cellspacing="2" style="width:100%" border="0">
+                    <tr>
+                        <td colspan="4" align="center">
+                            <div id="fileOprMsg" style="text-align:center;display:inline">&nbsp;</div>
+                            @Html.ValidationSummary(true)
+                            @Html.Hidden("ID", FileHeaderObj.ID)
+                            @Html.Hidden("ClaimID", FileHeaderObj.ClaimID)
+                            @Html.Hidden("UserID", FileHeaderObj.UserID)
+                            @Html.Hidden("UploadedOn", FileHeaderObj.UploadedOn)
+                            @Html.ValidationMessage("FileName")
+                        </td>
+                    </tr>
+                    <tr>
+                        <td valign="middle" align="right" width="5%">File</td>
+                        <td align="left" width="70%" nowrap="nowrap">@* HT : DON'T class="required" because it'll err in edit mode*@                            
+                            <input type="file" id="FileNameNEW" name="FileNameNEW" title="@maxFileSizMB" /><span class="small">@maxFileSizMB</span>
+                            <span class="small">@FileHeaderObj.FileName</span>@Html.Hidden("FileName", FileHeaderObj.FileName)
+                        </td>
+                        <td valign="middle" align="right" nowrap="nowrap" width="5%">&nbsp;&nbsp;File Type</td>
+                        <td width="20%">
+                            @Html.DropDownList("FileType", new SelectList((IEnumerable)ViewData["FileTypes"], "id", "value", FileHeaderObj.FileType), new { @class = "dropDown", @onchange = "setDDLtext('FileType', 'FileTypeTitle');", @style = "width:99%" })
+                            @Html.ValidationMessage("FileType")
+                            @Html.Hidden("FileTypeTitle", FileHeaderObj.FileTypeTitle)
+                        </td>
+                    </tr>
+                    <tr>
+                        <td valign="top" align="right">Comment</td>
+                        <td rowspan="2">
+                            @Html.TextArea("Comment", FileHeaderObj.Comment, 3, 50, new { @class = "textbox", @style = "width:98%", @onblur = "return trimTextAreaMaxLen(this,250);" })
+                        </td>
+                        <td colspan="2" valign="top" align="right">
+                        @Html.Hidden("ClaimGUID", FileHeaderObj.ClaimGUID)
+                        &nbsp;&nbsp;
+       <input id="btnSubmit" type="submit" value="Save" class="button" onclick="setDDLtext('FileType', 'FileTypeTitle');" />
+       <input id="btnReset" type="reset" value="Cancel" class="button" onclick="reloadFile();" /></td>
+                    </tr>                    
+                </table>
+                }
+                </td>
+        </tr>
+        } 
+        <tr>
+            <td align="center">
+                <table class="thinBorder" width="100%" border="0">
+                    <thead class="header">
+                        <tr>
+                            @if (!isArchived){<th width="3%"></th>} 
+                            <th>File</th>
+                            <th>Type</th>
+                            <th>Comment</th>
+                            <th nowrap="nowrap">Uploaded By</th>
+                            <th nowrap="nowrap">Uploaded Date</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model){
+                            if (!item._Deleted){ //Avoid deleted records 
+                        <tr>
+                            @if (!isArchived){
+                            <td nowrap="nowrap">                                
+                                <div class="dDialog" onclick="reloadFile('@Url.Action("Files", new { ClaimID = item.ClaimID, FileHeaderID = item.ID, ClaimGUID = ClaimGUID })');">@Html.Raw(Defaults.editImg)</div>
+                                &nbsp;
+                                @* OLD kept for ref -
+                                @string.Format(Defaults.delImgLink, " reloadFile('" + Url.Action("FileHeaderDelete", new { FileHeaderID = item.ID }) + "');")*@
+                                @Html.Raw(Defaults.delPOSTImgTACO("FileHeaderID", item.ID, "doFileDelPost"))
+                            </td>} 
+                            <td>@item.FileName</td>
+                            <td>@item.FileTypeTitle</td>
+                            <td>@item.Comment</td>
+                            <td>@item.UploadedBy</td>
+                            <td>@item.UploadedOn.ToString(Defaults.dtFormat, Defaults.ci)</td>
+                            <td align="center">
+                                @{ string sepr = CPM.DAL.FileHeader.sep;
+                                   string codeStr = item.FileName + sepr + item.ClaimGUID.ToString() + sepr + item.IsAsync;
+                                   codeStr = HttpUtility.UrlEncode( CPM.Helper.Crypto.EncodeStr(codeStr, true)); 
+                               // Make sure you do UrlEncode TWICE in code to get the code!!!
+                                   string clipImgLink = string.Format(Defaults.clipImgLink, Url.Action("GetFile?" + codeStr, "Claim"));
+                                }                                              
+                                <div class="dDialog" onclick="javascript:openWin('@Url.Action("GetFile","Claim")@("?" + codeStr)',1,1);">
+                                @Html.Raw(Defaults.clipImg)
+                                </div>
+                            </td>
+                        </tr> }}
+                    </tbody>
+                    <tfoot>
+                        @Html.Raw(Defaults.chkNoRecords(Model.Count(), 7))</tfoot>
+                </table>
+            </td>
+        </tr>
+    </table>
+</div>
+@if (!isArchived){
+    <text>
+<script type="text/javascript" language="javascript" defer="defer">
+    //? http://old.nabble.com/Form-Plugin-with-file-upload-td21181087s27240.html
+    //http://forum.jquery.com/topic/jquery-form-malsup-ie7-file-download-security-warning-on-ajax-file-upload
+    //http://forum.jquery.com/topic/file-upload-with-malsup-s-jquery-form-plugin
+
+    try {//Proceed only if jQuery is defined - to avoid issues with the file upload
+        // Put script at bottom to avoid early-references
+        $(document).ready(function () {
+            doAjaxForm('#frmFiles', '#divFiles', null);
+            $("#frmFiles").validate({ @Defaults.validatorJQsetting });
+            setFocus("FileNameNEW");
+        });
+    }catch (err) { } /* Avoid disturbance because of obsolete error 
+    FIX: http://moguzalp.blogspot.com/2010/12/jquery-ajaxform-malsup-and-file-upload.html  */
+    function reloadFile(url) { return reload(url, $('#frmFiles').attr('action'), "#divFiles"); }
+    
+    function doFileDelPost(txtId, txtVal) {
+        var data = {}; data[txtId] = txtVal;
+        var url = '@Url.Action("FileHeaderDelete", "Claim",new { ClaimGUID = ClaimGUID})';
+        $.post(url, data);
+        return false; // prevent any postback
+    } 
+</script>
+   </text>
+}
+

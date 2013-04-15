@@ -1,0 +1,60 @@
+﻿@model CPM.DAL.UserRpt
+@using System.Collections
+@using Webdiyer.WebControls.Mvc
+@using CPM.Services
+@using CPM.Helper
+@{ ViewBag.Title = "User Report"; Layout = Defaults.masterLayout;}
+@section HeadContent {}
+@{ CPM.DAL.vw_Users_Role_Org usrSearch = (CPM.DAL.vw_Users_Role_Org)Model.SearchData;
+    Dictionary<string, object> txtAttr = new Dictionary<string, object>();
+    txtAttr.Add("class", "hdrTxt textBox");
+    txtAttr.Add("onchange", "setFiltered(1,this);");    
+}
+<table width="100%" border="0">
+    <tr>
+        <td class="sqz" valign="top">
+            <b class="smallHeading">User Report</b>
+        </td>        
+    </tr>
+    @*<tr>
+        <td>
+            <fieldset>
+            @Html.Hidden("reportStr", Model.Report)
+                <legend onclick="showHideDiv('tblSearch')" style="cursor: pointer">&nbsp;<img id="tblSearchImg"
+                    src="@Url.Content("~/Content/Images/aroB.gif")" alt="Show/Hide panel" />
+                    &nbsp;Search&nbsp;</legend>
+                <form action="@Url.Content("~/Report/UserData")" method="post" id="frm" style="display: inline">
+                <table id="tblSearch" cellpadding="2" cellspacing="2" border="0" width="100%">
+                    <tr>
+                        <td nowrap="nowrap" width="5%">Role</td>
+                        <td nowrap="nowrap">@Html.DropDownList("RoleID", new SelectList((IEnumerable)ViewData["Roles"], "ID", "TEXT", usrSearch.RoleID), "All Roles", new { @class = "dropDown" })</td>                        
+                        <td nowrap="nowrap" width="5%">Organization</td>
+                        <td>@Html.TextBox("OrgName", usrSearch.OrgName, txtAttr)</td>
+                        <td nowrap="nowrap" width="5%">Show Org Type</td>
+                        <td><input type="checkbox" name="isOrgType" id="isOrgType" /></td>
+                        </tr><tr>
+                        <td nowrap="nowrap"align="right" colspan="6"><input type="submit" value="Search" class="button" />
+                            &nbsp;<input type="submit" value="Reset" class="button" onclick="clearForm(document.getElementById('frm')); document.getElementById('doReset').checked = true;" />
+                            <input type="checkbox" name="doReset" id="doReset" style="display: none;" />
+                        </td>
+                    </tr>
+                </table>
+                </form>
+            </fieldset>
+            <!-- END: Search Panel -->
+        </td>
+    </tr>*@
+    <tr>
+        <td>
+                <div id="tdReport">
+                    @{ Html.RenderAction("UserReport", "Report", new { reportStr = Model.Report }); }                    
+                </div>
+        </td>
+    </tr>
+</table>
+<script language="javascript" type="text/javascript" defer="defer">
+//    setFocus("RoleID");
+//    $().ready(function () {
+//        doAjaxForm('#frm', '#tdReport', '#doReset'); //AJAXify form
+//    });    
+//</script>

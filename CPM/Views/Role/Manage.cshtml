@@ -1,0 +1,74 @@
+﻿@model IEnumerable<CPM.Models.RoleRights>
+@using CPM.Helper
+@using CPM.Models
+@using CPM.Services
+@{ ViewBag.Title = "Manage Security"; Layout = Defaults.masterLayout;}
+@{ string formID = "frmSecurity"; }
+@using (Html.BeginForm("Manage", "Roles", FormMethod.Post, new { id = "frmSecurity", style = "display:inline", @onsubmit = "$('#btnSubmit').prop('disabled', true);" }))
+{
+<table width="100%" border="0">
+    <tr>
+        <td colspan="2"><b class="smallHeading">Manage Roles</b></td>
+    </tr>    
+    <tr>
+        <td align="center" class="w100">
+        @*  Kept for debugging @Html.ValidationSummary(true)  *@
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            @{bool? oprSuccess = ((bool?)ViewData["oprSuccess"]);
+              string oprResult = (!oprSuccess.HasValue)?"":
+                  Defaults.getOprResult(oprSuccess.Value, (ViewData["err"] ?? "").ToString());}
+            @if (oprSuccess.HasValue){ <span>@Html.Raw(oprResult) </span> }
+            </td>
+        <td align="right" class="sqz">
+            <input type="button" value="Add New" onclick="addNewTR();" style="display:none" id="btnAddNew" />
+            <input type="button" value="Add New" onclick="showHideNew(true, null);$(this).toggle();$('#btnAddNew').toggle();" />
+            &nbsp;<input id="btnSubmit" type="submit" value="Save changes" onclick="document.getElementById('chkDone').checked = true;" />
+            @* HT: http://www.mediacollege.com/internet/javascript/page/reload.html *@
+            &nbsp;<input type="button" onclick="window.location.href=window.location.href" value="Reset" />            
+            <input type="checkbox" id="chkDone" name="chkDone" style="display: none" />
+        </td>
+    </tr>
+    <tr>
+        <td colspan="2">
+            <table id="sortable" class="thinBorder tablesorter" width="100%" title="Drag the table rows to reorder the entries.">
+                <thead class="header">
+                    <tr>
+                        <th></th>
+                        <th>Role</th>
+                        <th nowrap1="nowrap" style="display:none">Sort Order</th>
+                            @* IMP: DO not reposition without changing the sortable plugin code / user control *@
+                        <th class="sqz">Org Type</th>
+                        <th nowrap1="nowrap">Manage<br /> Role</th>
+                        <th nowrap1="nowrap">Manage<br /> Master</th>
+                        <th nowrap1="nowrap">Manage<br /> User</th>
+                        <th nowrap1="nowrap">Claim<br /> Delete</th>
+                        <th nowrap1="nowrap">View<br /> Activity</th>
+                        <th nowrap1="nowrap">Manage<br /> Setting</th>
+                        <th nowrap1="nowrap">Archive <br />Claim&nbsp;</th>
+                        <th class="sqz">Last <br />&nbsp;Modified&nbsp;&nbsp;&nbsp;<br />By</th>
+                        <th class="sqz">Last <br />Modified<br />Date</th>
+                    </tr>                    
+                </thead>
+                <tbody>
+                @if (Model != null) {
+                    for (int i = 0; i < Model.Count(); i++){                           
+                    @Html.EditorFor(x => x.ToList<RoleRights>()[i], "RoleEdit")
+                     }
+                   } 
+               </tbody>
+            </table>
+        </td>
+    </tr>
+</table>
+    @* For Debug: <textarea id="tx1" name="tx1" cols="50" rows="10"></textarea><textarea id="tx2" name="tx2" cols="50" rows="10"></textarea>*@
+ } 
+<script src="@Url.Content("~/Content/Scripts/jquery.tablesorter.min.js")" type="text/javascript"></script>
+<script src="@Url.Content("~/Content/Scripts/bulkOprGrid.js")" type="text/javascript"></script>
+<script type="text/javascript" defer="defer">setFocus("[0].Title");</script>
+<script type="text/javascript">
+    //.disableSelection();	WON'T allow to edit inputs or else follow: http://stackoverflow.com/questions/4027158
+    $(document).ready(function () {
+        $("#sortable").tablesorter({textExtraction: sorterTextExtraction/*,headers: {  5: { sorter: false }} */});
+        $("#@formID").validate({ @Defaults.validatorJQsetting });
+    });    
+	</script>

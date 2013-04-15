@@ -1,0 +1,105 @@
+﻿@model CPM.DAL.ActivityRpt
+@using Webdiyer.WebControls.Mvc
+@using CPM.Services
+@using CPM.Helper
+@using System.Collections
+@{ ViewBag.Title="Activity Report";    Layout = Defaults.masterLayout;}
+
+@{ CPM.DAL.vw_ActivityLog logSearch = (CPM.DAL.vw_ActivityLog)Model.SearchData;
+    Dictionary<string, object> txtAttr = new Dictionary<string, object>();
+    txtAttr.Add("class", "hdrTxt textBox");
+    txtAttr.Add("onchange", "setFiltered(1,this);");        
+}
+<table width="100%">
+    <tr>
+        <td>
+            <b class="smallHeading">Activity Report</b>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <!-- START: Search Panel -->                
+            <fieldset>
+            @Html.Hidden("reportStr", Model.Report)
+                <legend onclick="showHideDiv('tblSearch')" style="cursor: pointer">&nbsp;<img id="tblSearchImg"
+                    src="@Url.Content("~/Content/Images/aroB.gif")" alt="Show/Hide panel" />
+                    &nbsp;Search&nbsp;</legend>
+            <form action="@Url.Content("~/Report/Activity")" method="post" id="frm" style="display: inline">        
+                <table id="tblSearch" width="100%">
+                    <tr>
+                        <td nowrap="nowrap" width="5%">Activity</td>
+                        <td>@Html.DropDownList("ActivityID", new SelectList((IEnumerable)ViewData["Activities"], "ID", "TEXT", logSearch.ActivityID), "", new { @class = "dropDown" })</td>
+                        <td nowrap="nowrap" width="5%">Claim</td>
+                        <td>@Html.TextBox("ClaimText", logSearch.ClaimText)</td>                        
+                        <td nowrap="nowrap" width="5%">File</td>
+                        <td>@Html.TextBox("FileName", logSearch.FileName, txtAttr)</td>
+                        </tr>
+                    <tr>
+                        @if (!_Session.IsOnlyCustomer){ 
+                        <td nowrap="nowrap" width="5%">User</td>
+                        <td nowrap="nowrap">@Html.DropDownList("UserID", new SelectList((IEnumerable)ViewData["UserList"], "id", "value", logSearch.UserID), " ", new { @class = "dropDown" })</td>
+                        } 
+                        <td nowrap="nowrap" width="5%">Activity Date From</td>
+                        <td>
+                            @Html.TextBox("ActDateFrom1", logSearch.ActDateFrom.HasValue ? logSearch.ActDateFrom.Value.ToString(Defaults.dtFormat, Defaults.ci) : "", new { @id = "ActDateFrom1" })
+                                @Html.Hidden("ActDateFrom", logSearch.ActDateFrom.HasValue ? logSearch.ActDateFrom.Value.ToString(Defaults.dtUniFormat, Defaults.ci) : "", new { @id = "ActDateFrom" })
+                        </td>
+                        <td nowrap="nowrap" width="5%">Activity Date To</td>
+                        <td @if (_Session.IsOnlyCustomer) { Html.Raw("colspan=\"3\""); } >
+                        @Html.TextBox("ActDateTo1", logSearch.ActDateTo.HasValue ? logSearch.ActDateTo.Value.ToString(Defaults.dtFormat, Defaults.ci) : "", new { @id = "ActDateTo1" })
+                        @Html.Hidden("ActDateTo", logSearch.ActDateTo.HasValue ? logSearch.ActDateTo.Value.ToString(Defaults.dtFormat, Defaults.ci) : "", new { @id = "ActDateTo" })
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="6" align="right">
+                            <input type="submit" value="Search" class="button" />
+                            &nbsp;<input type="submit" value="Reset" class="button" onclick="clearForm(document.getElementById('frm')); document.getElementById('doReset').checked = true;
+                            resetDatepicker('#ActDateFrom1, #ActDateTo1');" />
+                            <input type="checkbox" name="doReset" id="doReset" style="display: none;" />
+                        </td>
+                    </tr>
+                </table>
+            </form>
+            </fieldset>                
+            <!-- END: Search Panel -->
+        </td>
+    </tr>
+    <tr>
+        <td align="center">
+            <div id="tdReport" style="text-align:center">
+                    @{ Html.RenderAction("ActivityReport", "Report", new { reportStr  = Model.Report }); }
+                </div>
+        </td>
+    </tr>
+</table>
+<script language="javascript" type="text/javascript" defer="defer">        setFocus("ActivityID");
+    $().ready(function() {
+        //AJAXify form
+        doAjaxForm('#frm', '#tdReport', '#doReset');
+
+        // Configure Date picker plugin
+        //http://jqueryui.com/demos/datepicker/date-range.html
+        var dates = $("#ActDateFrom1, #ActDateTo1").datepicker({
+            defaultDate: "+1w",
+            minDate: minSQLDate,
+            maxDate: maxSQLDate,
+            changeMonth: true,
+            numberOfMonths: 3,
+            onSelect: function(selectedDate) {
+                var option = this.id == "ActDateFrom1" ? "minDate" : "maxDate",
+			instance = $(this).data("datepicker"),
+			date = $.datepicker.parseDate(
+				instance.settings.dateFormat ||
+				$.datepicker._defaults.dateFormat,
+				selectedDate, instance.settings);
+                dates.not(this).datepicker("option", option, date);
+            }
+        });
+        // Set format to be used by alt date field
+        $("#ActDateFrom1").datepicker("option", "altField", '#ActDateFrom');
+        $("#ActDateFrom1").datepicker("option", "altFormat", 'dd-M-yy');
+            
+        $("#ActDateTo1").datepicker("option", "altField", '#ActDateTo');
+        $("#ActDateTo1").datepicker("option", "altFormat", 'dd-M-yy');
+    });
+</script>    

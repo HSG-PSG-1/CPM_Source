@@ -1,0 +1,74 @@
+﻿@model IEnumerable<CPM.DAL.ClaimDetail>
+@using CPM.Helper
+@using System.Collections
+@{CPM.DAL.ClaimDetail DetailObj = ((CPM.DAL.ClaimDetail)ViewData["DetailObj"]);
+  string showToInternal = !_Session.IsOnlyCustomer ? "" : "style='display:none'";
+}<table width="100%">
+    <tr>
+        <td><div id="divItems">
+         @if (!(bool)(ViewData["ShowGrid"])){@Html.Partial("~/Views/Claim/EditorTemplates/ItemDetail.cshtml", DetailObj)
+                <text><script type="text/javascript" language="javascript">                    
+                    function setItem(item) {
+                        $(idBox).val(item ? item.id : '');
+                        $("#Description").val(item ? item.descr : '').effect('highlight', {}, 2000) ;
+                        $("#TDOriginal").val(item ? item.tdo : '').effect('highlight', {}, 2000) ;
+                        $("#CurrentCost").val(item ? item.cc : '').effect('highlight', {}, 2000);
+                        $("#CurrentPrice").val(item ? item.cp : '').effect('highlight', {}, 2000);
+                        //$("#data").html(ui.item.descr);//$( "#project-icon" ).attr( "src", "images/" + ui.item.icon );//return false;
+                        autoCalc(null); //Auto calculate after new values being populated
+                        //What about Size   Ply Type?                        
+                    }
+
+                    function checkReq(ctrl, impactCtrl) {
+                        if (!($(ctrl).val().toString().length > 0)) {
+                            $(impactCtrl).val('');
+                            $("#Description").val('');
+                            $("#TDOriginal").val('0');
+                            $("#CurrentCost").val('0.00');
+                            $("#CurrentPrice").val('0.00');
+                            //What about Size   Ply Type?
+                        }
+                    }
+                    // Auto calculation of TD fields and price / cost
+                    function autoCalc(txt) {
+
+                        if (txt != null) setDefaultIfEmpty(txt, '0.00');
+
+                    var TDRemaining = $("#TDRemaining").val();
+                    var TDOriginal = $("#TDOriginal").val();
+
+                    var CurrentPrice = $("#CurrentPrice").val(); $("#CurrentPrice").val(parseFloat(CurrentPrice).toFixed(2));
+                    var CurrentCost = $("#CurrentCost").val(); $("#CurrentCost").val(parseFloat(CurrentCost).toFixed(2));
+
+                    if (parseFloat(TDRemaining) > parseFloat(TDOriginal)) {
+                        $("#TDRemaining").val(TDOriginal); //reset
+                        $("#TDRemaining").focus(); //HT: Won't focus in FF http://stackoverflow.com/questions/1695715
+                        TDRemaining = TDOriginal;
+                    }                        
+                    
+                    var RemainingTread = TDRemaining * 100 / ((TDOriginal > 0) ? TDOriginal : 1);
+                    var CreditAmt = roundNumber((RemainingTread * CurrentPrice / 100), 2).toFixed(2);
+                    var InvoiceAmt = roundNumber((RemainingTread * CurrentCost / 100), 2).toFixed(2);
+                    //http://stackoverflow.com/questions/6134039/format-number-to-always-show-2-decimal-places
+
+                    $("#CreditAmt1").val(CreditAmt).effect('highlight', {}, 2000);
+                    $("#InvoiceAmt1").val(InvoiceAmt).effect('highlight', {}, 2000);
+                    }
+                    /* http://jqueryui.com/demos/autocomplete/#custom-data */
+                </script></text>    
+                }@* END OF if (!(bool)(ViewData["ShowGrid"])) *@
+        else{<table width="99%"><tr><td>@Html.EditorForModel("ItemList")</td></tr></table>}
+            </div>
+            <script type="text/javascript" language="javascript">
+                try {//Proceed only if jQuery is defined - to avoid issues with the file upload
+                    // Put script at bottom to avoid early-references
+                    $(document).ready(function() {doAjaxForm('#frmItems', '#divItems', null); //AJAXify form
+                        $("#frmItems").validate({ @Defaults.validatorJQsetting, focusCleanup: true });
+                    });
+                }catch (err) { }
+                // Refresh
+                function reloadItm(url) { return reload(url, $('#frmItems').attr('action'), "#divItems"); }
+            </script>
+        </td>
+    </tr>
+</table>

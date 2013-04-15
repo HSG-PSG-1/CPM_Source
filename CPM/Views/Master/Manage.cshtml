@@ -1,0 +1,80 @@
+﻿@model IEnumerable<CPM.Models.Master>
+@using System.Collections
+@using CPM.Helper
+@using CPM.Models
+@using CPM.Services
+@{ ViewBag.Title = "Manage Master Data"; Layout = Defaults.masterLayout;}
+@{ string formID = "frmMaster";
+   int? MasterTbl = null;
+   if(_Session.MasterTbl.HasValue) {MasterTbl = (int)_Session.MasterTbl;}
+ }
+    @using (Html.BeginForm("Manage", "Master", FormMethod.Post, new { id = formID, style = "display:inline", @onsubmit = "$('#btnSubmit').prop('disabled', true);" }))
+    {            
+    <table width="100%" border="0">
+        <tr>
+            <td colspan="3" nowrap="nowrap">
+            <b class="smallHeading">Manage @Html.Raw(MasterService.formatTitle(_Session.MasterTbl.ToString()))</b>
+            </td>
+        </tr>
+        <tr>
+        <td class="sqz"> Master data for : @(Html.DropDownList("ddlMaster", 
+        ExtensionMethods.GetEnumSelectList<MasterService.Table>(MasterTbl),
+        new { @class = "dropDown", @onchange = "changeMaster(this, this.value);" }))
+        </td>
+        <td align="center">
+        @* For debug<%= Html.ValidationSummary(true)%>*@        
+        @{bool? oprSuccess = ((bool?)ViewData["oprSuccess"]);
+          string oprResult = (!oprSuccess.HasValue)?"":
+                             Defaults.getOprResult(oprSuccess.Value, (ViewData["err"] ?? "").ToString());}
+            @if (oprSuccess.HasValue)
+            { <span>@Html.Raw(oprResult) </span> }        
+        </td>
+            <td align="right"  class="sqz">
+        <input type="button" value="Add New" onclick="addNewTR();" style="display:none" id="btnAddNew" />
+        <input type="button" value="Add New" onclick="showHideNew(true, null);$(this).toggle();$('#btnAddNew').toggle();" />
+        <input type="submit" id="btnSubmit" value="Save changes" onclick="document.getElementById('chkDone').checked = true;" />
+        <input type="button" onclick="window.location.replace('@_Session.MasterTbl.ToString()');" value="Reset" />
+        <input type="checkbox" id="chkDone" name="chkDone" style="display: none" />
+            </td>
+        </tr>
+        <tr>
+            <td colspan="3">            
+                <table id="sortable" class="thinBorder tablesorter" width="100%" title="Drag the table rows to reorder the entries.">
+                    <thead class="header">
+                        <tr>
+                            <th></th>
+                            <th>Title</th>
+                            @* For future <% //HT: Special case for Master Defect
+                            if (_Session.MasterTbl.HasValue && _Session.MasterTbl.Value == MasterService.Table.Defect){ %>
+                            <th>
+                                Category
+                            </th>
+                            <%}//HT: Special case for Master Defect %>*@
+                            <th nowrap="nowrap" style="display:none">Sort Order</th>
+                            <th nowrap="nowrap">Last Modified By</th>
+                            <th nowrap="nowrap">Last Modified Date</th>
+                        </tr>
+                    </thead>
+                    <tbody>             
+                    @if (Model != null){
+                        for (int i = 0; i < Model.Count(); i++){ 
+                           @Html.EditorFor(x => x.ToList<Master>()[i], "MasterEdit")                    
+                     }} 
+                    </tbody>
+                </table>
+            </td>
+        </tr>
+    </table>
+    @*  For Debug: <textarea id="tx1" name="tx1" cols="50" rows="10"></textarea><textarea id="tx2" name="tx2" cols="50" rows="10"></textarea>*@
+     }     
+    <script src="@Url.Content("~/Content/Scripts/jquery.tablesorter.min.js")" type="text/javascript"></script>
+    <script src="@Url.Content("~/Content/Scripts/bulkOprGrid.js")" type="text/javascript"></script>
+    <script type="text/javascript" defer="defer">setFocus("ddlMaster");</script>
+	<script type="text/javascript">
+	    function changeMaster(ddl, val) { window.location.replace(ddl.options[ddl.selectedIndex].text); }
+	    //.disableSelection();	WON'T allow to edit inputs or else follow: http://stackoverflow.com/questions/4027158
+	    $(document).ready(function () {
+	        $("#sortable").tablesorter({ textExtraction: sorterTextExtraction });
+	        $("#@formID").validate({ @Defaults.validatorJQsetting });
+        });
+	</script>

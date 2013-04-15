@@ -1,0 +1,23 @@
+﻿@model List<CPM.DAL.Comment>
+@using CPM.Helper
+@{Layout = ""; /* Master page is NOT needed here */}
+    <table class="thinBorder" width="99%">
+            <thead class="header">
+                <tr>
+                    <th nowrap="nowrap">Comment By</th>
+                    <th nowrap="nowrap">Posted On</th>
+                    <th>Comment</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model){
+                    <tr>
+                        <td>@item.CommentBy</td>
+                        <td>@item.PostedOn.ToString(Defaults.dtFormat, Defaults.ci)</td>
+                        <td>@item.Comment1</td>
+                    </tr>
+                   }
+            </tbody>
+            <tfoot>
+                @Html.Raw(Defaults.chkNoRecords(Model.Count(), 3))</tfoot>
+        </table>

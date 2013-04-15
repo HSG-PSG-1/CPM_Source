@@ -1,0 +1,43 @@
+﻿@model List<CPM.DAL.vw_StatusHistory_Usr>
+@using CPM.Helper
+@using CPM.Services
+@using System.Collections
+@if (Model.Count > 0 && !Convert.ToBoolean(ViewData["IsReadOnly"]) 
+      /*string.IsNullOrEmpty(Request.QueryString["fromdashboard"])*/)
+  {// Make sure this block renders only when the dialog is opened from Dashboard
+      CPM.DAL.vw_StatusHistory_Usr rec = Model.LastOrDefault();
+      IEnumerable Statuses = new LookupService().GetLookup(LookupService.Source.Status);   
+<table width="99%">
+    <tr>
+        <td align="center"><span id="msgStatusHistory"></span></td>
+        <td class="sqz">Claim Status:</td>
+        <td class="sqz">
+            @Html.DropDownList("NewStatusID", new SelectList(Statuses, "id", "value", rec.NewStatusID), new { @class = "dropDown required" })
+            @Html.Hidden("OldStatusID", rec.NewStatusID)@Html.Hidden("OldStatus", rec.NewStatus)
+        </td>
+        <td class="sqz" align="right"><input type="button" name="updClaimStatus" id="updClaimStatus" value="Update" onclick="javascript: changeClaimStatusPost(@rec.ClaimID,$('#OldStatusID').val(),$('#NewStatusID').val());" /></td>
+    </tr>
+</table>
+} 
+<table class="thinBorder" align="center" width="99%" style="padding-top: 10px" id="tblStatusHistory">
+    <thead class="header">
+        <tr>
+            <th>User</th>
+            <th>Date</th>
+            <th>From</th>
+            <th>To</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model){ 
+        <tr>
+            <td align="center">@item.UserName</td>
+            <td align="center">@item.LastModifiedDate.ToString(Defaults.dtFormat, Defaults.ci)</td>
+            <td align="center">@item.OldStatus</td>
+            <td align="center">@item.NewStatus</td>
+        </tr>
+         }
+    </tbody>
+    <tfoot>
+        @Html.Raw(Defaults.chkNoRecords(Model.Count(), 4))</tfoot>
+</table>
