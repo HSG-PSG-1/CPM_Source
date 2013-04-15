@@ -101,6 +101,7 @@
     <Compile Include="Code\Services\CommentService.cs" />
     <Compile Include="Code\Services\ClaimDetailService.cs" />
     <Compile Include="Code\Services\ActivityLogService.cs" />
+    <Compile Include="Code\Services\NavigatorService.cs" />
     <Compile Include="Code\Services\ReportingService.cs" />
     <Compile Include="Code\Services\SettingService.cs" />
     <Compile Include="Code\Services\SecurityService.cs" />
@@ -114,6 +115,7 @@
     <Compile Include="Code\Services\_ServiceBase.cs" />
     <Compile Include="Code\Services\UserService.cs" />
     <Compile Include="Controllers\BaseController.cs" />
+    <Compile Include="Controllers\ClaimCommentKOController.cs" />
     <Compile Include="Controllers\CommonController.cs" />
     <Compile Include="Controllers\ClaimController.cs" />
     <Compile Include="Controllers\ClaimFileController.cs" />
@@ -133,6 +135,7 @@
     </Compile>
     <Compile Include="Controllers\MasterController.cs" />
     <Compile Include="Controllers\UserController.cs" />
+    <Compile Include="Controllers\UserKOController.cs" />
     <Compile Include="Controllers\UserReportController.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -219,6 +222,13 @@
     <Content Include="Content\jQUI\ui-lightness\jquery-ui-1.10.0.custom.min.css" />
     <Content Include="Content\Scripts\jquery.blockUI.js" />
     <Content Include="Content\Scripts\jquery.hint.js" />
+    <Content Include="Content\Scripts\KO\jquery.tmpl.js" />
+    <Content Include="Content\Scripts\KO\knockout-2.2.0.js" />
+    <Content Include="Content\Scripts\KO\knockout.mapping-latest.js" />
+    <Content Include="Content\Scripts\KO\KoExtra.js" />
+    <Content Include="Content\Scripts\KO\KoGrid.css" />
+    <Content Include="Content\Scripts\KO\KoGrid.debug.js" />
+    <Content Include="Content\Scripts\KO\perpetuum.knockout.js" />
     <Content Include="Global.asax" />
     <Content Include="Content\Scripts\common.js" />
     <Content Include="Web.config">
@@ -294,6 +304,9 @@
     <Content Include="Views\Claim\PrintCustomer.cshtml" />
     <Content Include="Views\Claim\Copy of PrintInternal.cshtml" />
     <Content Include="Views\Common\Navigate.cshtml" />
+    <Content Include="Views\Claim\CommentsKO.cshtml" />
+    <Content Include="Views\User\ListKO.cshtml" />
+    <Content Include="Views\User\ListKOMobile.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Service Include="{3259AA49-8AA1-44D3-9025-A0B520596A8C}" />
