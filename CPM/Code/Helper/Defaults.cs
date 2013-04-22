@@ -97,7 +97,7 @@ namespace CPM.Helper
         //public static string delPOSTImgTACO(string txtID, int txtVal) { return delPOSTImgTACO(txtID, txtVal, null); }
         public static string delPOSTImgTACO(string txtID, int txtVal, string doDelPostFunction = null)
         {
-            return string.Format(delImgLink, ("delTR = this.parentNode.parentNode;" + 
+            return string.Format(delImgLink, ("delTR = this.parentNode.parentNode;$(this).toggle();" + 
                 (doDelPostFunction ?? "doDelPost") + "('" + txtID + "'," + txtVal + ");"));
         }
         

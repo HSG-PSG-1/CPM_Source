@@ -144,8 +144,10 @@
             <td id="main" colspan="2" align="left" valign="top">@RenderBody()</td>
         </tr>
         <tr>
-            <td id="footer" colspan="2" align="center">
+            <td id="footer" colspan="2" align="left" class="small">
                 @* Copyright &copy; 2011 American Omni Trading *@
+                @{ string version = "version " + _Session.WebappVersion;}
+                &nbsp;@version
                 <img src="@Url.Content("~/Content/Images/spacer.gif")" height="1px" width="800px" />
             </td>
         </tr>

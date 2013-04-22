@@ -253,6 +253,27 @@ namespace CPM.Helper
                 HttpContext.Current.Session["ErrDetailsForELMAH"] = value;
             }
         }
+
+        public static string WebappVersion
+        { // http://www.craftyfella.com/2010/01/adding-assemblyversion-to-aspnet-mvc.html
+            get
+            {
+                if (string.IsNullOrEmpty((HttpContext.Current.Session["WebappVersion"] ?? "").ToString()))
+                {
+                    try
+                    {
+                        System.Version version = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version;
+                        return version.Major + "." + version.Minor + "." + version.Build;
+                    }
+                    catch (Exception)
+                    {
+                        return "?.?.?";
+                    }
+                }
+                else
+                    return HttpContext.Current.Session["WebappVersion"].ToString();
+            }
+        }
         #endregion
     }
 
