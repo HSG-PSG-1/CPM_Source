@@ -151,7 +151,8 @@ namespace CPM.Controllers
 
         #region Functions & JSON result returning Actions
         
-        [CacheControl(HttpCacheability.NoCache), HttpGet]
+        //[CacheControl(HttpCacheability.NoCache), HttpGet]
+        [OutputCache(Duration=3600, VaryByParam="id;term;extras")]
         public JsonResult Lookup(string id, string term, string extras)
         {
             #region Ref code kept for testing

@@ -13,45 +13,18 @@ namespace CPM.Controllers
     //[CompressFilter] - don't use it here
     //[IsAuthorize(IsAuthorizeAttribute.Rights.NONE)]//Special case for some dirty session-abandoned pages and hacks
     public partial class ClaimController : BaseController
-    {
-       public ActionResult CommentsKO1()
-        {
-            //InitializeViewBag("Better list");
-            var model = new CommentKOModel
-            {
-                 CommentToAdd = new Comment() { ClaimID=-1, ClaimGUID="TEMP01"},
-                AllComments = new List<Comment> { 
-                new Comment() { ClaimID=-1, ClaimGUID="TEMP01", CommentBy = "Hemant", ID = 1, LastModifiedBy = 1, LastModifiedDate = DateTime.Today, Comment1 = "First comment", Archived= false },
-                new Comment() { ClaimID=-1, ClaimGUID="TEMP02", CommentBy = "Hemant", ID = 1, LastModifiedBy = 1, LastModifiedDate = DateTime.Today, Comment1 = "Second comment", Archived= false },
-                new Comment(){ ClaimID=-1, ClaimGUID="TEMP03", CommentBy = "Hemant", ID = 1, LastModifiedBy = 1, LastModifiedDate = DateTime.Today, Comment1 = "Third comment", Archived= false },
-                }
-            };
-            return View(model);
-        }
-
-        public ActionResult AddItem(CommentKOModel model)
-        {
-            model.AddComment();
-            return Json(model);
-        }
-
-        public ActionResult RemoveSelected(CommentKOModel model)
-        {
-            model.RemoveSelected(model.CommentToRemove);
-            return Json(model);
-        }
-
-        #region Actions for Comments - Secure
-                
+    {       
         //Comments List (Claim\1\Comments) & Edit (Claim\1\Comments\2)
         [CacheControl(HttpCacheability.NoCache), HttpGet]
-        public ActionResult CommentsKO(int ClaimID, string ClaimGUID, int? CommentID) // PartialViewResultViewResultBase 
+        public ActionResult CommentsKO(int ClaimID) // PartialViewResultViewResultBase 
         {
             if (_Session.IsOnlyCustomer) return PartialView();//Customer doesn't have access to Comments
 
-            //Set Comment object
+            #region NOT required
+
+            /*Set Comment object
             Claim claimObj = _Session.Claims[ClaimGUID];
-            Comment newObj = new Comment();
+            Comment newObj = new Comment() { _Added=true, ClaimID = ClaimID, ClaimGUID = ClaimGUID, CommentBy = _SessionUsr.Email, LastModifiedBy = _SessionUsr.ID, LastModifiedDate = DateTime.Now, PostedOn = DateTime.Now, UserID = _SessionUsr.ID, Archived = false };
 
             if (TempData["PRGModel"] != null)
                 new CPM.Models.PRGModel(TempData["PRGModel"]).ExtractData<Comment>(ref newObj, ModelState);
@@ -70,6 +43,10 @@ namespace CPM.Controllers
             ViewData["claimObj"] = claimObj; // For AssignTo & AssignToVal (in future for more properties)
 
             return View(vm); 
+            */
+            #endregion
+
+            return View();
             /*
             PartialView("~/Views/Claim/EditorTemplates/Comments.cshtml",
                  new CAWcomment(IsAsync).Search(ClaimID, null, ClaimGUID));//.Cast<Comment>()); - NOT needed 
@@ -82,35 +59,35 @@ namespace CPM.Controllers
             if (_Session.IsOnlyCustomer) return Json(null);//Customer doesn't have access to Comments
 
             //Set Comment object
-            Claim claimObj = _Session.Claims[ClaimGUID];
-            Comment newObj = new Comment();
+            Comment newObj = new Comment() { ID = -1, _Added = true, ClaimID = ClaimID, ClaimGUID = ClaimGUID, CommentBy = _SessionUsr.Email, LastModifiedBy = _SessionUsr.ID, LastModifiedDate = DateTime.Now, PostedOn = DateTime.Now, UserID = _SessionUsr.ID, Archived = false };
 
-            if (TempData["PRGModel"] != null)
-                new CPM.Models.PRGModel(TempData["PRGModel"]).ExtractData<Comment>(ref newObj, ModelState);
-            //if (TempData["ViewData"] != null)ViewData = (ViewDataDictionary)TempData["ViewData"]; //SPECIAL: required for when redirected from Invalid Add attempt
-            else
-                newObj = new CAWcomment(IsAsync).GetCommentById(CommentID, claimObj);
+            List<Comment> comments = new List<Comment>();
+            try { comments = ((List<Comment>)Session["Comments_Demo"]); }
+            catch (Exception ex) { comments = null; }
+            bool sendResult = (comments != null && comments.Count() > 0);
+            if (sendResult) 
+                Session.Remove("Comments_Demo");
 
             //if (newObj != null && string.IsNullOrEmpty(newObj.Comment1)) newObj.Comment1 = "";
             DAL.CommentKOModel vm = new CommentKOModel()
             {
                 CommentToAdd = newObj,
-                AllComments = new CAWcomment(false).Search(ClaimID, null, ClaimGUID)
+                AllComments = (sendResult? comments : new CAWcomment(false).Search(ClaimID, null, ClaimGUID))
             };
 
             return Json(vm, JsonRequestBehavior.AllowGet);
         }
 
-        [HttpPost]
+        /*[HttpPost]
         public ActionResult CommentKODelete(int ClaimID, string ClaimGUID, int CommentID)
         {
            // new CAWcomment(false).Delete(new Comment() { ID = CommentID, ClaimID = ClaimID, ClaimGUID = ClaimGUID });
             //Taconite XML
             return this.Content(Defaults.getTaconite(true, Defaults.getOprResult(true, ""), "cmtOprMsg"), "text/xml");
-        }
+        }*/
 
         [HttpPost]
-        public ActionResult CommentsKO(/*int ClaimID,*/ [FromJson] IEnumerable<Comment> comments)
+        public ActionResult CommentsKO(int? ClaimID, [FromJson] IEnumerable<Comment> comments) // IEnumerable
         {
             /*
             ViewData["commentObj"] = CommentObj;
@@ -137,10 +114,16 @@ namespace CPM.Controllers
             }*/
             #endregion
 
-            return View(new CommentKOModel());
-        }
+            List<Comment> commentList = comments.ToList();
 
-        #endregion
+
+            commentList.Add(new Comment()
+            { Comment1 = "I came from postback refresh! (to confirm a successful postback)", CommentBy = "Server postback" });
+
+            Session["Comments_Demo"] = commentList;
+
+            return View();// RedirectToAction("CommentsKO");//new CommentKOModel()
+        }
     }
 }
 

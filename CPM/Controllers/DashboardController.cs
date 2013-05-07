@@ -6,6 +6,7 @@ using System.Web.Mvc;
 using CPM.DAL;
 using CPM.Services;
 using CPM.Helper;
+using StackExchange.Profiling;
 
 namespace CPM.Controllers
 {
@@ -41,10 +42,17 @@ namespace CPM.Controllers
             base.SetTempDataSort(ref index);// Set TempDate, Sort & index
             //Make sure searchOpts is assigned to set ViewState
             populateData(false);
+            
+            var profiler = MiniProfiler.Current; // it's ok if this is null
 
-            return PartialView("~/Views/Dashboard/EditorTemplates/" +
-                (_Session.IsOnlyCustomer? "ListCustomer.cshtml":"ListInternal.cshtml"),
-                new DashboardService().Search(sortExpr, index, gridPageSize, (vw_Claim_Dashboard)searchOpts, false, _Session.IsOnlyCustomer));
+            List<vw_Claim_Dashboard> result = new List<vw_Claim_Dashboard>();
+            using (profiler.Step("Fetch Dashboard Data"))
+            {
+                result = new DashboardService().Search(sortExpr, index, gridPageSize, (vw_Claim_Dashboard)searchOpts, false, _Session.IsOnlyCustomer);
+            }
+                return PartialView("~/Views/Dashboard/EditorTemplates/" +
+                    (_Session.IsOnlyCustomer ? "ListCustomer.cshtml" : "ListInternal.cshtml"), result);
+            
         }
         #endregion
 
@@ -117,13 +125,16 @@ namespace CPM.Controllers
 
         public void populateData(bool fetchOtherData)
         {
-            vw_Claim_Dashboard searchOptions = (vw_Claim_Dashboard)(searchOpts);
-            if (_Session.IsOnlyCustomer) searchOptions.CustID = _SessionUsr.OrgID;//Set the cust filter
-            if (_Session.IsOnlyVendor) searchOptions.VendorID = _SessionUsr.OrgID;//Set the Vendor filter
-            if (_Session.IsOnlySales) searchOptions.SalespersonID = _SessionUsr.ID;//Set the Sales filter
+            using (MiniProfiler.Current.Step("Populate lookup Data"))
+            {
+                vw_Claim_Dashboard searchOptions = (vw_Claim_Dashboard)(searchOpts);
+                if (_Session.IsOnlyCustomer) searchOptions.CustID = _SessionUsr.OrgID;//Set the cust filter
+                if (_Session.IsOnlyVendor) searchOptions.VendorID = _SessionUsr.OrgID;//Set the Vendor filter
+                if (_Session.IsOnlySales) searchOptions.SalespersonID = _SessionUsr.ID;//Set the Sales filter
 
-            if (fetchOtherData)
-                ViewData["Status"] = new LookupService().GetLookup(LookupService.Source.Status);
+                if (fetchOtherData)
+                    ViewData["Status"] = new LookupService().GetLookup(LookupService.Source.Status);
+            }
         }
 
         #endregion

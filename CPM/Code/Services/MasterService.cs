@@ -106,6 +106,19 @@ select new {
             }
         }
 
+        public List<Master> FetchAllCached()
+        {
+            object cachedData = _SessionLookup.MasterData[masterType];
+            if (cachedData == null || ((List<Master>)cachedData).Count < 1)
+            { 
+                List<Master> data = FetchAll();
+                _SessionLookup.MasterData[masterType] = data;
+                return data;
+            }
+            else
+                return ((List<Master>)cachedData);
+        }
+
         #endregion
 
         #region Add / Edit / Delete & Bulk

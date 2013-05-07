@@ -353,15 +353,17 @@ function setDefaultIfEmpty(txt, defaultStr) {// use with onblur (don't use with 
     if ($(txt).val() == '') $(txt).val(defaultStr); // make sure defaultStr is a string
 }
 
-function trimTextAreaMaxLen(txt,maxlen) { // requires jQuery
-    try{$(txt).val($(txt).val().slice(0, maxlen));}catch(ex){;}
+function trimTextAreaMaxLen(txt,maxlen) { // requires jQuery    
+    if (maxlen == null) 
+        maxlen = $(txt).attr("maxlength");
+    try { $(txt).val($(txt).val().slice(0, maxlen)); } catch (ex) { }    
 }
 
-function trimTextAreaMaxLen(txt) { // requires jQuery
+/*function trimTextAreaMaxLen(txt) { // requires jQuery
     try{var maxlen = $(txt).attr("maxlength");
     $(txt).val($(txt).val().slice(0, maxlen));}
     catch(ex){;}
-}
+}*/
 
 function chartPieSelectHandler(chartObj,dataTbl,keyPos) {
 

@@ -6,6 +6,7 @@ using System.Web.Mvc;
 using System.Web.Routing;
 using System.Reflection;
 using CPM.Helper;
+using StackExchange.Profiling;
 namespace CPM
 {
     // Note: For instructions on enabling IIS6 or IIS7 classic mode, 
@@ -41,6 +42,11 @@ namespace CPM
             #endregion
         }
 
+        public static void RegisterGlobalFilters(GlobalFilterCollection filters)
+        {
+            //filters.Add(new HandleErrorAttribute());            
+        }
+
         protected void Application_Start()
         {
             AreaRegistration.RegisterAllAreas();
@@ -65,6 +71,20 @@ namespace CPM
             //Custom model binder / identifier : http://forums.asp.net/p/1640342/4243825.aspx
             // ModelBinderConfig.Initialize();
             //ModelBinderProviders.Providers.RegisterBinderForType(typeof(IList<ProfileModel>), new CollectionModelBinder<ProfileModel>());
+
+            #region for MiniProfiler
+            
+            GlobalFilters.Filters.Add(new ProfilingActionFilter());            
+            RegisterGlobalFilters(GlobalFilters.Filters);
+
+            var copy = ViewEngines.Engines.ToList();
+            ViewEngines.Engines.Clear();
+            foreach (var item in copy)
+            {
+                ViewEngines.Engines.Add(new ProfilingViewEngine(item));
+            }
+
+            #endregion
         }
 
         protected void Session_Start(Object sender, EventArgs e)
@@ -165,5 +185,20 @@ namespace CPM
             // http://code.google.com/p/elmah/wiki/MVC
             // http://dotnetslackers.com/articles/aspnet/ErrorLoggingModulesAndHandlers.aspx
         }
+
+        #region For MiniProfiler
+
+        protected void Application_BeginRequest()
+        {
+            //if (Request.IsLocal)
+            { MiniProfiler.Start(); } //or any number of other checks, up to you 
+        }
+
+        protected void Application_EndRequest()
+        {
+            MiniProfiler.Stop(); //stop as early as you can, even earlier with MvcMiniProfiler.MiniProfiler.Stop(discardResults: true);
+        }
+
+        #endregion
     }
 }

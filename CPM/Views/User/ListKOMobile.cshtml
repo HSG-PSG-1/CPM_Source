@@ -10,7 +10,7 @@
     <link href="@Url.Content("~/Content/Site.css")" rel="stylesheet" type="text/css" />
     <script language="javascript" src="@Url.Content("~/Content/Scripts/common.js")" type="text/javascript"></script>
     @*SOME scripts are better persisted in head *@ 
-    <script src="@Url.Content("~/Content/Scripts/KO/jquery-1.7.2.min.js")" type="text/javascript"></script>
+    <script src="@Url.Content("~/Content/jQUI/min/jquery-1.9.1.min.js")" type="text/javascript"></script>
     <script src="@Url.Content("~/Content/Scripts/KO/knockout-2.2.0.js")" type="text/javascript"></script>
     <script src="@Url.Content("~/Content/Scripts/KO/knockout.mapping-latest.js")" type="text/javascript"></script>    
     <script src="@Url.Content("~/Content/Scripts/KO/KoExtra.js")" type="text/javascript"></script>
@@ -25,6 +25,8 @@
     
     bool? oprSuccess = ((bool?)ViewData["oprSuccess"]);
 }
+<i class="small"><b>Note: </b>A simple demo of how we can reuse the json implementation to swap the view and get a
+<br />quick implementation. This one's just for list.</i><br /><br />
 <table width="1%" border="0">
     <tr>
         <td class="sqz" valign="top">
@@ -83,10 +85,10 @@
                 <a data-bind="attr: { href: '@Html.Raw(Url.Action("AddEdit"))/' + ID}">@Html.Raw(Defaults.editImg)</a>
                 <div class="dDialog" data-bind="click:$parent.removeSelected">@Html.Raw(@Defaults.delImg)</div>
             </td>
-            <td data-bind="text:OrgType"></td>
-            <td data-bind="text:UserName"></td>
-            <td data-bind="text:Email"></td>
-            <td data-bind="text:RoleName"></td>            
+            <td nowrap="nowrap" data-bind="text:OrgType"></td>
+            <td nowrap="nowrap" data-bind="text:UserName"></td>
+            <td nowrap="nowrap" data-bind="text:Email"></td>
+            <td nowrap="nowrap" data-bind="text:RoleName"></td>            
         </tr>
     </tbody>
         <tfoot>

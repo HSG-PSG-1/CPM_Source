@@ -121,8 +121,8 @@ namespace CPM.DAL
         public decimal TDOriginal1 { get { return (TDOriginal > 0) ? TDOriginal : 1; } }
         
         public decimal RemainingTread1 { get { return TDRemaining * 100 / TDOriginal1; } }
-        public decimal CreditAmt1 { get { return RemainingTread1 * CurrentPrice / 100; } }
-        public decimal InvoiceAmt1 { get { return RemainingTread1 * CurrentCost / 100; } }
+        public decimal CreditAmt1 { get { return RemainingTread1 * CurrentPrice / 100; } }  public string CreditAmt1Str { get { return CreditAmt1.ToString("#0.00"); } }
+        public decimal InvoiceAmt1 { get { return RemainingTread1 * CurrentCost / 100; } }  public string InvoiceAmt1Str { get { return InvoiceAmt1.ToString("#0.00"); } }
 
         #endregion
 

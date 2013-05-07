@@ -18,7 +18,11 @@ namespace CPM.Services
         public _ServiceBase()
         {
             if (dbc == null)
-                dbc = new CPMmodel() {DeferredLoadingEnabled = true };
+            {
+                dbc = new CPMmodel();
+                dbc = new CPMmodel(new StackExchange.Profiling.Data.ProfiledDbConnection
+                    (dbc.Connection, StackExchange.Profiling.MiniProfiler.Current)) { DeferredLoadingEnabled = true };
+            }
             //http://blogs.microsoft.co.il/blogs/bursteg/archive/2007/10/06/linq-to-sql-deferred-loading-lazy-load.aspx
             //http://dotnetslackers.com/articles/csharp/Load-Lazy-in-LINQ-to-SQL.aspx
         }

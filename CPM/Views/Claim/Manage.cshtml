@@ -106,7 +106,9 @@
                           { //&& !IsOnlyCustomer
                 <input type="button" value="Print" class="button" onclick="javascript:openWinScrollable('@Url.Action("Print", "Claim", new { ClaimID = Model.ID })',648,838);" />@Html.Raw("&nbsp;")}
 @if (_Session.IsInternal && !isNewClaim)
-{<a href='@Url.Action("PrintPDF")' target="_blank">PDF</a>@Html.Raw("&nbsp;")}
+{<a href='@Url.Action("PrintPDF")' target="_blank">PDF</a>@Html.Raw("&nbsp;")
+<a href='@Url.Action("CommentsKO")' style="color:Blue"><i>CommentsKO (demo)</i></a>@Html.Raw("&nbsp;")
+}
 
 </td></tr></table>
         </td>

@@ -50,12 +50,12 @@ namespace CPM.Services
                     return dasQ.OrderBy(orderBy).ToPagedList(pgIndex ?? 1, pageSize);
 
                 /* Apply pagination and return - kept for future ref
-                return userQuery.Skip(startRow).Take(pageSize).ToList<vw_User_Org_UserRole>();
+                return dasQ.OrderBy(orderBy).Skip(pgIndex.Value).Take(pageSize).ToList<vw_Claim_Dashboard>(); 
                 */
                 #endregion
             }
         }
-
+        
         public static IQueryable<vw_Claim_Dashboard> PrepareQuery(IQueryable<vw_Claim_Dashboard> dasQ, vw_Claim_Dashboard das)
         {
             #region Append WHERE clause if applicable

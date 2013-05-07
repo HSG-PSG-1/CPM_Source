@@ -1,0 +1,177 @@
+﻿@using CPM.Helper
+@using System.Collections
+@using System.Web.Script.Serialization
+@using System.Collections
+@using CPM.Services
+@using CPM.Helper
+
+@*<script id="commentTemplate" type="text/x-jquery-tmpl">    
+    <tr>
+        <td nowrap="nowrap">
+            <div class="dDialog" onclick="reloadCmt('@Url.Action("CommentsKO", new { CommentID = 0 })${ID}');">@Html.Raw(@Defaults.editImg)</div>&nbsp;
+            @Html.Raw(Defaults.delPOSTImgTACO("CommentID", -1, "doCmtDelPost"))
+        </td>
+        <td>${CommentBy}</td>
+        <td>${PostedOn}</td>
+        <td>${Comment1}</td>
+    </tr>
+</script>*@
+    <script type="text/javascript" language="javascript" defer="defer">
+    function doEditable(editDiv)
+    {
+        $(editDiv).closest('tr').find("td input[class='textBox']").closest('td').click();
+        //editDiv.parentElement.parentElement.children[4].click();
+    }
+    var doTDHover = true;
+    
+    function toggleLabel(td) {
+        if(doTDHover){
+            $('input:first', td).toggle(); // toggle the textbox
+            $('span:first', td).html($('input:first', td).val()).toggle(); // set textbox value in span and toggle
+            //$('span:first', td).html($('input:first', td).val());
+        }
+    }
+    // Put script at bottom to avoid early-references
+    $(document).ready(function () {
+        //doAjaxForm('#frmComments', '#divComments', null); //AJAXify form
+//        try{$("#frmComments").validate({@Defaults.validatorJQsetting});}catch(e){}
+        setFocus("Comment1");
+        
+        createKO();
+    });
+    
+    var IsEditMode = false;
+    var NextNewCommentID = -1;
+    var commentsModel = function () {
+        var self = this;
+        self.commentToAdd = ko.observable();
+        self.allComments = ko.observableArray(); // Initial items
+        self.selectedComment = ko.observable(); // Initial selection
+        self.allCommentsTemp = ko.observableArray(); // Initial items
+        self.emptyComment = { 'ID': -1, 'Comment1': '', 'PostedOn': Date111, 'ClaimID': 0, 'CommentBy': 'Hemant' };
+        //self.jsonText = ko.computed(function() { return ("JSON: " + ko.toJSON(self.commentToAdd())); });
+
+        self.setEdited = function (comment) {
+            comment._Edited(!comment._Added()); //alert(ko.mapping.toJSON(ko.mapping.fromJS(new Date())()));
+            comment.PostedOn(Date111); //Date111 ko.mapping.fromJS(new Date())
+        }
+        self.saveComment = function (comment) {
+            comment.CommentBy("Hemant Save"); //alert(ko.mapping.toJSON(ko.mapping.fromJS(new Date())()));
+            comment.PostedOn(Date111); //Date111 ko.mapping.fromJS(new Date())
+        }
+        self.addComment = function () {
+            if (self.commentToAdd != null) // Prevent blanks and duplicates
+                if (self.commentToAdd.Comment1() == null || self.commentToAdd.Comment1() == "")
+                    alert("Comment is a required field");
+                else {
+                    //self.commentToAdd().CommentBy = "Hemant"; //alert(ko.mapping.toJSON(ko.mapping.fromJS(new Date())()));
+                    //self.commentToAdd()._Added = true;
+                    //self.commentToAdd().PostedOn = Date111;//ko.mapping.fromJS(new Date())
+                    if (!IsEditMode)
+                    { self.allComments.push(cloneObservable(self.commentToAdd)); }
+
+                    IsEditMode = false;
+                    self.commentToAdd.Comment1("");
+                    //self.commentToAdd({'ID':0,'Comment1':'','PostedOn':Date111, 'ClaimID':0,'CommentBy':'Hemant'}); 
+                    //self.commentToAdd = cloneObservable(self.emptyComment);  // Clear the text box self.commentToAdd self.commentToAdd.Comment1("");
+                    NextNewCommentID = NextNewCommentID - 1;
+                    self.commentToAdd.ID(NextNewCommentID);
+                }
+        };
+
+        self.setSelected = function (comment) {
+            if (comment != null) // Prevent blanks and duplicates
+                self.commentToAdd(comment);
+            comment._Edited(!comment._Added());
+            self.selectedComment(cloneObservable(comment)); IsEditMode = true;
+            self.allCommentsTemp = ko.mapping.fromJS(ko.mapping.toJS(self.allComments));
+            return;
+            //ko.mapping.fromJS({'ID':0,'Comment1':'','PostedOn':'', 'ClaimID':0,'CommentBy':'Hemant'}, self.commentToAdd);  // Clear the text box self.commentToAdd 
+            //try{  
+            //self.commentToAdd(comment); 
+            //self.commentToAdd = ko.mapping.fromJS(ko.toJS(comment));//ko.mapping.fromJS(comment);
+            //self.commentToAdd.Comment1("this is new");// = ko.observable(ko.toJS(comment));// = ko.mapping.fromJS(ko.toJS(comment));//ko.mapping.fromJS(comment);
+            //ko.applyBindings(comment,document.getElementById("addComment"));
+            //ko.mapping.fromJS(comment, self.commentToAdd);
+
+            // }catch(e){alert(e);}
+        };
+
+        self.removeSelected = function (comment) {
+            if (comment != null) // Prevent blanks and duplicates
+            {
+                comment._Deleted(true);
+                if (comment._Added()) {
+                    comment._Added(false);
+                    self.allComments.remove(comment);
+                }
+            }
+        };
+
+        self.unRemoveSelected = function (comment) {
+            if (comment != null) // Prevent blanks and duplicates
+            {
+                comment._Deleted(false);
+            }
+        };
+
+
+        self.cancelComment = function (comment) {
+            IsEditMode = false;
+            //comment.commentToAdd(comment.selectedComment());//.Comment1 = comment.selectedComment().Comment1;
+            //comment.allComments(self.allCommentsTemp);
+            //comment.allComments().valueHasMutated();//SO: 8537397
+
+            //ko.mapping.fromJS(self.selectedComment, self.commentToAdd);
+            //self.commentToAdd(self.emptyComment);  // Clear the text box self.commentToAdd
+            self.commentToAdd.Comment1("");
+        };
+
+        self.saveToServer = function () {
+            ko.utils.postJson(location.href, { comments: ko.mapping.toJS(self.allComments) }); //ko.toJSON(self.allComments)
+
+           // $.getJSON('@Url.Action("CommentsKOVM", "Claim")',
+            //function (data) { ko.mapping.fromJS(data.AllComments, viewModel.allComments); });
+
+            return false;
+        }
+
+        /*http://jsfiddle.net/rniemeyer/GgFa9/
+        self.jsonText = ko.computed(function() {
+        return JSON.stringify($.map(self.allComments(), function (comment) { return comment.val(); }));
+        });*/
+    };
+
+ function cloneObservable(observableObject) { return ko.mapping.fromJS(ko.toJS(observableObject)); }
+
+ function createKO()
+ {
+        var viewModel = new commentsModel();
+        $.getJSON('@Url.Action("CommentsKOVM", "Claim", new { ClaimGUID = "" })',
+         function (data) {
+             //self.commentsModel = data;
+             if (data.CommentToAdd.ID != -1) data.CommentToAdd.ID = NextNewCommentID;
+
+             viewModel.commentToAdd = ko.mapping.fromJS(data.CommentToAdd); // ko.observable(data.CommentToAdd); //
+             //var mapping = {'ignore': ["PostedOn"]};
+             viewModel.allComments = ko.mapping.fromJS(data.AllComments); //, mapping);//ko.observableArray(data.AllComments); // Initial items         
+             //var viewModel = ko.mapping.fromJS(data); 
+             //$("#commentTemplate").tmpl(data.AllComments).appendTo( "#tbComments" );
+             // viewModel.jsonText = ko.dependentObservable(function() {
+             // if(this.allComments() != null)  return ("JSON: " + ko.toJSON(this.allComments())); }, this);
+
+             ko.applyBindings(viewModel);
+         });
+ }
+
+    function doCmtDelPost(txtId, txtVal) {
+        var data = {}; data[txtId] = txtVal;
+        var url = '@Url.Action("CommentKODelete", "Claim", new { ClaimGUID = "" })';
+        $.post(url, data);
+        return false; // prevent any postback
+    }
+      
+    </script>
+    @*<json>
+    @Html.Raw(new JavaScriptSerializer().Serialize(Model.AllComments))
+    </json>*@

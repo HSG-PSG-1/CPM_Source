@@ -126,3 +126,8 @@ function ParseJSONdate(jsonDate) {
     }
     return value.getMonth() + 1 + "/" + value.getDate() + "/" + value.getFullYear();
 }
+
+function formatDecimal(val) { 
+if(val==null) return 0.00;
+try{return val.toFixed(2);}catch(e){return 0.00;}
+}

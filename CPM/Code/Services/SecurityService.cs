@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Dynamic;
@@ -96,6 +97,19 @@ namespace CPM.Services
 
                 return RolesQ;
             }
+        }
+
+        public IEnumerable GetRolesCached()
+        {
+            object cachedData = _SessionLookup.UserRoles;
+            if (cachedData == null || ((IEnumerable)cachedData).AsQueryable().Count() < 1)
+            {
+                IEnumerable data = GetRoles();
+                _SessionLookup.UserRoles = data;
+                return data;
+            }
+            else
+                return ((IEnumerable)cachedData);
         }
 
         public MasterRole GetRoleObj(RoleRights rrObj)

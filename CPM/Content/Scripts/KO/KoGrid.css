@@ -8,7 +8,7 @@
 	background-color: rgb(253, 253, 253); -webkit-touch-callout: none; -webkit-user-select: none; -khtml-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none;
 }
 .kgGroupPanel {
-	overflow: hidden; border-bottom-color: rgb(212, 212, 212); border-bottom-width: 1px; border-bottom-style: solid; background-color: rgb(234, 234, 234);
+	overflow: hidden; border-bottom-color: rgb(213, 208, 181); border-bottom-width: 1px; border-bottom-style: solid; background-color: rgb(234, 234, 234);
 }
 .kgGroupPanelDescription {
 	margin-top: 5px; margin-left: 5px;
@@ -23,7 +23,7 @@
 	width: 100%; height: 100%; float: left;
 }
 .kgGroupName {
-	padding: 3px 10px; border-radius: 3px; border: 1px solid rgb(212, 212, 212); font-weight: bold; margin-top: 2px; margin-left: 0px; float: left; background-color: rgb(247, 247, 247); -moz-border-radius: 3px; -webkit-border-radius: 3px;
+	padding: 3px 10px; border-radius: 3px; border: 1px solid rgb(213, 208, 181); font-weight: bold; margin-top: 2px; margin-left: 0px; float: left; background-color: rgb(247, 247, 247); -moz-border-radius: 3px; -webkit-border-radius: 3px;
 }
 :first-child.kgGroupItem {
 	margin-left: 2px;
@@ -38,7 +38,7 @@
 	width: 0px; height: 0px; margin-top: 10px; margin-right: 5px; margin-left: 5px; border-top-color: transparent; border-bottom-color: transparent; border-left-color: black; border-top-width: 6px; border-bottom-width: 6px; border-left-width: 6px; border-top-style: solid; border-bottom-style: solid; border-left-style: solid; float: right;
 }
 .kgTopPanel {
-	border-bottom-color: rgb(212, 212, 212); border-bottom-width: 1px; border-bottom-style: solid; position: relative; z-index: 5; background-color: rgb(234, 234, 234);
+	border-bottom-color: rgb(213, 208, 181); border-bottom-width: 1px; border-bottom-style: solid; position: relative; z-index: 5; background-color: rgb(234, 234, 234);
 }
 .kgHeaderContainer {
 	overflow: hidden; font-weight: bold; position: relative;
@@ -50,13 +50,13 @@
 	overflow: hidden; position: absolute; cursor: pointer;
 }
 .kgHeaderCell {
-	border-left-color: rgb(212, 212, 212); border-left-width: 1px; border-left-style: solid; position: absolute; cursor: pointer;
+	border-left-color: rgb(213, 208, 181); border-left-width: 1px; border-left-style: solid; position: absolute; cursor: pointer;
 }
 :first-child.kgHeaderCell {
 	border-left-color: currentColor; border-left-width: 0px; border-left-style: none;
 }
 :last-child.kgHeaderCell {
-	border-right-color: rgb(212, 212, 212); border-right-width: 1px; border-right-style: solid;
+	border-right-color: rgb(213, 208, 181); border-right-width: 1px; border-right-style: solid;
 }
 .kgSortButtonUp {
 	border-width: 0px 5px 5px; border-style: solid; border-color: gray transparent; left: 0px; top: 3px; width: 0px; height: 0px; right: 0px; margin-right: auto; margin-left: auto; position: absolute;
@@ -86,19 +86,19 @@
 	background-color: rgb(253, 253, 253);
 }
 .selected.kgRow {
-	background-color: rgb(255, 255, 170);
+	background-color: rgb(255, 255, 215);
 }
 .canSelect.kgRow {
 	cursor: pointer;
 }
 .kgCell {
-	overflow: hidden; border-left-color: rgb(212, 212, 212); border-left-width: 1px; border-left-style: solid; position: absolute;
+	overflow: hidden; border-left-color: rgb(213, 208, 181); border-left-width: 1px; border-left-style: solid; position: absolute;
 }
 :first-child.kgCell {
 	border-left-color: currentColor; border-left-width: 0px; border-left-style: none;
 }
 :last-child.kgCell {
-	border-right-color: rgb(212, 212, 212); border-right-width: 1px; border-right-style: solid;
+	border-right-color: rgb(213, 208, 181); border-right-width: 1px; border-right-style: solid;
 }
 .kgCellText {
 	padding: 5px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; box-sizing: border-box; -o-text-overflow: ellipsis;
@@ -119,7 +119,7 @@ input {
 	cursor: default;
 }
 .kgFooterPanel {
-	padding: 0px; border-top-color: rgb(212, 212, 212); border-top-width: 1px; border-top-style: solid; position: relative; background-color: rgb(234, 234, 234);
+	padding: 0px; border-top-color: rgb(213, 208, 181); border-top-width: 1px; border-top-style: solid; position: relative; background-color: rgb(234, 234, 234);
 }
 .kgTotalSelectContainer {
 	margin: 7px 5px 5px; float: left;
@@ -137,7 +137,7 @@ input {
 	border: currentColor; position: absolute;
 }
 .kgAggregate {
-	left: 0px; top: 0px; right: -1px; bottom: 0px; overflow: hidden; border-bottom-color: beige; border-bottom-width: 1px; border-bottom-style: solid; position: absolute; background-color: rgb(179, 191, 188);
+	left: 0px; top: 0px; right: -1px; bottom: 0px; overflow: hidden; border-bottom-color: rgb(212,212,212); border-bottom-width: 1px; border-bottom-style: solid; position: absolute; background-color: rgb(255, 255, 212); /*rgb(179, 191, 188);*/
 }
 .kgAggregateText {
 	left: 27px; top: 5px; line-height: 20px; white-space: nowrap; position: absolute;
@@ -155,7 +155,7 @@ input {
 	border-width: 6.5px 4.5px 0px; border-style: solid; border-color: rgb(0, 0, 0) transparent transparent; left: 3px; top: 4px; width: 0px; height: 0px; position: absolute;
 }
 .kgColMenu {
-	padding: 5px; border-radius: 3px; border: 2px solid rgb(212, 212, 212); top: 25px; right: 2px; position: absolute; z-index: 5; background-color: rgb(189, 208, 203); -moz-border-radius: 3px; -webkit-border-radius: 3px;
+	padding: 5px; border-radius: 3px; border: 2px solid rgb(212, 212, 96); top: 25px; right: 2px; position: absolute; z-index: 5; background-color: rgb(255, 255, 204); -moz-border-radius: 3px; -webkit-border-radius: 3px;
 }
 .kgMenuText {
 	left: 2px; top: 2px; position: relative;
@@ -164,10 +164,10 @@ input {
 	list-style-type: none;
 }
 .kgColListItem {
-	top: 2px; right: 17px; white-space: nowrap; position: relative;
+	top: 3px; right: 25px; white-space: nowrap; position: relative;
 }
 .kgColListCheckbox {
-	top: 4px; right: 3px; position: relative;
+	top: 5px; right: 5px; position: relative;
 }
 .kgPagerButton {
 	height: 25px; margin-bottom: 10px; min-width: 26px;
@@ -191,11 +191,11 @@ input {
 	margin-left: 1px;
 }
 .kgGroupIcon {
-	top: 2px; width: 15px; height: 15px; right: -2px; position: absolute; background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAA4AAAANCAYAAACZ3F9/AAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAadEVYdFNvZnR3YXJlAFBhaW50Lk5FVCB2My41LjEwMPRyoQAAAEFJREFUKFNjoAhISkr+h2J5JDZODNXGwGBsbPwfhIGAA8bGh6HaGBiAGhxAGJmND4M1gQCSM0adCsVQbcPcqQwMALWDGyDvWPefAAAAAElFTkSuQmCC"); background-repeat: no-repeat;
+	top: 2px; width: 15px; height: 15px; right: -18px; position: absolute; background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAA4AAAANCAYAAACZ3F9/AAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAadEVYdFNvZnR3YXJlAFBhaW50Lk5FVCB2My41LjEwMPRyoQAAAEFJREFUKFNjoAhISkr+h2J5JDZODNXGwGBsbPwfhIGAA8bGh6HaGBiAGhxAGJmND4M1gQCSM0adCsVQbcPcqQwMALWDGyDvWPefAAAAAElFTkSuQmCC"); background-repeat: no-repeat;
 }
 .kgGroupedByIcon {
-	top: 2px; width: 15px; height: 15px; right: -2px; position: absolute; background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAA4AAAANCAYAAACZ3F9/AAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAadEVYdFNvZnR3YXJlAFBhaW50Lk5FVCB2My41LjEwMPRyoQAAAElJREFUKFNjoAhISkr+R8LyaHwMDNXGwGBsbPwfhoGAA5mPDUO1oWpE52PDYE0gALTFAYbR+dgwWBMIoPlh1I9ADNU2NPzIwAAAFQYI9E4OLvEAAAAASUVORK5CYII="); background-repeat: no-repeat;
+	top: 2px; width: 15px; height: 15px; right: -17px; position: absolute; background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAA4AAAANCAYAAACZ3F9/AAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAadEVYdFNvZnR3YXJlAFBhaW50Lk5FVCB2My41LjEwMPRyoQAAAElJREFUKFNjoAhISkr+R8LyaHwMDNXGwGBsbPwfhoGAA5mPDUO1oWpE52PDYE0gALTFAYbR+dgwWBMIoPlh1I9ADNU2NPzIwAAAFQYI9E4OLvEAAAAASUVORK5CYII="); background-repeat: no-repeat;
 }
 .kgGroupingNumber {
-	top: -2px; right: -10px; position: absolute;
+	top: 1px; right: -25px; position: absolute;
 }
