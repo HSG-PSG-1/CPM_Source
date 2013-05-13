@@ -122,7 +122,7 @@ namespace CPM.Helper
             string hide = success ? (".toggle(500" + callback + ")") : "";
             return string.Format(
      "<taconite><replaceContent select=\"#{0}\">{1}</replaceContent>" +//<slideDown select=\"#{0}\" value=\"1000\" />
-     "<eval><![CDATA[ $(delTR).effect('highlight',{{}},1000){2};delTR = ''; ]]> </eval></taconite>", 
+     "<eval><![CDATA[ try{{$(delTR).effect('highlight',{{}},1000){2};delTR = '';}}catch(e){{;}} ]]> </eval></taconite>", 
      msgContainer?? "msg", msg , hide);
         }
 

@@ -32,7 +32,7 @@ namespace CPM.Controllers
             //    ViewData["Defects"] = new LookupService().GetLookup(LookupService.Source.Defect);
             
             //Set Item object
-            ClaimDetail newObj = new ClaimDetail() { ID = -1, _Added = true, ClaimID = ClaimID, LastModifiedBy = _SessionUsr.ID, LastModifiedDate = DateTime.Now, Archived = false };
+            ClaimDetail newObj = new ClaimDetail() { ID = 0, _Added = true, ClaimID = ClaimID, LastModifiedBy = _SessionUsr.ID, LastModifiedDate = DateTime.Now, Archived = false };
 
             List<ClaimDetail> items = new List<ClaimDetail>();
             try { items = ((List<ClaimDetail>)Session["Items_Demo"]); }catch (Exception ex) { items = null; }
@@ -43,7 +43,7 @@ namespace CPM.Controllers
             //if (newObj != null && string.IsNullOrEmpty(newObj.Comment1)) newObj.Comment1 = "";
             DAL.ItemKOModel vm = new ItemKOModel()
             {
-                 ItemToAdd = newObj,
+                 ItemToAdd = newObj, EmptyItem = newObj,
                 AllItems = (sendResult ? items : new CAWItem(false).Search(ClaimID, null, null))
             };
 
@@ -75,6 +75,7 @@ namespace CPM.DAL
 {
     public class ItemKOModel
     {
+        public ClaimDetail EmptyItem { get; set; }
         public ClaimDetail ItemToAdd { get; set; }
         public List<ClaimDetail> AllItems { get; set; }
         public IEnumerable Defects { get; set; }

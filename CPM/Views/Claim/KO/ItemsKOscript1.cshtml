@@ -55,7 +55,7 @@
         self.isEditMode = ko.observable();
         self.allItems = ko.observableArray([]); // Initial items
 
-        self.emptyItem = "";//ko.observable();
+        self.emptyItem = ko.observable();
 
         self.invalidateToRefreshComputed = function () {
             _dummyObservable.notifySubscribers(); //fake a change notification
@@ -71,7 +71,7 @@
             _dummyObservable(); //retrieve and ignore the value
             for (var i = 0; i < self.allItems().length; i++) {
                 if (!self.allItems()[i]._Deleted)
-                    total += parseFloat(self.allItems()[i].CreditAmt1());
+                    total += parseFloat(self.allItems()[i].CreditAmt1);
             }
             return total; //.toFixed(2);
         });
@@ -82,15 +82,15 @@
             _dummyObservable(); //retrieve and ignore the value
             ko.utils.arrayForEach(self.allItems(), function (item) {
                 if (!item._Deleted)
-                    total += parseFloat(item.InvoiceAmt());
+                    total += parseFloat(item.InvoiceAmt);
             });
             return total; //.toFixed(2);
         });
 
         self.formatData = function () {
             ko.utils.arrayForEach(self.allItems(), function (item) {
-                item.InvoiceAmt1(parseFloat(item.InvoiceAmt1().toFixed(2)));
-                item.CreditAmt1(parseFloat(item.CreditAmt1().toFixed(2)));
+                item.InvoiceAmt1 = parseFloat(item.InvoiceAmt1.toFixed(2));
+                item.CreditAmt1 = parseFloat(item.CreditAmt1.toFixed(2));
             });
         }
 
@@ -105,8 +105,8 @@
             IsEditMode = false;
         }
         self.setEdited = function (item) {
-            item._Edited(!item._Added); //alert(ko.mapping.toJSON(ko.mapping.fromJS(new Date())()));
-            item.LastModifiedDate(Date111); //Date111 ko.mapping.fromJS(new Date())            
+            item._Edited = !item._Added; //alert(ko.mapping.toJSON(ko.mapping.fromJS(new Date())()));
+            item.LastModifiedDate = Date111; //Date111 ko.mapping.fromJS(new Date())            
 
             //self.itemToAdd = ko.mapping.fromJS(ko.toJS(item));
             self.itemToAdd(item); //ko.mapping.fromJS(ko.toJS(item), self.itemToAdd);
@@ -120,12 +120,12 @@
             IsEditMode = true;
         }
         self.setEditedFlag = function (item) {
-            item._Edited(!item._Added);
-            item.LastModifiedDate(Date111);
+            item._Edited = !item._Added;
+            item.LastModifiedDate = Date111;
 
-            /*var index = self.allItems.indexOf(item);
+            var index = self.allItems.indexOf(item);
             self.allItems.remove(item);
-            self.allItems.splice(index, 0, item);*/
+            self.allItems.splice(index, 0, item);
         }
         self.saveItem = function (item) {
             //if (self.itemToAdd != null) // Prevent blanks and duplicates
@@ -135,7 +135,7 @@
                 //self.itemToAdd().PostedOn = Date111;//ko.mapping.fromJS(new Date())
                 if (!IsEditMode) {
                     item.ID = NextNewItemID;
-                    self.allItems.push(ko.mapping.fromJS(cloneObservable(item))); // self.allItems.push(item);
+                    self.allItems.push(item); // self.allItems.push(ko.toJS(item)); //self.allItems.push((self.itemToAdd)); 
                     NextNewItemID = NextNewItemID - 1;
                     self.emptyItem.ID = NextNewItemID; // NOT WORKING as expected
                 } //cloneObservable
@@ -163,9 +163,9 @@
             if (item != null) // Prevent blanks and duplicates
             {
                 //self.allItems.valueWillMutate();
-                item._Deleted(true);
-                if (item._Added()) {
-                    item._Added(false);
+                item._Deleted = true;
+                if (item._Added) {
+                    item._Added = false;
                     self.allItems.remove(item);
                 }
                 /*var old = ko.utils.arrayFirst(self.allItems(), function (itm) { return itm.ID == item.ID; });
@@ -179,19 +179,18 @@
         self.unRemoveSelected = function (item) {
             if (item != null) // Prevent blanks and duplicates
             {
-                item._Deleted(false);
+                item._Deleted = false;
 
-                /*var index = self.allItems.indexOf(item);
+                var index = self.allItems.indexOf(item);
                 self.allItems.remove(item);
-                self.allItems.splice(index, 0, item);*/
+                self.allItems.splice(index, 0, item);
             }
         };
 
 
         self.cancelItem = function (item) {
             IsEditMode = false;
-            //self.itemToAdd(null); //ko.toJS(self.emptyItem) // ko.mapping.fromJS(ko.toJS(self.emptyItem), self.itemToAdd);
-            self.itemToAdd(cloneObservable(self.emptyItem));
+            self.itemToAdd(null); //ko.toJS(self.emptyItem) // ko.mapping.fromJS(ko.toJS(self.emptyItem), self.itemToAdd);
             self.showGrid(true);
         };
 
@@ -234,11 +233,11 @@
              //self.itemsModel = data;
              // Because we need to show/hide file upload if (data.ItemToAdd.ID != -1) data.ItemToAdd.ID = NextNewItemID;
 
-             viewModel.emptyItem = data.ItemToAdd; // viewModel.emptyItem = ko.mapping.fromJS(data.ItemToAdd);
              viewModel.itemToAdd(data.ItemToAdd); // viewModel.itemToAdd = ko.mapping.fromJS(data.ItemToAdd);
-             
+             viewModel.emptyItem(data.ItemToAdd); // viewModel.emptyItem = ko.mapping.fromJS(data.ItemToAdd);
 
-             viewModel.allItems = ko.mapping.fromJS(data.AllItems); // viewModel.allItems(data.AllItems); // viewModel.allItems = ko.mapping.fromJS(data.AllItems);
+             viewModel.allItems(data.AllItems); // viewModel.allItems(ko.mapping.fromJS(data.AllItems));
+              // viewModel.allItems = ko.mapping.fromJS(data.AllItems);
 
              // viewModel.Defects(data.Defects); //
              viewModel.Defects = ko.mapping.fromJS(data.Defects); 

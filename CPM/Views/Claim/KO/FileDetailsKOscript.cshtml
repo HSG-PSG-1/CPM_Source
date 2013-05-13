@@ -1,0 +1,162 @@
+﻿@using CPM.Helper
+@using System.Collections
+@using System.Web.Script.Serialization
+@using System.Collections
+@using CPM.Services
+@using CPM.Helper
+@{
+        string url = Url.Action("FilesDetailKOVM", "Claim", new {ClaimDetailID = ViewData["ClaimDetailID"], ClaimGUID = ViewData["ClaimGUID"] });
+}
+<script type="text/javascript" language="javascript" defer="defer">
+    function editable(ctrl, show) 
+    {
+       if (show) $(ctrl).removeAttr('readonly').removeClass('noBorder').addClass('note');
+       else $(ctrl).attr('readonly', true).removeClass('note').addClass('noBorder');
+     }
+
+    function doEditable(editDiv)
+    {
+        $(editDiv).closest('tr').find("td input[class='noBorder']").focus().trigger("click");
+        //editDiv.parentElement.parentElement.children[4].click();
+    }
+    var doTDHover = true;
+
+    // Put script at bottom to avoid early-references
+    $(document).ready(function () {
+        //doAjaxForm('#frmFiles', '#divFiles', null); //AJAXify form
+//        try{$("#frmFiles").validate({@Defaults.validatorJQsetting});}catch(e){}
+        setFocus("Comment");
+        
+        createKO();
+    });
+    
+    var IsEditMode = false;
+    var NextNewFileDetailID = -1;
+    var filesModel = function () {
+        var self = this;
+        
+        self.emptyFile = "";//ko.observable(); HT: DON'T keep it observable or it'll be set to NULL!
+
+        self.fileDetailToAdd = ko.observable();
+        self.allFiles = ko.observableArray(); // Initial items
+        self.selectedFile = ko.observable(); // Initial selection
+        
+        self.TriggerOpenWin = function (fileFD) {
+            openWin("@Url.Action("GetFileD", "Claim")?" + fileFD.CodeStr,1,1);
+        }
+        
+        self.setEdited = function (file) {
+            file._Edited(!file._Added()); //alert(ko.mapping.toJSON(ko.mapping.fromJS(new Date())()));
+            file.UploadedOn(Date111); //Date111 ko.mapping.fromJS(new Date())
+        }
+        self.setEditedFlag = function (file) {
+            file._Edited(!file._Added());
+            file.LastModifiedDate(Date111);
+
+            /*var index = self.allFiles.indexOf(file);
+            self.allFiles.remove(file);
+            self.allFiles.splice(index, 0, file);*/
+        }
+        self.addFile = function (file) {
+            if (file.FileName == null || file.FileName == "")
+            //if (self.itemToAdd.ItemCode == null || self.itemToAdd.ItemCode == "")
+                {
+                   //http://knockoutjs.com/documentation/event-binding.html
+                   alert("Please select a file to upload"); return false; 
+                }
+            else {
+                //self.itemToAdd().UploadedOn = Date111;//ko.mapping.fromJS(new Date())
+                if (!IsEditMode) {
+                    file.ID = NextNewFileDetailID;
+                    self.allFiles.push(ko.mapping.fromJS(cloneObservable(file))); // self.allItems.push(ko.toJS(item));
+                    NextNewFileDetailID = NextNewFileDetailID - 1;
+                    self.emptyFile.ID = NextNewFileDetailID; // NOT WORKING as expected
+
+                } //cloneObservable
+                else {                        
+                    //HT: if observable is set correctly nothing needs to be done
+                    /*var index = self.allFiles.indexOf(file);
+                    self.allFiles.remove(file);
+                    self.allFiles.splice(index, 0, file);*/
+                }
+            }
+            return true; // because we need to ajax submit the form
+        };
+
+        self.setSelected = function (file) {
+            if (file != null) // Prevent blanks and duplicates
+                self.fileDetailToAdd(file);
+            file._Edited(!file._Added());
+            self.selectedFile(cloneObservable(file)); IsEditMode = true;            
+        };
+
+        self.removeSelected = function (file) {
+            if (file != null) // Prevent blanks and duplicates
+            {
+                //self.allItems.valueWillMutate();
+                file._Deleted(true);
+                if (file._Added()) {
+                    file._Added(false);
+                    self.allFiles.remove(file);
+                }
+            }            
+        };
+
+        self.unRemoveSelected = function (file) {
+            if (file != null) // Prevent blanks and duplicates
+            {
+                file._Deleted(false);
+
+                /*var index = self.allItems.indexOf(file);
+                self.allItems.remove(file);
+                self.allItems.splice(index, 0, file);*/
+            }
+        };
+
+
+        self.cancelFile = function (file) {
+            IsEditMode = false;
+            //ko.mapping.fromJSON(ko.toJSON(file))
+            //self.fileDetailToAdd = cloneObservable(self.emptyFile);
+            //ko.mapping.fromJSON(cloneObservable(self.emptyFile), self.fileDetailToAdd);
+            self.fileDetailToAdd(cloneObservable(self.emptyFile));//ko.mapping.fromJS(ko.toJS(self.emptyFile)));
+            //self.fileDetailToAdd.valueHasMutated(); - DOESN'T make any difference!
+        };
+
+        self.saveToServer = function () {
+            ko.utils.postJson(location.href, { files: ko.mapping.toJS(self.allFiles) }); //ko.toJSON(self.allFiles)
+           // $.getJSON('@Url.Action("FilesKOVM", "Claim")',
+            //function (data) { ko.mapping.fromJS(data.AllFiles, viewModelFD.allFiles); });
+
+            return false;
+        }
+
+        /*http://jsfiddle.net/rniemeyer/GgFa9/
+        self.jsonText = ko.computed(function() {
+        return JSON.stringify($.map(self.allFiles(), function (file) { return file.val(); }));
+        });*/
+    };
+
+ 
+ 
+ var viewModelFD = new filesModel();
+ function createKO()
+ {      
+        $.getJSON('@url',
+         function (data) {
+             if (data.FileDetailToAdd.ID != -1) data.fileDetailToAdd.ID = NextNewFileDetailID;
+
+             viewModelFD.emptyFile = data.EmptyFileDetail; // THIS SHUD NOT BE AN OBSERVABLE
+            //viewModelFD.fileDetailToAdd = ko.mapping.fromJS(data.FileDetailToAdd); 
+             viewModelFD.fileDetailToAdd(data.FileDetailToAdd);             
+             
+             viewModelFD.allFiles = ko.mapping.fromJS(data.AllFiles);
+              // viewModelFD.allItems(ko.mapping.fromJS(data.AllItems)); // viewModelFD.allFiles(data.AllFiles);
+
+             viewModelFD.FileDetailTypes = ko.mapping.fromJS(data.FileDetailTypes);
+             
+             ko.applyBindings(viewModelFD);
+         });
+ }
+      
+    </script>

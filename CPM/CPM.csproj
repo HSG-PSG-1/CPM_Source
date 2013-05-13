@@ -150,6 +150,7 @@
     <Compile Include="Controllers\ClaimPrintController.cs" />
     <Compile Include="Controllers\ClaimCommentKOController.cs" />
     <Compile Include="Controllers\ClaimDetailsKOController.cs" />
+    <Compile Include="Controllers\ClaimFileKOController.cs" />
     <Compile Include="Controllers\UserKOController.cs" />
     <Compile Include="Controllers\ReportController.cs" />
     <Compile Include="Controllers\SettingController.cs" />
@@ -341,8 +342,14 @@
     <Content Include="Views\User\ListKOGrid.cshtml" />
     <Content Include="Views\User\EditorTemplates\UserListKO.cshtml" />
     <Content Include="Views\Claim\KO\CommentsKOscript.cshtml" />
-    <Content Include="Views\Claim\KO\ItemsKOscript.cshtml" />
+    <Content Include="Views\Claim\KO\ItemsKOscript1.cshtml" />
+    <Content Include="Views\Claim\ItemsKO1.cshtml" />
+    <Content Include="Views\Claim\FilesKO.cshtml" />
+    <Content Include="Views\Claim\KO\FilesKOscript.cshtml" />
+    <Content Include="Views\Claim\FilesDetailKO.cshtml" />
+    <Content Include="Views\Claim\KO\FileDetailsKOscript.cshtml" />
     <Content Include="Views\Claim\ItemsKO.cshtml" />
+    <Content Include="Views\Claim\KO\ItemsKOscript.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Service Include="{3259AA49-8AA1-44D3-9025-A0B520596A8C}" />

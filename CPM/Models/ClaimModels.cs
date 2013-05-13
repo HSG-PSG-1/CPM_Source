@@ -357,6 +357,7 @@ namespace CPM.DAL
         public string UploadedBy { get; set; }
         public string FileNameNEW { get; set; }
         public string FileTypeTitle { get; set; }
+        public string CodeStr { get { return HttpUtility.UrlEncode(CPM.Helper.Crypto.EncodeStr(FileName + sep + IsAsync, true)); } }
         
         public string FilePath { //HT: Usage: <a href='<%= Url.Content("~/" + item.FilePath) %>' target="_blank">
             get { return FileIO.GetClaimFilePath

@@ -347,7 +347,7 @@
                             </tr>
                         </thead>
                         <tbody data-bind="foreach: allItems()">
-                            <tr data-bind="attr:{class:_Deleted()?'deletedTR':'deletedTR_NO'}" style="height: 25px">
+                            <tr data-bind="attr:{class:_Deleted?'deletedTR':'deletedTR_NO'}" style="height: 25px">
                                 <td nowrap="nowrap" width="3%">
                                     <span data-bind='text:ID' style1="display:none"></span>
                                     <input type="checkbox" data-bind="checked:_Added" />
@@ -355,11 +355,11 @@
                                     <input type="checkbox" data-bind="checked:_Deleted" />
                                 </td>
                                 <td nowrap="nowrap" width="3%">
-                                    <div class="dDialog" data-bind="visible:!_Deleted(), click:$parent.setEdited">@Html.Raw(@Defaults.editImg)</div>
+                                    <div class="dDialog" data-bind="visible:!_Deleted, click:$parent.setEdited">@Html.Raw(@Defaults.editImg)</div>
                                     &nbsp;
-                                    <div class="dDialog" data-bind="visible:!_Deleted(), click:$parent.removeSelected">@Html.Raw(@Defaults.delImg)</div>
+                                    <div class="dDialog" data-bind="visible:!_Deleted, click:$parent.removeSelected">@Html.Raw(@Defaults.delImg)</div>
                                     &nbsp;
-                                    <div class="dDialog" data-bind="visible:_Deleted(), click:$parent.unRemoveSelected">@Html.Raw(@Defaults.cancelImgOnly)</div>
+                                    <div class="dDialog" data-bind="visible:_Deleted, click:$parent.unRemoveSelected">@Html.Raw(@Defaults.cancelImgOnly)</div>
                                     @*@Html.Raw(Defaults.delPOSTImgTACO("ItemID", -1, "doCmtDelPost"))*@
                                 </td>
                                 <td align="center" data-bind="text:$index()+1" width="1%">

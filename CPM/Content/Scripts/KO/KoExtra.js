@@ -131,3 +131,27 @@ function formatDecimal(val) {
 if(val==null) return 0.00;
 try{return val.toFixed(2);}catch(e){return 0.00;}
 }
+
+ko.unWrappedToJSON = function (obj) {
+    return JSON.stringify(ko.toJS(obj), function (key, val) {
+        return key === '__ko_mapping__' ? null : val; //undefined : val;
+    });
+}
+
+function cloneObservable(obj) {
+    if (ko.isWriteableObservable(obj))
+        return ko.observable(obj()); //this is the trick
+
+    if (obj === null || typeof obj !== 'object') return obj;
+
+    var temp = obj.constructor(); // give temp the original obj's constructor
+    for (var key in obj) {
+
+        if (key === '__ko_mapping__') continue; //HT: Special case to exclude the ko mapping
+
+        temp[key] = cloneObservable(obj[key]);
+    }
+
+    return temp;
+    //return ko.mapping.fromJS(ko.toJS(observableObject)); 
+}
