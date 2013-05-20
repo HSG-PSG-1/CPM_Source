@@ -26,13 +26,21 @@ namespace CPM.Controllers
 
         [AccessClaim("ClaimID")]
         [CacheControl(HttpCacheability.NoCache), HttpGet]
+        public ActionResult ItemsKO1(int ClaimID, string ClaimGUID, int? DetailID)
+        {
+            ViewData["Brands"] = new LookupService().GetLookup(LookupService.Source.BrandItems);
+            return View();
+        }
+
+        [AccessClaim("ClaimID")]
+        [CacheControl(HttpCacheability.NoCache), HttpGet]
         public ActionResult ItemsKOVM(int ClaimID)
         {
             //if (!(bool)ViewData["ShowGrid"])
             //    ViewData["Defects"] = new LookupService().GetLookup(LookupService.Source.Defect);
             
             //Set Item object
-            ClaimDetail newObj = new ClaimDetail() { ID = 0, _Added = true, ClaimID = ClaimID, LastModifiedBy = _SessionUsr.ID, LastModifiedDate = DateTime.Now, Archived = false };
+            ClaimDetail newObj = new ClaimDetail() { ID = 0, _Added = true, ClaimID = ClaimID, LastModifiedBy = _SessionUsr.ID, LastModifiedDate = DateTime.Now, Archived = false, aDFilesJSON = "" };
 
             List<ClaimDetail> items = new List<ClaimDetail>();
             try { items = ((List<ClaimDetail>)Session["Items_Demo"]); }catch (Exception ex) { items = null; }

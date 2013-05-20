@@ -18,7 +18,7 @@ namespace CPM.Controllers
         #region File Header Actions
         //Files List (Claim\1\Files) & Edit (Claim\1\Files\2)
         [CacheControl(HttpCacheability.NoCache), HttpGet]
-        public ActionResult FilesKO(int ClaimID) // PartialViewResultViewResultBase 
+        public ActionResult FilesKO(int ClaimID, string ClaimGUID) // PartialViewResultViewResultBase 
         {
             ViewData["Archived"] = false;
             ViewData["ClaimGUID"] = System.Guid.NewGuid();
@@ -43,7 +43,7 @@ namespace CPM.Controllers
             //if (newObj != null && string.IsNullOrEmpty(newObj.File1)) newObj.File1 = "";
             DAL.FileKOModel vm = new FileKOModel()
             {
-                FileToAdd = newObj,
+                FileToAdd = newObj, EmptyFileHeader = newObj,
                 AllFiles = (sendResult? files : new CAWFile(false).Search(ClaimID, null, ClaimGUID))
             };
             // Lookup data
@@ -201,6 +201,7 @@ namespace CPM.DAL
 {
     public class FileKOModel
     {
+        public FileHeader EmptyFileHeader { get; set; }
         public FileHeader FileToAdd { get; set; }
         public List<FileHeader> AllFiles { get; set; }
         public IEnumerable FileTypes { get; set; }

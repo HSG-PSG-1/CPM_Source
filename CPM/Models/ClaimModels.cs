@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
@@ -116,6 +117,8 @@ namespace CPM.DAL
         public string ItemCode { get; set; }
         public string Defect { get; set; }
         public List<FileDetail> aDFiles { get; set; }
+        [System.Xml.Serialization.XmlIgnore]//[System.Runtime.Serialization.IgnoreDataMember]//[NonSerialized(), FromJson]
+        public string aDFilesJSON { get; set; }
 
         //HT: To save from divide by zero
         public decimal TDOriginal1 { get { return (TDOriginal > 0) ? TDOriginal : 1; } }

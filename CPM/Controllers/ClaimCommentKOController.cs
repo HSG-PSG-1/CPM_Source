@@ -16,7 +16,7 @@ namespace CPM.Controllers
     {       
         //Comments List (Claim\1\Comments) & Edit (Claim\1\Comments\2)
         [CacheControl(HttpCacheability.NoCache), HttpGet]
-        public ActionResult CommentsKO(int ClaimID) // PartialViewResultViewResultBase 
+        public ActionResult CommentsKO(int ClaimID, string ClaimGUID) // PartialViewResultViewResultBase 
         {
             if (_Session.IsOnlyCustomer) return PartialView();//Customer doesn't have access to Comments
 
@@ -45,7 +45,7 @@ namespace CPM.Controllers
             return View(vm); 
             */
             #endregion
-
+            ViewData["ClaimGUID"] = ClaimGUID;
             return View();
             /*
             PartialView("~/Views/Claim/EditorTemplates/Comments.cshtml",
@@ -71,7 +71,7 @@ namespace CPM.Controllers
             //if (newObj != null && string.IsNullOrEmpty(newObj.Comment1)) newObj.Comment1 = "";
             DAL.CommentKOModel vm = new CommentKOModel()
             {
-                CommentToAdd = newObj,
+                CommentToAdd = newObj, EmptyComment = newObj, 
                 AllComments = (sendResult? comments : new CAWcomment(false).Search(ClaimID, null, ClaimGUID))
             };
 
@@ -124,6 +124,24 @@ namespace CPM.Controllers
 
             return View();// RedirectToAction("CommentsKO");//new CommentKOModel()
         }
+
+        [HttpPost]
+        public JsonResult CommentsKOEmail(int ClaimID, string ClaimGUID, int AssignedTo, int ClaimNo, Comment CommentObj)
+        {            
+            bool sendMail = (ClaimID > Defaults.Integer && AssignedTo != _SessionUsr.ID);// No need to send mail if its current user
+            try
+            {
+                #region Check and send email
+                if (sendMail)//Make sure "_Session.Claim" is available
+                {
+                    string UserEmail = new UserService().GetUserEmailByID(AssignedTo);
+                    //MailManager.AssignToMail(ClaimNo.ToString(), CommentObj.Comment1, ClaimID, UserEmail, (_SessionUsr.UserName), true);
+                }
+                #endregion
+            }
+            catch (Exception ex) { sendMail = false; }
+            return Json(sendMail, JsonRequestBehavior.AllowGet); ;// RedirectToAction("CommentsKO");//new CommentKOModel()
+        }        
     }
 }
 
@@ -131,20 +149,8 @@ namespace CPM.DAL
 {
     public class CommentKOModel
     {
+        public Comment EmptyComment { get; set; }
         public Comment CommentToAdd { get; set; }
-        public Comment CommentToRemove { get; set; }
-        public List<Comment> AllComments { get; set; }        
-
-        public void AddComment()
-        {
-            if (CommentToAdd != null && !AllComments.Contains(CommentToAdd))
-                AllComments.Add(CommentToAdd);
-            CommentToAdd = null;
-        }
-
-        public void RemoveSelected(Comment cmtObj)
-        {
-            AllComments.Remove(cmtObj);            
-        }
+        public List<Comment> AllComments { get; set; }
     }
 }

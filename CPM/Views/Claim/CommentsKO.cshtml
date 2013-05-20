@@ -1,5 +1,5 @@
-﻿@*@model CPM.DAL.CommentKOModel*@
-@using CPM.Helper
+﻿@using CPM.Helper
+@*
 @using System.Collections
 @using System.Web.Script.Serialization
 @using System.Collections
@@ -9,26 +9,25 @@
 @{ ViewBag.Title = "Claim Comments KO Mobile";}
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
-
 <head>
     <link rel="shortcut icon" href="@Url.Content("~/Content/favicon.ico")" type="image/x-icon" />
     <link rel="icon" href="@Url.Content("~/Content/favicon.ico")" type="image/ico" />
     <link href="@Url.Content("~/Content/Site.css")" rel="stylesheet" type="text/css" />
     <script language="javascript" src="@Url.Content("~/Content/Scripts/common.js")" type="text/javascript"></script>
-    @*SOME scripts are better persisted in head *@ 
+    /*SOME scripts are better persisted in head */
     <script src="@Url.Content("~/Content/jQUI/min/jquery-1.9.1.min.js")" type="text/javascript"></script>
     <script src="@Url.Content("~/Content/jQUI/min/jquery-migrate-1.1.0.min.js")" type="text/javascript"></script>
     <script src="@Url.Content("~/Content/Scripts/KO/knockout-2.2.0.js")" type="text/javascript"></script>
-    <script src="@Url.Content("~/Content/Scripts/KO/knockout.mapping-latest.js")" type="text/javascript"></script>    
+    <script src="@Url.Content("~/Content/Scripts/KO/knockout.mapping-latest.js")" type="text/javascript"></script>
     <script src="@Url.Content("~/Content/Scripts/KO/KoExtra.js")" type="text/javascript"></script>
-
-    @*<script src="@Url.Content("~/Content/Scripts/jquery.hint.js")" type="text/javascript"></script>    
-    <script src="http://www.json.org/json2.js" type="text/javascript"></script>*@
-</head>
-<body>    
+    /*script src="@Url.Content("~/Content/Scripts/jquery.hint.js")" type="text/javascript"></script>    
+    <script src="http://www.json.org/json2.js" type="text/javascript"></script*/
+</head>{@ViewData["ClaimGUID"]}
+*@
 <br />
 <div id="divComments">
-<div style="text-align:right"><input type="button" data-bind="click:saveToServer" class="button" value="Submit to Server" /></div>
+    <div style="text-align: right">
+        <input type="button" data-bind="click:saveToServer" class="button" value="Submit to Server" /></div>
     <table style="width: 100%" border="0">
         <tr>@*Add \ Edit Comment : START*@
             <td>
@@ -36,24 +35,32 @@
                 <table cellpadding="2" cellspacing="2" border="0" data-bind="with: commentToAdd">
                     <tr>
                         <td id="addComment" valign="top">
-                            <div style="display:none">
-                            <input type="checkbox" data-bind="checked:_Added" />
-                            ID: <span data-bind="text:ID"></span><br />
-                            Claim ID: <span data-bind="text:ClaimID"></span><br />
-                            PostedOn: <input class="button" type="text" data-bind="date: PostedOn" /><br />
-                            CommentBy: <input class="button" type="text" data-bind="value:CommentBy" /><br /><br />
+                            <div style="display: none">
+                                <input type="checkbox" data-bind="checked:_Added" />
+                                ID: <span data-bind="text:ID"></span>
+                                <br />
+                                Claim ID: <span data-bind="text:ClaimID"></span>
+                                <br />
+                                PostedOn:
+                                <input class="button" type="text" data-bind="date: PostedOn" /><br />
+                                CommentBy:
+                                <input class="button" type="text" data-bind="value:CommentBy" /><br />
+                                <br />
                             </div>
-                            New Comment: @*<input type="text" r data-bind="value:Comment1" /> *@ 
-                            @*<button type="submit" data-bind="click:$parent.saveComment">Save</button>*@
+                            New Comment:
                         </td>
                         <td>
-                        <textarea data-bind="value:Comment1" class="textbox required" cols="60" id="Comment1" name="Comment1" 
-                            onblur="return trimTextAreaMaxLen(this,4000);" rows="2" style="width:90%"></textarea>
+                            <textarea data-bind="value:Comment1" class="textbox required" cols="60" id="Comment1"
+                                name="Comment1" onblur="return trimTextAreaMaxLen(this,4000);" rows="2" style="width: 90%"
+                                onchange='setSubmitBtn(this,"btnCmtAdd")'></textarea>
                         </td>
                         <td valign="top">
-                            <input type="button" data-bind="click:$parent.addComment" value="Add" class="button" />
-                            <input id="btnReset" data-bind="click:$parent.cancelComment" type="reset" value="Cancel" class="button" />
-                            <br /><i class="small">(Note: Testing so no emails wil be sent)</i>
+                            <input id="btnCmtAdd" type="button" data-bind="click:$parent.addComment" value="Add"
+                                class="button" />
+                            <input id="btnCmtReset" data-bind="click:$parent.cancelComment" type="reset" value="Cancel"
+                                class="button" />
+                            <br />
+                            <i class="error">(Note: Sending email still pending!!!)</i>
                         </td>
                     </tr>
                 </table>
@@ -64,14 +71,23 @@
         <tr>
             <td align="center">
                 @* Comments : START *@
-                <table class="thinBorder" width="99%">
+                <table class="thinBorder" width="99%" data-bind="visible:allComments().length > 0">
                     <thead class="header">
                         <tr>
-                            <th width="3%" align="left"> id &nbsp;&nbsp; A &nbsp;&nbsp; E &nbsp;&nbsp; D</th>
-                            <th width="3%"></th>
-                            <th nowrap="nowrap" width="10%">Comment By</th>
-                            <th nowrap="nowrap" width="10%">Posted On</th>
-                            <th>Comment</th>
+                            <th width="3%" align="left">
+                                id &nbsp;&nbsp; A &nbsp;&nbsp; E &nbsp;&nbsp; D
+                            </th>
+                            <th width="3%">
+                            </th>
+                            <th nowrap="nowrap" width="10%">
+                                Comment By
+                            </th>
+                            <th nowrap="nowrap" width="10%">
+                                Posted On
+                            </th>
+                            <th>
+                                Comment
+                            </th>
                         </tr>
                     </thead>
                     <tbody data-bind="foreach: allComments">
@@ -82,40 +98,39 @@
                                 <input type="checkbox" data-bind="checked:_Edited" />
                                 <input type="checkbox" data-bind="checked:_Deleted" />
                             </td>
-                            <td nowrap="nowrap">                                
-                                <div class="dDialog" onclick="doEditable(this);" data-bind="visible:!_Deleted(), click:$parent.setEdited" data-bind1="click:$parent.setSelected">@Html.Raw(@Defaults.editImg)</div>
+                            <td nowrap="nowrap">
+                                <div class="dDialog" onclick="doEditable(this);" data-bind="visible:!_Deleted(), click:$parent.setEdited">@Html.Raw(@Defaults.editImg)</div>
                                 &nbsp;
                                 <div class="dDialog" data-bind="visible:!_Deleted(), click:$parent.removeSelected">@Html.Raw(@Defaults.delImg)</div>
                                 &nbsp;
-                                <div class="dDialog" data-bind="visible:_Deleted(), click:$parent.unRemoveSelected">@Html.Raw(@Defaults.cancelImgOnly)</div>
-                                @*@Html.Raw(Defaults.delPOSTImgTACO("CommentID", -1, "doCmtDelPost"))*@
+                                <div class="dDialog" data-bind="visible:_Deleted(), click:$parent.unRemoveSelected">@Html.Raw(@Defaults.cancelImgOnly)
+                                    &nbsp; &nbsp;
+                                </div>
                             </td>
-                            <td data-bind="text:CommentBy"></td>
+                            <td data-bind="text:CommentBy">
+                            </td>
                             @*<td data-bind="text:new Date(parseInt(PostedOn.substr(6)))"></td>*@
-                            <td data-bind="date: PostedOn()"></td>@*http://forums.asp.net/t/1651593.aspx/1*@                            
-                            <td onclick="$('input:first', this).show().focus();$('span:first', this).hide();">
-                            <span data-bind="text:Comment1" onmouseover="toggleLabel(this.parentElement);"></span>
-                            @*<span data-bind="text:new Date(parseInt(PostedOn.toString().substr(6))).toLocaleFormat('%d/%m/%Y')"></span>*@
-                            <input data-bind="value:Comment1, event:{change:$parent.setEdited}" style="display:none;width:99%" onfocus="doTDHover = false;"
-                             onblur="doTDHover = true;toggleLabel(this.parentElement);" onmouseout="toggleLabel(this.parentElement);" class="textBox"/>
+                            <td data-bind="date: PostedOn()">
+                            </td>@*http://forums.asp.net/t/1651593.aspx/1*@
+                            <td>
+                                <input class="noBorder" data-bind="value:Comment1, event:{change:$parent.setEditedFlag}"
+                                    readonly="readonly" style="border: none; width: 99%" type="text" onclick="editable(this, true);"
+                                    onblur="editable(this, false);" title="click to edit" />
                             </td>
+                            @*<td onclick="$('input:first', this).show().focus();$('span:first', this).hide();">
+                                    <span data-bind="text:Comment1" onmouseover="toggleLabel(this.parentElement);"></span>
+                                    <input data-bind="value:Comment1, event:{change:$parent.setEdited}" style="display: none;
+                                        width: 99%" onfocus="doTDHover = false;" class="textBox" onblur="doTDHover = true;toggleLabel(this.parentElement);"
+                                        onmouseout="toggleLabel(this.parentElement);" />
+                                </td>*@
                         </tr>
                     </tbody>
                     <tfoot>
-                        @*@Html.Raw(Defaults.chkNoRecords((Model.AllComments ?? new List<CPM.DAL.Comment>()).Count, 4))*@
-                        </tfoot>
-                </table>               
+                    </tfoot>
+                </table>
                 @* Comments : END *@
             </td>
         </tr>
     </table>
 </div>
-<div>
-@*{<span data-bind="text: jsonText"></span>}*@
-</div>
-</body>
-    @{ Html.RenderPartial("KO/CommentsKOscript"); }
-    @*<json>
-    @Html.Raw(new JavaScriptSerializer().Serialize(Model.AllComments))
-    </json>*@
-</html>
+@{ Html.RenderPartial("KO/CommentsKOscript"); }

@@ -1,5 +1,4 @@
-﻿@*@model CPM.DAL.ItemKOModel*@
-@using CPM.Helper
+﻿@using CPM.Helper
 @using System.Collections
 @using System.Web.Script.Serialization
 @using System.Collections
@@ -55,10 +54,9 @@
                 $(txtBox).attr('title', 'Start typing to search or type space twice to view all');
                 //$(idBox).css("display", "none");
 
-                setFocus("ItemCode"); //Set focus after the code textbox has been autocompleted - above                
+                setFocus("ItemCode"); @*Set focus after the code textbox has been autocompleted - above *@            
             } //);
-            //catch (err) { } /* Avoid disturbance because of obsolete error */
-            /* http://jqueryui.com/demos/autocomplete/#custom-data */
+            @*//catch (err) { } /* Avoid disturbance because of obsolete error http://jqueryui.com/demos/autocomplete/#custom-data *@
         }
 
         function setItem(item) {
@@ -359,7 +357,7 @@
                                     &nbsp;
                                     <div class="dDialog" data-bind="visible:!_Deleted, click:$parent.removeSelected">@Html.Raw(@Defaults.delImg)</div>
                                     &nbsp;
-                                    <div class="dDialog" data-bind="visible:_Deleted, click:$parent.unRemoveSelected">@Html.Raw(@Defaults.cancelImgOnly)</div>
+                                    <div class="dDialog" data-bind="visible:_Deleted, click:$parent.unRemoveSelected">@Html.Raw(@Defaults.cancelImgOnly) &nbsp; &nbsp; </div>
                                     @*@Html.Raw(Defaults.delPOSTImgTACO("ItemID", -1, "doCmtDelPost"))*@
                                 </td>
                                 <td align="center" data-bind="text:$index()+1" width="1%">
@@ -418,7 +416,7 @@
     </div>
 </body>
 <script language="javascript" src="@Url.Content("~/Content/Scripts/jquery.numeric.js")" type="text/javascript"></script>
-@{ Html.RenderPartial("KO/ItemsKOscript"); }
+@{ Html.RenderPartial("KO/ItemsKOscript1"); }
 <script type="text/javascript" language="javascript">
     var autoCompMinLen = 2;
     var txtBox = "#ItemCode", idBox = "#ItemID";

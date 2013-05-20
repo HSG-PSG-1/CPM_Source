@@ -31,21 +31,21 @@
         string ClaimDetailD = ViewData["ClaimDetailID"].ToString();
         string maxFileSizMB = "(" + Config.MaxFileSizMB + " MB max)";
     }
-    <div id="divFiles">
+    <div id="divFilesDetail">
         <table style="width: 100%" border="0">
             @if (!isArchived)
             {<tr>
                 @* File upload solution with AJAX http://stackoverflow.com/questions/166221/how-can-i-upload-files-asynchronously-with-jquery*@
                 <td align="center">
-                    @using (Html.BeginForm("FileDetailPostKO", "Claim", 
-                        new {ClaimDetailD = ClaimDetailD, ClaimGUID = ClaimGUID }, FormMethod.Post,
+                    @using (Html.BeginForm("FileDetailPostKO", "Claim",
+                        new { ClaimDetailD = ClaimDetailD, ClaimGUID = ClaimGUID }, FormMethod.Post,
         new { id = "frmFilesDetail", enctype = "multipart/form-data", style = "display:inline" }))
                     {
                         <div id="fileDetailOprMsg" style="text-align: center; display: inline">&nbsp;</div>
                         <table cellpadding="2" cellspacing="2" style="width: 100%" border="0" data-bind="with: fileDetailToAdd">
                             <tr>
                                 <td colspan="4" align="center">                                    
-                                    <div style1="display:none">
+                                    <div style="display:none">
                                         <input type="checkbox" data-bind="checked:_Added" />
                                         ID: <input id="ID" data-bind="value:ID" />
                                         <br />
@@ -102,7 +102,7 @@
             }
             <tr>
                 <td align="center">
-                    <table class="thinBorder" width="100%" border="0">
+                    <table class="thinBorder" width="100%" border="0" data-bind="visible:allFiles().length > 0">
                         <thead class="header">
                             <tr>
                                 @if (!isArchived)
@@ -148,7 +148,7 @@
                                         &nbsp;
                                         <div class="dDialog" data-bind="visible:!_Deleted(), click:$parent.removeSelected">@Html.Raw(@Defaults.delImg)</div>
                                         &nbsp;
-                                        <div class="dDialog" data-bind="visible:_Deleted(), click:$parent.unRemoveSelected">@Html.Raw(@Defaults.cancelImgOnly)</div>
+                                        <div class="dDialog" data-bind="visible:_Deleted(), click:$parent.unRemoveSelected">@Html.Raw(@Defaults.cancelImgOnly) &nbsp; &nbsp; </div>
                                         @*@Html.Raw(Defaults.delPOSTImgTACO("CommentID", -1, "doCmtDelPost"))*@
                                     </td>
                                 }
@@ -199,6 +199,14 @@
 <script type="text/javascript" language="javascript" defer="defer">
 
     $(document).ready(function () {
+
+        window.onbeforeunload = function () {
+            //if (window.opener != null)
+            try {
+                window.opener.addFilesDetail(ko.mapping.toJSON(viewModelFD.allFiles()));
+            } catch (e) { alert(e); }
+        }
+
         var bar = $('.bar');
         var percent = $('.percent');
         var status = $('#status');

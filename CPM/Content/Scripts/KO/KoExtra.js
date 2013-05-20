@@ -1,75 +1,4 @@
-﻿/* http://ericmbarnard.github.com/KoGrid/#/examples
-function pagingVm(){
-    var self = this; 
-    this.myData = ko.observableArray([]);
-  
-    this.filterOptions = {
-        filterText: ko.observable(""),
-        useExternalFilter: true
-    };
-  
-    this.pagingOptions = {
-        pageSizes: ko.observableArray([250, 500, 1000]),
-        pageSize: ko.observable(250),
-        totalServerItems: ko.observable(0),
-        currentPage: ko.observable(1)     
-    };
-  
-    this.setPagingData = function(data, page, pageSize){	
-        var pagedData = data.slice((page - 1) * pageSize, page * pageSize);
-        self.myData(pagedData);
-        self.pagingOptions.totalServerItems(data.length);
-    };
-  
-    this.getPagedDataAsync = function (pageSize, page, searchText) {
-        setTimeout(function () {
-            var data;
-            if (searchText) {
-                var ft = searchText.toLowerCase();
-                $.getJSON('largeLoad.json', function (largeLoad) {		
-                    data = largeLoad.filter(function(item) {
-                        return JSON.stringify(item).toLowerCase().indexOf(ft) != -1;
-                    });
-                    self.setPagingData(data,page,pageSize);
-                });            
-            } else {
-                $.getJSON('largeLoad.json', function (largeLoad) {
-	                self.setPagingData(largeLoad,page,pageSize);
-                });
-            }
-        }, 100);
-    };
-  
-    self.filterOptions.filterText.subscribe(function (data) {
-        self.getPagedDataAsync(self.pagingOptions.pageSize(), self.pagingOptions.currentPage(), self.filterOptions.filterText());
-    });   
-
-    self.pagingOptions.pageSizes.subscribe(function (data) {
-        self.getPagedDataAsync(self.pagingOptions.pageSize(), self.pagingOptions.currentPage(), self.filterOptions.filterText());
-    });
-    self.pagingOptions.pageSize.subscribe(function (data) {
-        self.getPagedDataAsync(self.pagingOptions.pageSize(), self.pagingOptions.currentPage(), self.filterOptions.filterText());
-    });
-    self.pagingOptions.totalServerItems.subscribe(function (data) {
-        self.getPagedDataAsync(self.pagingOptions.pageSize(), self.pagingOptions.currentPage(), self.filterOptions.filterText());
-    });
-    self.pagingOptions.currentPage.subscribe(function (data) {
-        self.getPagedDataAsync(self.pagingOptions.pageSize(), self.pagingOptions.currentPage(), self.filterOptions.filterText());
-    });
-  
-    self.getPagedDataAsync(self.pagingOptions.pageSize(), self.pagingOptions.currentPage());
-
-    this.gridOptions = {
-        data: self.myData,
-        enablePaging: true,
-        pagingOptions: self.pagingOptions,
-        filterOptions: self.filterOptions
-    };	
-};
-ko.applyBindings(new pagingVm());
-*/
-
-//=========== HT: Extra functions and handling reqwuired by our custom KO implementation
+﻿//=========== HT: Extra functions and handling reqwuired by our custom KO implementation
 var Date111 = "/Date(-62135596800000)/";
 //http://stackoverflow.com/questions/8735617/handling-dates-with-asp-net-mvc-and-knockoutjs
 
@@ -138,6 +67,9 @@ ko.unWrappedToJSON = function (obj) {
     });
 }
 
+function copyObservable(observableObject) 
+{ return ko.mapping.fromJS(ko.toJS(observableObject)); }
+
 function cloneObservable(obj) {
     if (ko.isWriteableObservable(obj))
         return ko.observable(obj()); //this is the trick
@@ -155,3 +87,24 @@ function cloneObservable(obj) {
     return temp;
     //return ko.mapping.fromJS(ko.toJS(observableObject)); 
 }
+
+var doTDHover = true;
+
+function editable(ctrl, show) 
+{
+    if (show) $(ctrl).removeAttr('readonly').removeClass('noBorder').addClass('note');
+    else $(ctrl).attr('readonly', true).removeClass('note').addClass('noBorder');
+    }
+
+function doEditable(editDiv)
+{
+    $(editDiv).closest('tr').find("td input[class='noBorder']").focus().trigger("click");
+    //editDiv.parentElement.parentElement.children[4].click();
+}
+
+function setSubmitBtn(ctrl, btnID) {
+    if ($(ctrl).val() != "") { $("#" + btnID).removeAttr("disabled"); }
+    else { $("#" + btnID).attr("disabled", true); }
+}
+
+/*<span data-bind="text:new Date(parseInt(PostedOn.toString().substr(6))).toLocaleFormat('%d/%m/%Y')"></span>*/

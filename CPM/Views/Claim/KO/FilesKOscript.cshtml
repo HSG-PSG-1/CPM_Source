@@ -1,46 +1,8 @@
 ﻿@using CPM.Helper
-@using System.Collections
-@using System.Web.Script.Serialization
-@using System.Collections
-@using CPM.Services
-@using CPM.Helper
-
-@*<script id="fileTemplate" type="text/x-jquery-tmpl">    
-    <tr>
-        <td nowrap="nowrap">
-            <div class="dDialog" onclick="reloadCmt('@Url.Action("FilesKO", new { FileID = 0 })${ID}');">@Html.Raw(@Defaults.editImg)</div>&nbsp;
-            @Html.Raw(Defaults.delPOSTImgTACO("FileID", -1, "doCmtDelPost"))
-        </td>
-        <td>${FileBy}</td>
-        <td>${PostedOn}</td>
-        <td>${Comment}</td>
-    </tr>
-</script>*@
-    <script type="text/javascript" language="javascript" defer="defer">
-          function editable(ctrl, show) {
-            if (show) $(ctrl).removeAttr('readonly').removeClass('noBorder').addClass('note');
-            else $(ctrl).attr('readonly', true).removeClass('note').addClass('noBorder');
-         }
-
-    function doEditable(editDiv)
-    {
-        $(editDiv).closest('tr').find("td input[class='textBox']").closest('td').click();
-        //editDiv.parentElement.parentElement.children[4].click();
-    }
-    var doTDHover = true;
-
-    // Put script at bottom to avoid early-references
-    $(document).ready(function () {
-        //doAjaxForm('#frmFiles', '#divFiles', null); //AJAXify form
-//        try{$("#frmFiles").validate({@Defaults.validatorJQsetting});}catch(e){}
-        setFocus("Comment");
-        
-        createKO();
-    });
-    
+    <script type="text/javascript" language="javascript" defer="defer">    
     var IsEditMode = false;
     var NextNewFileID = -1;
-    var filesModel = function () {
+    var filesHeaderModel = function () {
         var self = this;
         
         self.emptyFile = ko.observable();
@@ -58,117 +20,78 @@
             file.PostedOn(Date111); //Date111 ko.mapping.fromJS(new Date())
         }
         self.setEditedFlag = function (file) {
-            file._Edited = !file._Added;
+            file._Edited(!file._Added());
             file.LastModifiedDate = Date111;
-
-            var index = self.allFiles.indexOf(file);
-            self.allFiles.remove(file);
-            self.allFiles.splice(index, 0, file);
-        }
-        self.saveFile = function (file) {
-            file.FileBy("Hemant Save"); //alert(ko.mapping.toJSON(ko.mapping.fromJS(new Date())()));
-            file.PostedOn(Date111); //Date111 ko.mapping.fromJS(new Date())
         }
         self.addFile = function (file) {
-        //if (self.fileToAdd != null) // Prevent blanks and duplicates
-            if (file.FileName == null || file.FileName == "")//if (self.itemToAdd.ItemCode == null || self.itemToAdd.ItemCode == "")
+            if (file.FileName == null || file.FileName == "")
                 {
                    //http://knockoutjs.com/documentation/event-binding.html
                    alert("Please select a file to upload"); return false; 
                 }
             else {
-                //self.itemToAdd().PostedOn = Date111;//ko.mapping.fromJS(new Date())
                 if (!IsEditMode) {
                     file.ID = NextNewFileID;
-                    self.allFiles.push(file); // self.allItems.push(ko.toJS(item)); //self.allItems.push((self.itemToAdd)); 
+                    self.allFiles.push(file); // self.allItems.push(ko.toJS(item));
                     NextNewFileID = NextNewFileID - 1;
                     self.emptyFile.ID = NextNewFileID; // NOT WORKING as expected
                 } //cloneObservable
-                else {                        
-                    var index = self.allFiles.indexOf(file);
-                    self.allFiles.remove(file);
-                    self.allFiles.splice(index, 0, file);
-                }
+                else {/* Editmode Handled by KO */}
             }
-            return true; // because we need to ajax submit the form
-        };
-
-        self.setSelected = function (file) {
-            if (file != null) // Prevent blanks and duplicates
-                self.fileToAdd(file);
-            file._Edited(!file._Added());
-            self.selectedFile(cloneObservable(file)); IsEditMode = true;
-            self.allFilesTemp = ko.mapping.fromJS(ko.mapping.toJS(self.allFiles));
-            return;            
+            return true; // for ajax submit
         };
 
         self.removeSelected = function (file) {
-            if (item != null) // Prevent blanks and duplicates
+            if (file != null)
             {
-                //self.allItems.valueWillMutate();
-                item._Deleted = true;
-                if (item._Added) {
-                    item._Added = false;
-                    self.allFiles.remove(item);
-                }                
+                file._Deleted(true);
+                if (file._Added()) {
+                    file._Added(false);
+                    self.allFiles.remove(file);
+                }
             }            
         };
 
         self.unRemoveSelected = function (file) {
-            if (item != null) // Prevent blanks and duplicates
+            if (file != null)
             {
-                item._Deleted = false;
-
-                var index = self.allItems.indexOf(item);
-                self.allItems.remove(item);
-                self.allItems.splice(index, 0, item);
+                file._Deleted(false);
             }
         };
 
 
         self.cancelFile = function (file) {
             IsEditMode = false;
-            self.fileToAdd(ko.toJS(self.emptyFile));
+            self.fileToAdd(cloneObservable(self.emptyFile));            
         };
 
         self.saveToServer = function () {
             ko.utils.postJson(location.href, { files: ko.mapping.toJS(self.allFiles) }); //ko.toJSON(self.allFiles)
-
-           // $.getJSON('@Url.Action("FilesKOVM", "Claim")',
-            //function (data) { ko.mapping.fromJS(data.AllFiles, viewModel.allFiles); });
-
             return false;
         }
-
-        /*http://jsfiddle.net/rniemeyer/GgFa9/
-        self.jsonText = ko.computed(function() {
-        return JSON.stringify($.map(self.allFiles(), function (file) { return file.val(); }));
-        });*/
     };
 
- function cloneObservable(observableObject) { return ko.mapping.fromJS(ko.toJS(observableObject)); }
-
- var viewModel = new filesModel();
- function createKO()
+ var viewModelFH = new filesHeaderModel();
+ function createFilesHeaderKO()
  {        
         $.getJSON('@Url.Action("FilesKOVM", "Claim", new { ClaimGUID = "" })',
          function (data) {
              if (data.FileToAdd.ID != -1) data.FileToAdd.ID = NextNewFileID;
 
-             viewModel.fileToAdd(data.FileToAdd); // viewModel.itemToAdd = ko.mapping.fromJS(data.ItemToAdd);
-             viewModel.emptyFile(data.FileToAdd); // viewModel.emptyFile = ko.mapping.fromJS(data.ItemToAdd);
+             viewModelFH.emptyFile = data.EmptyFileHeader; // THIS SHUD NOT BE AN OBSERVABLE
+             viewModelFH.fileToAdd(data.FileToAdd);             
 
-             viewModel.allFiles(data.AllFiles); // viewModel.allItems(ko.mapping.fromJS(data.AllItems));
-              // viewModel.allItems = ko.mapping.fromJS(data.AllItems);
-
-             // viewModel.Defects(data.Defects); //
-             viewModel.FileTypes = ko.mapping.fromJS(data.FileTypes);
-             
-             ko.applyBindings(viewModel);
+             viewModelFH.allFiles = ko.mapping.fromJS(data.AllFiles);              
+             viewModelFH.FileTypes = ko.mapping.fromJS(data.FileTypes);
+             //alert('Claim-FilesHeader');
+             ko.applyBindings(viewModelFH, document.getElementById("divFiles"));
          });
  }
       
-    </script>
-    @*<json>
-    @Html.Raw(new JavaScriptSerializer().Serialize(Model.AllFiles))
-    </json>*@
+    // Put script at bottom to avoid early-references
+    $(document).ready(function () {
+        setFocus("Comment");        
+        createFilesHeaderKO();
+    });
+
+    </script>    

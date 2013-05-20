@@ -284,6 +284,8 @@ function openWin(url, h, w) {
     //Open new window
     targetWin1 = window.open(url, "_blank", "toolbar=no, location=no, directories=no, status=no, menubar=no, scrollbars=no,"+
     " resizable=yes, copyhistory=no, width=" + w + ", height=" + h + ", top=" + top + ", left=" + left);
+
+    return targetWin1;
 }
 function openWinScrollable(url, h, w) {
     //http://msdn.microsoft.com/en-us/library/ms536651(VS.85).aspx
