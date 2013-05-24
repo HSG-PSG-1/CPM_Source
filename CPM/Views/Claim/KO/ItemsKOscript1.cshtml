@@ -197,9 +197,6 @@
         self.saveToServer = function () {
             ko.utils.postJson(location.href, { items: ko.mapping.toJS(self.allItems) }); //ko.toJSON(self.allItems)
 
-            // $.getJSON('@Url.Action("ItemsKOVM", "Claim")',
-            //function (data) { ko.mapping.fromJS(data.AllItems, viewModel.allItems); });
-
             return false;
         }
 
@@ -228,7 +225,7 @@
  function createKO()
  {
         var viewModel = new itemsModel();
-        $.getJSON('@Url.Action("ItemsKOVM", "Claim")',
+        $.getJSON('@Html.Raw(Url.Action("ItemsKOVM", "Claim", new { ClaimGUID = ViewData["ClaimGUID"] }))',
          function (data) {
              //self.itemsModel = data;
              // Because we need to show/hide file upload if (data.ItemToAdd.ID != -1) data.ItemToAdd.ID = NextNewItemID;
@@ -236,8 +233,10 @@
              viewModel.itemToAdd(data.ItemToAdd); // viewModel.itemToAdd = ko.mapping.fromJS(data.ItemToAdd);
              viewModel.emptyItem(data.ItemToAdd); // viewModel.emptyItem = ko.mapping.fromJS(data.ItemToAdd);
 
-             viewModel.allItems(data.AllItems); // viewModel.allItems(ko.mapping.fromJS(data.AllItems));
+             //viewModel.allItems(data.AllItems); 
+             viewModel.allItems(ko.mapping.fromJS(data.AllItems));
               // viewModel.allItems = ko.mapping.fromJS(data.AllItems);
+              //salert(viewModel.allItems());             
 
              // viewModel.Defects(data.Defects); //
              viewModel.Defects = ko.mapping.fromJS(data.Defects); 

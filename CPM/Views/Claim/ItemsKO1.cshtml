@@ -8,7 +8,7 @@
 @{ ViewBag.Title = "Claim Items KO Mobile";
    string showToInternal = !_Session.IsOnlyCustomer ? "" : "style='display:none'";
 }
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<!DOCTYPE html /> @*PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">*@
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
     <link rel="shortcut icon" href="@Url.Content("~/Content/favicon.ico")" type="image/x-icon" />
@@ -345,19 +345,20 @@
                             </tr>
                         </thead>
                         <tbody data-bind="foreach: allItems()">
-                            <tr data-bind="attr:{class:_Deleted?'deletedTR':'deletedTR_NO'}" style="height: 25px">
+                            <tr  style="height: 25px"
+                data-bind="attr:{className:_Deleted() ? 'deletedTR' : 'deletedTR_NO'}">
                                 <td nowrap="nowrap" width="3%">
                                     <span data-bind='text:ID' style1="display:none"></span>
-                                    <input type="checkbox" data-bind="checked:_Added" />
-                                    <input type="checkbox" data-bind="checked:_Edited" />
-                                    <input type="checkbox" data-bind="checked:_Deleted" />
+                                    <input type="checkbox" data-bind="checked:_Added()" />
+                                    <input type="checkbox" data-bind="checked:_Edited()" />
+                                    <input type="checkbox" data-bind="checked:_Deleted()" />
                                 </td>
                                 <td nowrap="nowrap" width="3%">
-                                    <div class="dDialog" data-bind="visible:!_Deleted, click:$parent.setEdited">@Html.Raw(@Defaults.editImg)</div>
+                                    <div class="dDialog" data-bind="visible:!_Deleted(), click:$parent.setEdited">@Html.Raw(@Defaults.editImg)</div>
                                     &nbsp;
-                                    <div class="dDialog" data-bind="visible:!_Deleted, click:$parent.removeSelected">@Html.Raw(@Defaults.delImg)</div>
+                                    <div class="dDialog" data-bind="visible:!_Deleted(), click:$parent.removeSelected">@Html.Raw(@Defaults.delImg)</div>
                                     &nbsp;
-                                    <div class="dDialog" data-bind="visible:_Deleted, click:$parent.unRemoveSelected">@Html.Raw(@Defaults.cancelImgOnly) &nbsp; &nbsp; </div>
+                                    <div class="dDialog" data-bind="visible:_Deleted(), click:$parent.unRemoveSelected">@Html.Raw(@Defaults.cancelImgOnly) &nbsp; &nbsp; </div>
                                     @*@Html.Raw(Defaults.delPOSTImgTACO("ItemID", -1, "doCmtDelPost"))*@
                                 </td>
                                 <td align="center" data-bind="text:$index()+1" width="1%">

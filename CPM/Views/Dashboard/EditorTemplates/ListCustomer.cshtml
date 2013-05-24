@@ -27,7 +27,7 @@
                         out val, item.ID, ref i, 7, ref prevID))
                 <tr>
                     <td align="center">
-                    @{ string href =  Url.Action(!item.Archived?"Manage?":"Archived", "Claim", new { ClaimId = item.ID });}
+                    @{ string href =  Url.Action(!item.Archived?"ManageKO?":"Archived", "Claim", new { ClaimId = item.ID });}
                     <a href='@HttpUtility.UrlDecode(href)' title="Click to view this claim">
                         <div style="height: 99%; cursor: pointer;"><u>@item.ClaimNo</u></div>
                     </a>                    

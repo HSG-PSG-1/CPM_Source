@@ -19,6 +19,8 @@ namespace CPM.DAL
     {
         #region Variables & Properties
 
+        public const string sep = ";";
+
         public bool _Added { get; set;}
         public bool _Edited { get; set; }
         public bool _Deleted { get; set; }
@@ -59,7 +61,8 @@ namespace CPM.DAL
     public partial class vw_Claim_Master_User_Loc
     {
         #region Extra Variables & Properties
-        
+
+        public int AssignedToOld { get; set; }
         public int StatusIDold { get; set; }
         public string ClaimGUID { get; set; }
         public string LocationAndCode { get { return Common.getLocationAndCode(this.Location, this.LocationCode); } }
@@ -355,12 +358,13 @@ namespace CPM.DAL
             set { _ClaimGUID = value; }
         }
 
-        public const string sep = ";";
-
         public string UploadedBy { get; set; }
         public string FileNameNEW { get; set; }
         public string FileTypeTitle { get; set; }
-        public string CodeStr { get { return HttpUtility.UrlEncode(CPM.Helper.Crypto.EncodeStr(FileName + sep + IsAsync, true)); } }
+        public string CodeStr { get { return HttpUtility.UrlEncode(CPM.Helper.Crypto.EncodeStr
+            (FileName + sep + ClaimGUID.ToString() + sep + IsAsync, true));
+        }
+        } // Can't use HttpUtility.UrlDecode - because it'll create issues with string.format and js function calls so handle in GetFile
         
         public string FilePath { //HT: Usage: <a href='<%= Url.Content("~/" + item.FilePath) %>' target="_blank">
             get { return FileIO.GetClaimFilePath
@@ -488,6 +492,14 @@ namespace CPM.DAL
         public string UploadedBy { get; set; }
         public string FileNameNEW { get; set; }
         public string FileTypeTitle { get; set; }
+        public string CodeStr
+        {
+            get
+            {
+                return HttpUtility.UrlEncode(CPM.Helper.Crypto.EncodeStr
+                    (FileName + sep + ClaimGUID + sep + ClaimDetailID.ToString() + sep + IsAsync, true));
+            }
+        }
         
         public string FilePath { //HT: Usage: <a href='<%= Url.Content("~/" + item.FilePath) %>' target="_blank">
             get { 

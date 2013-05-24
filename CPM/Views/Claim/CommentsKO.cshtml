@@ -1,6 +1,5 @@
 ﻿@using CPM.Helper
-@*
-@using System.Collections
+@*using System.Collections
 @using System.Web.Script.Serialization
 @using System.Collections
 @using Webdiyer.WebControls.Mvc
@@ -22,14 +21,13 @@
     <script src="@Url.Content("~/Content/Scripts/KO/KoExtra.js")" type="text/javascript"></script>
     /*script src="@Url.Content("~/Content/Scripts/jquery.hint.js")" type="text/javascript"></script>    
     <script src="http://www.json.org/json2.js" type="text/javascript"></script*/
-</head>{@ViewData["ClaimGUID"]}
-*@
+</head><body>*@
 <br />
 <div id="divComments">
-    <div style="text-align: right">
-        <input type="button" data-bind="click:saveToServer" class="button" value="Submit to Server" /></div>
+    @*<div style="text-align: right">
+        <input type="button" data-bind="click:saveToServer" class="button" value="Submit to Server" /></div>*@
     <table style="width: 100%" border="0">
-        <tr>@*Add \ Edit Comment : START*@
+        <tr>@* Add \ Edit Comment : START *@
             <td>
                 <form>
                 <table cellpadding="2" cellspacing="2" border="0" data-bind="with: commentToAdd">
@@ -54,13 +52,21 @@
                                 name="Comment1" onblur="return trimTextAreaMaxLen(this,4000);" rows="2" style="width: 90%"
                                 onchange='setSubmitBtn(this,"btnCmtAdd")'></textarea>
                         </td>
+                        <td valign="top" nowrap="nowrap" align="right" width="5%">Assign To</td>
+                        <td valign="top" align="right" width="10%">                            
+                            <select id="AssignTo" class="dropbox" name="AssignTo" 
+                            data-bind="options: $parent.Users, value:$parent.AssignTo, optionsText: 'value', optionsValue:'id'"
+                            onchange="setAssignedTo(this)">
+                            </select> <br/>                           
+                            <input id="AssignToVal" name="AssignToVal" type="hidden" data-bind="value:$parent.AssignToVal" /> 
+                            <input id="AssignToOLD" name="AssignToOLD" type="hidden" />
+                        </td>
                         <td valign="top">
                             <input id="btnCmtAdd" type="button" data-bind="click:$parent.addComment" value="Add"
                                 class="button" />
                             <input id="btnCmtReset" data-bind="click:$parent.cancelComment" type="reset" value="Cancel"
                                 class="button" />
-                            <br />
-                            <i class="error">(Note: Sending email still pending!!!)</i>
+                            <br />                            
                         </td>
                     </tr>
                 </table>
@@ -74,7 +80,7 @@
                 <table class="thinBorder" width="99%" data-bind="visible:allComments().length > 0">
                     <thead class="header">
                         <tr>
-                            <th width="3%" align="left">
+                            <th width="3%" align="left" nowrap="nowrap">
                                 id &nbsp;&nbsp; A &nbsp;&nbsp; E &nbsp;&nbsp; D
                             </th>
                             <th width="3%">
@@ -91,7 +97,7 @@
                         </tr>
                     </thead>
                     <tbody data-bind="foreach: allComments">
-                        <tr data-bind="attr:{class:_Deleted()?'deletedTR':'deletedTR_NO'}">
+                        <tr data-bind="attr:{className:_Deleted()?'deletedTR':'deletedTR_NO'}">
                             <td nowrap="nowrap">
                                 <span data-bind='text:ID' style1="display:none"></span>
                                 <input type="checkbox" data-bind="checked:_Added" />

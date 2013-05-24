@@ -20,7 +20,8 @@ namespace CPM.Controllers
         [CacheControl(HttpCacheability.NoCache), HttpGet]
         public ActionResult ItemsKO(int ClaimID, string ClaimGUID, int? DetailID)
         {
-            ViewData["Brands"] = new LookupService().GetLookup(LookupService.Source.BrandItems); 
+            ViewData["Brands"] = new LookupService().GetLookup(LookupService.Source.BrandItems);
+            ViewData["ClaimGUID"] = ClaimGUID;
             return View();
         }
 
@@ -29,6 +30,7 @@ namespace CPM.Controllers
         public ActionResult ItemsKO1(int ClaimID, string ClaimGUID, int? DetailID)
         {
             ViewData["Brands"] = new LookupService().GetLookup(LookupService.Source.BrandItems);
+            ViewData["ClaimGUID"] = ClaimGUID;
             return View();
         }
 

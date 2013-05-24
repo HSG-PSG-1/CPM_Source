@@ -159,7 +159,7 @@ namespace CPM.Services
                     dbc.SubmitChanges();
 
                 // Finally, If Item is NOT deleted then process its Files
-                if (!item._Deleted) // Make sure item is not deleted
+                if (!item._Deleted && item.aDFiles != null && item.aDFiles.Count() > 0) // Make sure item is not deleted
                     new FileDetailService(dbc).BulkAddEditDel(item.aDFiles, claimObj, oldClaimDetailId, item.ID, doSubmit, dbcContext);
             }
             

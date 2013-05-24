@@ -21,7 +21,7 @@ namespace CPM.Controllers
         public ActionResult FilesKO(int ClaimID, string ClaimGUID) // PartialViewResultViewResultBase 
         {
             ViewData["Archived"] = false;
-            ViewData["ClaimGUID"] = System.Guid.NewGuid();
+            ViewData["ClaimGUID"] = ClaimGUID;
             return View();
         }
 
@@ -55,27 +55,7 @@ namespace CPM.Controllers
         [HttpPost]
         public ActionResult FilesKO(int ClaimID, [FromJson] IEnumerable<FileHeader> files) // IEnumerable
         {
-            #region Process based on ModelState
-            /*if (ModelState.IsValid)
-            {
-                bool changeAssignTo = (Request.Form["AssignTo"] != Request.Form["AssignToOLD"]);
-                // Add new file and also send flag to indicate if AssignTo was changed
-                new CAWfile(IsAsync).AddEdit(FileObj, changeAssignTo,
-                    int.Parse(Request.Form["AssignTo"]), Request.Form["AssignToVal"]);
-                //Don, return to default action
-                return RedirectToAction("Files", new { ClaimGUID = FileObj.ClaimGUID });
-            }
-            else
-            {
-                //http://stackoverflow.com/questions/279665/how-can-i-maintain-modelstate-with-redirecttoaction
-                //TempData["ViewData"] = ViewData;//Store in temp intermediate variable
-                TempData["PRGModel"] = new CPM.Models.PRGModel().SetPRGModel<File>(FileObj, ModelState);
-                return RedirectToAction("Files", new { ClaimGUID = FileObj.ClaimGUID });
-            }*/
-            #endregion
-
             List<FileHeader> fileList = files.ToList();
-
 
             fileList.Add(new FileHeader()
             { Comment = "I came from postback refresh! (to confirm a successful postback)", UploadedBy = "Server postback" });
@@ -86,15 +66,69 @@ namespace CPM.Controllers
         }
 
         [HttpPost]
-        public ActionResult FilePostKO(int ClaimID, string ClaimGUID, FileHeader fh)
+        public ActionResult FilePostKO(int ClaimID, string ClaimGUID, FileHeader FileHdrObj)
         { 
             HttpPostedFileBase hpFile = Request.Files["FileNameNEW"];
             bool success = true;
-            string result = "Uploaded " + hpFile.FileName + "("+ hpFile.ContentLength + ")";
+            string result = "";// "Uploaded " + hpFile.FileName + "(" + hpFile.ContentLength + ")";
+
+            #region New file upload
+
+            if ((FileHdrObj.FileNameNEW ?? FileHdrObj.FileName) != null)
+            {//HT Delete old\existing file? For Async need to wait until final commit
+                //HT:IMP: Set Async so that now the file maps to Async file-path
+                FileHdrObj.IsAsync = true;
+                //FileHdrObj.ClaimGUID = _Session.Claim.ClaimGUID; // to be used further
+                #region Old code (make sure the function 'ChkAndSaveClaimFile' does all of it)
+                //string docName = string.Empty;
+                //FileIO.result uploadResult = SaveClaimFile(Request.Files["FileNameNEW"], ref docName, ClaimID, true);
+
+                //if (uploadResult != FileIO.result.successful)
+                //    if (uploadResult == FileIO.result.duplicate)
+                //        ModelState.AddModelError("FileName", "Duplicate file found");
+                //    else
+                //        ModelState.AddModelError("FileName", "Unable to upload file");
+                #endregion
+                FileHdrObj.FileName = ChkAndSaveClaimFile("FileNameNEW", ClaimID, HeaderFM, FileHdrObj.ClaimGUID);
+                success = (ModelState["FileName"].Errors.Count() < 1);
+            }
+
+            #endregion
+            result = !success ? ("Unable to upload file - " + ModelState["FileName"].Errors[0].ErrorMessage) : "";
 
             //Taconite XML
-            return this.Content(Defaults.getTaconite(success,
-                Defaults.getOprResult(success, "Unable to upload file"), "fileOprMsg"), "text/xml");
+            return this.Content(Defaults.getTaconiteResult(success,
+                Defaults.getOprResult(success, result), "fileOprMsg",
+                "fileUploadResponse('" + FileHdrObj.CodeStr + "'," + success.ToString().ToLower() + "," + FileHdrObj.ID + ")"), "text/xml");
+        }
+
+        [SkipModelValidation]
+        [AccessClaim("ClaimID")]
+        [HttpPost]
+        public ActionResult FileHeaderKODelete(int ClaimID, string ClaimGUID,[FromJson] FileHeader delFH)
+        {//Call this ONLY when you need to actually delete the file
+            bool proceed = false;
+            if (delFH != null)
+            {
+                #region Delete File
+
+                //If its Async - we can delete the TEMP file, if its sync the file is not present in TEMP folder so delete is not effective
+                // HT: infer: send async because the file resides in the temp folder
+                if (FileIO.DeleteClaimFile(delFH.FileName, ClaimGUID, null, FileIO.mode.asyncHeader))
+                {
+                    //HT: INFER: Delete file for Async, Sync and (existing for Async - 
+                    //the above delete will cause no effect coz path is diff)
+                    //new CAWFile(IsAsync).Delete(new FileHeader() { ID = FileHeaderID, ClaimGUID = ClaimGUID });
+                    proceed = true;
+                }
+                else
+                    proceed = false;
+
+                #endregion
+            }
+            //Taconite XML
+            return this.Content(Defaults.getTaconite(proceed,
+                Defaults.getOprResult(proceed, "Unable to delete file"), "fileOprMsg"), "text/xml");
         }
 
         #endregion
@@ -152,27 +186,7 @@ namespace CPM.Controllers
         [HttpPost]
         public ActionResult FilesDetailKO(int ClaimID, [FromJson] IEnumerable<FileDetail> files) // IEnumerable
         {
-            #region Process based on ModelState
-            /*if (ModelState.IsValid)
-            {
-                bool changeAssignTo = (Request.Form["AssignTo"] != Request.Form["AssignToOLD"]);
-                // Add new file and also send flag to indicate if AssignTo was changed
-                new CAWfile(IsAsync).AddEdit(FileObj, changeAssignTo,
-                    int.Parse(Request.Form["AssignTo"]), Request.Form["AssignToVal"]);
-                //Don, return to default action
-                return RedirectToAction("Files", new { ClaimGUID = FileObj.ClaimGUID });
-            }
-            else
-            {
-                //http://stackoverflow.com/questions/279665/how-can-i-maintain-modelstate-with-redirecttoaction
-                //TempData["ViewData"] = ViewData;//Store in temp intermediate variable
-                TempData["PRGModel"] = new CPM.Models.PRGModel().SetPRGModel<File>(FileObj, ModelState);
-                return RedirectToAction("Files", new { ClaimGUID = FileObj.ClaimGUID });
-            }*/
-            #endregion
-
             List<FileDetail> fileList = files.ToList();
-
 
             fileList.Add(new FileDetail() { Comment = "I came from postback refresh! (to confirm a successful postback)", UploadedBy = "Server postback" });
 
@@ -182,17 +196,61 @@ namespace CPM.Controllers
         }
 
         [HttpPost]
-        public ActionResult FileDetailPostKO(int ClaimID, string ClaimGUID, FileHeader fh)
+        public ActionResult FileDetailPostKO(int ClaimID, int ClaimDetailD, string ClaimGUID, FileDetail FileDetailObj)
         {
             HttpPostedFileBase hpFile = Request.Files["FileDetailNameNEW"];
             bool success = true;
-            string result = "Uploaded " + hpFile.FileName + "(" + hpFile.ContentLength + ")";
+            string result = "";// "Uploaded " + hpFile.FileName + "(" + hpFile.ContentLength + ")";
+
+            #region New file upload
+
+            if ((FileDetailObj.FileNameNEW ?? FileDetailObj.FileName) != null)
+            {//HT Delete old\existing file? For Async need to wait until final commit
+                //HT:IMP: Set Async so that now the file maps to Async file-path
+                FileDetailObj.IsAsync = true;
+                //FileDetailObj.ClaimGUID = _Session.Claim.ClaimGUID; // to be used further
+                FileDetailObj.FileName = ChkAndSaveClaimFile("FileDetailNameNEW", ClaimID, DetailFM, FileDetailObj.ClaimGUID, ClaimDetailD);
+                success = (ModelState["FileName"].Errors.Count() < 1);
+            }
+
+            #endregion
+
+            result = !success ? ("Unable to upload file - " + ModelState["FileName"].Errors[0].ErrorMessage) : "";
 
             //Taconite XML
-            return this.Content(Defaults.getTaconite(success,
-                Defaults.getOprResult(success, "Unable to upload file"), "fileDetailOprMsg"), "text/xml");
+            return this.Content(Defaults.getTaconiteResult(success,
+                Defaults.getOprResult(success, result), "fileDetailOprMsg",
+                "fileDUploadResponse('" + FileDetailObj.FileName + "'," + success.ToString().ToLower() + "," + FileDetailObj.ID + ")"), "text/xml");
         }
 
+        [SkipModelValidation]
+        [AccessClaim("ClaimID")]
+        [HttpPost]
+        public ActionResult FileDetailKODelete(int ClaimID, string ClaimGUID, [FromJson] FileDetail delFD)
+        {//Call this ONLY when you need to actually delete the file
+            bool proceed = false;
+            if (delFD != null)
+            {
+                #region Delete File
+
+                //If its Async - we can delete the TEMP file, if its sync the file is not present in TEMP folder so delete is not effective
+                // HT: infer: send async because the file resides in the temp folder
+                if (FileIO.DeleteClaimFile(delFD.FileName, ClaimGUID, delFD.ClaimDetailID, FileIO.mode.asyncHeader))
+                {
+                    //HT: INFER: Delete file for Async, Sync and (existing for Async - 
+                    //the above delete will cause no effect coz path is diff)
+                    //new CAWFile(IsAsync).Delete(new FileHeader() { ID = FileHeaderID, ClaimGUID = ClaimGUID });
+                    proceed = true;
+                }
+                else
+                    proceed = false;
+
+                #endregion
+            }
+            //Taconite XML
+            return this.Content(Defaults.getTaconite(proceed,
+                Defaults.getOprResult(proceed, "Unable to delete file"), "fileDetailOprMsg"), "text/xml");
+        }
         #endregion
     }
 }

@@ -14,12 +14,12 @@
             renderAutoComplete('@Defaults.commonRoot/Lookup?id=OrgSalesperson', '#CustID', '#CustOrg');        
             @*bind the event which will auto-select salesperson and set in textbox for the selected customer*@
             $( "#CustOrg" ).bind( "autocompleteselect", function(event, ui) {        
-                $("#CustID").val(ui.item ? ui.item.id : '');//DON'T forget
+                $("#CustID").val(ui.item ? ui.item.id : '').trigger("change");//DON'T forget
                 @*set Interval Locations*@
                 fillLocations(true);
                 @*Set Salesperson*@
-                $("#SalespersonID").val(ui.item ? ui.item.spid : '');
-                $("#SalespersonName").val(ui.item ? ui.item.spName : '').effect('highlight', {}, 2000);
+                $("#SalespersonID").val(ui.item ? ui.item.spid : '').trigger("change");
+                $("#SalespersonName").val(ui.item ? ui.item.spName : '').effect('highlight', {}, 2000).trigger("change");
                 if($("#SalespersonID").val() != '') $("#SalespersonName").valid();
                 @*perform validation so that err msg(if any) is cleared.*@
             }); 
@@ -102,9 +102,8 @@
                         }@* END: Archive*@@if (!isNewClaim)
                           { //&& !IsOnlyCustomer
             <input type="button" value="Print" class="button" onclick="javascript:openWinScrollable('@Url.Action("Print", "Claim", new { ClaimID = Model.CVM.ID })',648,838);" />@Html.Raw("&nbsp;")}
-                        @if (_Session.IsInternal && !isNewClaim)
-                        {<a href='@Url.Action("PrintPDF")' target="_blank">PDF</a>@Html.Raw("&nbsp;")
-                            <a href='@Url.Action("CommentsKO")' style="color:Blue"><i>CommentsKO (demo)</i></a>@Html.Raw("&nbsp;")
+                        @if (_Session.IsInternal && !isNewClaim){
+                            <a href='@Url.Action("PrintPDF")' target="_blank">PDF</a>@Html.Raw("&nbsp;")@Html.Raw("&nbsp;")
                         }
                     </td>
                 </tr>
@@ -131,7 +130,9 @@
                               <tr>
                                   <td nowrap="nowrap" width="1%" align="right">@Html.LabelFor(model => model.CVM.ClaimNo)
                                   </td>
-                                  <td nowrap="nowrap" width="40%">@ClaimNo@Html.Hidden("ClaimNo",Model.CVM.ClaimNo, new { data_bind = "value:ClaimNo" })@Html.TextBox("AssignedTo", Model.CVM.AssignedTo, new { data_bind = "value:AssignedTo" })@Html.TextBox("AssignedToVal", Model.CVM.AssignedToVal, new { data_bind = "value:AssignedToVal" })
+                                  <td nowrap="nowrap" width="40%">@ClaimNo@Html.Hidden("ClaimNo",Model.CVM.ClaimNo, new { data_bind = "value:ClaimNo" })
+                                  @Html.Hidden("AssignedTo", Model.CVM.AssignedTo, new { data_bind = "value:AssignedTo" })@Html.Hidden("AssignedToVal", Model.CVM.AssignedToVal, new { data_bind = "value:AssignedToVal" })
+                                  @Html.Hidden("AssignedToOld", Model.CVM.AssignedToOld, new { data_bind = "value:AssignedToOld" })
                                   </td>
                                   <td nowrap="nowrap">
                                       &nbsp;&nbsp;
@@ -263,21 +264,28 @@
 <script src="@Url.Content("~/Content/Scripts/KO/KoExtra.js")" type="text/javascript"></script>
 <script language="javascript" type="text/javascript"> 
     var claimViewModel = function () {
-                var self = this;
-                self.CVM = ko.observable();
-                self.Statuses = ko.observableArray([]);
-                self.Brands = ko.observableArray([]); // Initial items
+        var self = this;
+        self.CVM = ko.observable();
+        self.Statuses = ko.observableArray([]);
+        self.Brands = ko.observableArray([]); // Initial items
 
-                self.SubmitData = function (claimObj) {
-                    ko.utils.postJson(location.href, 
-                    { 
-                        isAddMode: @isNewClaim.ToString().ToLower(),
-                        claimObj: claimObj,
-                        items: ko.mapping.toJS(viewModelItems.allItems()) 
-                    });
-                    return false;
-                }
+        self.SubmitData = function (claimObj) {
+            var proceed = $("#frmClaim").valid();
+            if(proceed){ try{DisableSubmitButtons(true);@*$.blockUI();*@}catch(e){}}
+
+            if (proceed) {
+                ko.utils.postJson(location.href, 
+                { 
+                    isAddMode: @isNewClaim.ToString().ToLower(),
+                    claimObj: claimObj,
+                    items: ko.mapping.toJS(viewModelItems.allItems()),
+                    comments: ko.mapping.toJS(viewModelComments.allComments()),  
+                    files: ko.mapping.toJS(viewModelFH.allFiles())  
+                });
+                return false;
             }
+        }@* END: self.SubmitData *@
+    }
 
       function LoadKOAndOther() {
            setFocus("StatusID");           
@@ -288,7 +296,7 @@
                reload('@Url.Action("ItemsKO", new { ClaimGUID = Model.CVM.ClaimGUID.ToString() })','',"#tabs-2");
                @if (!IsOnlyCustomer)
                {<text>@*reloadWithCallback('@Url.Action("CommentsKO", new { ClaimGUID = Model.CVM.ClaimGUID.ToString() })','',"#tabs-3", function(){callDocReadyComments();});*@
-                   reload('@Url.Action("CommentsKO", new { ClaimGUID = Model.CVM.ClaimGUID.ToString() })','',"#tabs-3");
+                   reload('@Url.Action("CommentsKO", new { ClaimGUID = Model.CVM.ClaimGUID.ToString(), AssignedTo = Model.CVM.AssignedTo })','',"#tabs-3");
                </text>}
                reload('@Url.Action("FilesKO", new { ClaimGUID = Model.CVM.ClaimGUID.ToString() })','',"#tabs-4");
             }
@@ -332,7 +340,7 @@
         function fillLocations(reset)
         {
             if (reset)
-             {$("#ShipToLocationID").val(''); $("#Location").val('');}
+             {$("#ShipToLocationID").val('').trigger("change"); $("#Location").val('').trigger("change");}
             
             var CustID = $("#CustID").val();
             CustID = (CustID==null || CustID.toString().length < 1)? oriCustID : CustID;//set or reset

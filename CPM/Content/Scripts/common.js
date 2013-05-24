@@ -7,10 +7,10 @@ var autoCompleteALL = "  "; //Must be equal to autoCompMinLen
 var delTR = ""; // Required tohold te deleted TR fopas using taconite plugin
 
 // If the required field is empty then empty the impact control
-function checkReq(ctrl, impactCtrl) {if (!($(ctrl).val().toString().length > 0)) $(impactCtrl).val('');}
+function checkReq(ctrl, impactCtrl) { if (!($(ctrl).val().toString().length > 0)) $(impactCtrl).val('').trigger("change"); }
 // Log the selected item.id or empty into id textbox
 function log(item, idBox, txtBox) {
-    $(idBox).val(item ? item.id : ''); /*"#ItemID" */    
+    $(idBox).val(item ? item.id : '').trigger("change"); /*"#ItemID" */    
     //try { $(txtBox).validate().valid(); } catch (e) { }
 }
 //Toggle the display of the two images in parent (make sure you follow the sequence)
@@ -52,7 +52,7 @@ function renderAutoComplete(url, idBox, txtBox) {
     $(txtBox).change(function() { checkReq(txtBox, idBox); }); //blur
     $(txtBox).focus(function() { $(this).select(); });//select text
     //Set initial value (null if it was defaulted to 0) and set tooltip
-    var val = $(idBox).val(); $(idBox).val((val == "0") ? "" : val); //Because sometimes Int is by default initialized by 0
+    var val = $(idBox).val(); $(idBox).val((val == "0") ? "" : val).trigger("change"); //Because sometimes Int is by default initialized by 0
     $(txtBox).attr('title', 'Start typing to search or enter blank space twice to view all');
     $(idBox).css("display", "none");
 }
@@ -62,7 +62,7 @@ function renderAutoComplete(url, idBox, txtBox) {
 function setDDLtext(ddlID, txtID) {
     var ddl = document.getElementById(ddlID);
     var selIndex = (ddl.selectedIndex != null) ? ddl.selectedIndex : 0;
-    $("#" + txtID).val(ddl.options[selIndex].text);
+    $("#" + txtID).val(ddl.options[selIndex].text).trigger("change");
 }
 
 function roundNumber(rnum, rlength) { // Arguments: number to round, number of decimal places
@@ -197,7 +197,7 @@ function clearForm(oForm) {
 
 //minSQLDate & maxSQLDate are declared in Master page
 function resetDatepicker(commaSepJQdatepickerIDs) {
-    $(commaSepJQdatepickerIDs).val('').datepicker('option', { minDate: minSQLDate, maxDate: maxSQLDate });
+    $(commaSepJQdatepickerIDs).val('').trigger("change").datepicker('option', { minDate: minSQLDate, maxDate: maxSQLDate });
 }
 
 //////////////////// START: Scripts to keep the search panel hidden while paging/sorting  ////////////////////
@@ -352,18 +352,18 @@ function showOprResult(spanId, success) {
 }
 
 function setDefaultIfEmpty(txt, defaultStr) {// use with onblur (don't use with jQuery.validate class = "required"
-    if ($(txt).val() == '') $(txt).val(defaultStr); // make sure defaultStr is a string
+    if ($(txt).val() == '') $(txt).val(defaultStr).trigger("change"); // make sure defaultStr is a string
 }
 
 function trimTextAreaMaxLen(txt,maxlen) { // requires jQuery    
     if (maxlen == null) 
         maxlen = $(txt).attr("maxlength");
-    try { $(txt).val($(txt).val().slice(0, maxlen)); } catch (ex) { }    
+    try { $(txt).val($(txt).val().slice(0, maxlen)).trigger("change"); } catch (ex) { }    
 }
 
 /*function trimTextAreaMaxLen(txt) { // requires jQuery
     try{var maxlen = $(txt).attr("maxlength");
-    $(txt).val($(txt).val().slice(0, maxlen));}
+    $(txt).val($(txt).val().slice(0, maxlen)).trigger("change");}
     catch(ex){;}
 }*/
 

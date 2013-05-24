@@ -1,18 +1,17 @@
 ﻿@using CPM.Helper
     <script type="text/javascript" language="javascript" defer="defer">    
-    var IsEditMode = false;
+    var IsFHEditMode = false;
     var NextNewFileID = -1;
     var filesHeaderModel = function () {
         var self = this;
         
-        self.emptyFile = ko.observable();
+        self.emptyFile = "";
 
         self.fileToAdd = ko.observable();
         self.allFiles = ko.observableArray(); // Initial items
-        self.selectedFile = ko.observable(); // Initial selection
         
         self.TriggerOpenWin = function (fileFH) {
-            openWin("@Url.Action("GetFile", "Claim")?" + fileFH.CodeStr,1,1);
+            openWin("@Url.Action("GetFile", "Claim")?" + fileFH.CodeStr(),1,1);
         }
         
         self.setEdited = function (file) {
@@ -21,7 +20,7 @@
         }
         self.setEditedFlag = function (file) {
             file._Edited(!file._Added());
-            file.LastModifiedDate = Date111;
+            file.LastModifiedDate(Date111);
         }
         self.addFile = function (file) {
             if (file.FileName == null || file.FileName == "")
@@ -30,26 +29,32 @@
                    alert("Please select a file to upload"); return false; 
                 }
             else {
-                if (!IsEditMode) {
+                if (!IsFHEditMode) {
                     file.ID = NextNewFileID;
-                    self.allFiles.push(file); // self.allItems.push(ko.toJS(item));
+                    self.allFiles.push(ko.mapping.fromJS(cloneObservable(file)));
                     NextNewFileID = NextNewFileID - 1;
                     self.emptyFile.ID = NextNewFileID; // NOT WORKING as expected
-                } //cloneObservable
-                else {/* Editmode Handled by KO */}
+                }
+                else { /* Editmode Handled by KO */ }
             }
             return true; // for ajax submit
         };
 
         self.removeSelected = function (file) {
-            if (file != null)
-            {
-                file._Deleted(true);
-                if (file._Added()) {
+            if (file == null)return false;
+            
+            if(!file._Added()) {file._Deleted(true); return false;}
+
+            var data = {}; data["delFH"] = ko.mapping.toJSON(file);
+            var url = '@Url.Action("FileHeaderKODelete", "Claim", new { ClaimGUID = ViewData["ClaimGUID"] })';
+            $.post(url, data, function(data, textStatus, jqXHR)
+                {
+                    //alert(data);
+                    file._Deleted(true);
                     file._Added(false);
-                    self.allFiles.remove(file);
+                    self.allFiles.remove(file);                        
                 }
-            }            
+            );                        
         };
 
         self.unRemoveSelected = function (file) {
@@ -61,7 +66,7 @@
 
 
         self.cancelFile = function (file) {
-            IsEditMode = false;
+            IsFHEditMode = false;
             self.fileToAdd(cloneObservable(self.emptyFile));            
         };
 
@@ -74,14 +79,18 @@
  var viewModelFH = new filesHeaderModel();
  function createFilesHeaderKO()
  {        
-        $.getJSON('@Url.Action("FilesKOVM", "Claim", new { ClaimGUID = "" })',
+        $.getJSON('@Html.Raw(Url.Action("FilesKOVM", "Claim", new { ClaimGUID = ViewData["ClaimGUID"] }))',
          function (data) {
              if (data.FileToAdd.ID != -1) data.FileToAdd.ID = NextNewFileID;
 
              viewModelFH.emptyFile = data.EmptyFileHeader; // THIS SHUD NOT BE AN OBSERVABLE
              viewModelFH.fileToAdd(data.FileToAdd);             
+             
+             if(data.AllFiles != null)
+                viewModelFH.allFiles = ko.mapping.fromJS(data.AllFiles);
+            else
+                viewModelFH.allFiles = ko.observableArray();
 
-             viewModelFH.allFiles = ko.mapping.fromJS(data.AllFiles);              
              viewModelFH.FileTypes = ko.mapping.fromJS(data.FileTypes);
              //alert('Claim-FilesHeader');
              ko.applyBindings(viewModelFH, document.getElementById("divFiles"));

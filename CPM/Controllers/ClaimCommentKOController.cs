@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
@@ -54,7 +55,7 @@ namespace CPM.Controllers
         }
 
         [CacheControl(HttpCacheability.NoCache), HttpGet]
-        public JsonResult CommentsKOVM(int ClaimID, string ClaimGUID, int? CommentID) // PartialViewResultViewResultBase 
+        public JsonResult CommentsKOVM(int ClaimID, string ClaimGUID, int AssignedTo) // PartialViewResultViewResultBase 
         {
             if (_Session.IsOnlyCustomer) return Json(null);//Customer doesn't have access to Comments
 
@@ -72,8 +73,11 @@ namespace CPM.Controllers
             DAL.CommentKOModel vm = new CommentKOModel()
             {
                 CommentToAdd = newObj, EmptyComment = newObj, 
-                AllComments = (sendResult? comments : new CAWcomment(false).Search(ClaimID, null, ClaimGUID))
+                AllComments = (sendResult? comments : new CAWcomment(false).Search(ClaimID, null, ClaimGUID)),
+                AssignedTo = AssignedTo
             };
+
+            vm.Users = new LookupService().GetLookup(LookupService.Source.User);
 
             return Json(vm, JsonRequestBehavior.AllowGet);
         }
@@ -126,16 +130,17 @@ namespace CPM.Controllers
         }
 
         [HttpPost]
-        public JsonResult CommentsKOEmail(int ClaimID, string ClaimGUID, int AssignedTo, int ClaimNo, Comment CommentObj)
+        public JsonResult CommentsKOEmail(int ClaimID, string ClaimGUID, int AssignedTo, int ClaimNo, [FromJson] Comment CommentObj)
+        //int AssignedToOLD,
         {            
             bool sendMail = (ClaimID > Defaults.Integer && AssignedTo != _SessionUsr.ID);// No need to send mail if its current user
             try
             {
                 #region Check and send email
-                if (sendMail)//Make sure "_Session.Claim" is available
-                {
+                if (sendMail)
+                {// No need to send mail if its current user
                     string UserEmail = new UserService().GetUserEmailByID(AssignedTo);
-                    //MailManager.AssignToMail(ClaimNo.ToString(), CommentObj.Comment1, ClaimID, UserEmail, (_SessionUsr.UserName), true);
+                    MailManager.AssignToMail(ClaimNo.ToString(), CommentObj.Comment1, ClaimID, UserEmail, (_SessionUsr.UserName), true);
                 }
                 #endregion
             }
@@ -152,5 +157,7 @@ namespace CPM.DAL
         public Comment EmptyComment { get; set; }
         public Comment CommentToAdd { get; set; }
         public List<Comment> AllComments { get; set; }
+        public IEnumerable Users { get; set; }
+        public int AssignedTo { get; set; }
     }
 }

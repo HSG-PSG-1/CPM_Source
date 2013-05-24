@@ -30,7 +30,7 @@
             //$('span:first', td).html($('input:first', td).val());
         }
     }*@    
-    var IsEditMode = false;
+    var IsCCEditMode = false;
     var NextNewCommentID = -1;
     var commentsViewModel = function () {
         var self = this;
@@ -38,6 +38,8 @@
 
         self.commentToAdd = ko.observable();
         self.allComments = ko.observableArray();
+        self.AssignTo = ko.observable();
+        self.AssignToVal = ko.observable();
         @*//self.jsonText = ko.computed(function() { return ("JSON: " + ko.toJSON(self.commentToAdd())); });*@
 
         self.setEdited = function (comment) {
@@ -60,7 +62,7 @@
                    return false; 
                 }
             else {
-                if (!IsEditMode) {
+                if (!IsCCEditMode) {
                     comment.ID = NextNewCommentID;
                     self.allComments.push(ko.mapping.fromJS(cloneObservable(comment)));
 
@@ -106,7 +108,7 @@
 
 
         self.cancelComment = function (comment) {
-            IsEditMode = false;
+            IsCCEditMode = false;
             @*comment.allComments().valueHasMutated();//SO: 8537397
             //ko.mapping.fromJS(self.selectedComment, self.commentToAdd); *@
             self.commentToAdd(cloneObservable(self.emptyComment));
@@ -118,16 +120,17 @@
             var proceed = false;
             proceed = !(comment == null || _AssignedTo == null || _ClaimNo == null);
             
-            alert(proceed  +":"+ comment +":"+ _AssignedTo +":"+ _ClaimNo);
+            alert(ko.mapping.toJSON(comment));
+
             if(proceed){
                 $.post('@Url.Action("CommentsKOEmail", "Claim", new { ClaimGUID = ViewData["ClaimGUID"] })',
                       { 
-                        CommentObj: comment,
+                        CommentObj: ko.mapping.toJSON(comment),
                         AssignedTo: _AssignedTo,
                         ClaimNo : _ClaimNo
                       },  
                       function (result) {   
-                        alert(result);
+                        //alert(result); HT: we can notify user if a succesful email was sent
                       }
                 );
             }
@@ -143,32 +146,36 @@
         return JSON.stringify($.map(self.allComments(), function (comment) { return comment.val(); }));
         });*@
     };
-
+var viewModelComments = new commentsViewModel();
  function createCommentsKO()
  {
-        var commentsVM = new commentsViewModel();
-        $.getJSON('@Url.Action("CommentsKOVM", "Claim", new { ClaimGUID = ViewData["ClaimGUID"] })',
+        var ClaimAssignedTo = $("#AssignedTo").val();
+        $.getJSON('@Html.Raw(Url.Action("CommentsKOVM", "Claim", new { ClaimGUID = ViewData["ClaimGUID"] }))' +  '&AssignedTo=' + ClaimAssignedTo ,
          function (data) {
              if (data.CommentToAdd.ID != -1) 
                 data.CommentToAdd.ID = NextNewCommentID;
 
-             commentsVM.emptyComment = data.EmptyComment; @*// THIS SHUD NOT BE AN OBSERVABLE*@
-
-             commentsVM.commentToAdd(data.CommentToAdd);@*//var mapping = {'ignore': ["PostedOn"]};*@
-             commentsVM.allComments = ko.mapping.fromJS(data.AllComments); //, mapping);
+             viewModelComments.emptyComment = data.EmptyComment; @*// THIS SHUD NOT BE AN OBSERVABLE*@
+             viewModelComments.AssignTo(data.AssignedTo);   $("#AssignToOLD").val(data.AssignedTo);
+             viewModelComments.AssignToVal("");
+             
+             viewModelComments.commentToAdd(data.CommentToAdd);@*//var mapping = {'ignore': ["PostedOn"]};*@
+             viewModelComments.allComments = ko.mapping.fromJS(data.AllComments); //, mapping);
+             viewModelComments.Users = ko.mapping.fromJS(data.Users);
+             
              @*
              //$("#commentTemplate").tmpl(data.AllComments).appendTo( "#tbComments" );
-             // commentsVM.jsonText = ko.dependentObservable(function() {
+             // viewModelComments.jsonText = ko.dependentObservable(function() {
              // if(this.allComments() != null)  return ("JSON: " + ko.toJSON(this.allComments())); }, this);
              *@
              //alert('Claim-Comments');
-             ko.applyBindings(commentsVM, document.getElementById("divComments"));
+             ko.applyBindings(viewModelComments, document.getElementById("divComments"));
          });
  }
 
     function doCmtEmailPost(comment) {
         var data = {}; data[txtId] = txtVal;
-        var url = '@Url.Action("CommentKODelete", "Claim", new { ClaimGUID = "" })';
+        var url = '@Url.Action("CommentKODelete", "Claim", new { ClaimGUID = ViewData["ClaimGUID"] })';
         $.post(url, data);
         return false; // prevent any postback
     }
@@ -183,5 +190,16 @@
     {
         setFocus("Comment1");        
         createCommentsKO();
-    }     
+    }
+
+    function setAssignedTo(ddl)
+    {
+        var ddlID = $(ddl).val();
+        var ddlTXT = $(ddl).children("option").filter(":selected").text();
+        
+        $(ddl).parent().children("input:first").val(ddlTXT).trigger("change");        
+
+        $("#AssignedTo").val(ddlID).trigger("change");
+        $("#AssignedToVal").val(ddlTXT).trigger("change");
+    }
     </script>   

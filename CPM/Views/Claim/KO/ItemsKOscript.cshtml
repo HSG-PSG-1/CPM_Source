@@ -26,7 +26,7 @@
         }
     }*@
     
-    var IsEditMode = false;
+    var IsCDEditMode = false;
     var NextNewItemID = -1;
     var itemsModel = function () {
         var self = this;
@@ -36,7 +36,7 @@
 
         self.showGrid = ko.observable(true);
         self.itemToAdd = ko.observable();
-        self.isEditMode = ko.observable();
+        self.IsCDEditMode = ko.observable();
         self.allItems = ko.observableArray([]);
         self.allFilesDetail = new Array();
 
@@ -76,7 +76,7 @@
         }
 
         self.openAttachFilesDetail = function (item) { 
-            var url = "@Url.Action("FilesDetailKO", "Claim")" + "?ClaimDetailID=" + item.ID() + "&ClaimGUID=" + item.ClaimGUID();
+            var url = "@Url.Action("FilesDetailKO", "Claim")" + "?ClaimDetailID=" + item.ID() + "&ClaimGUID=@ViewData["ClaimGUID"]";
             var winFD = openWin(url,450,650);
             //winFD.onunload = 
         }
@@ -84,7 +84,7 @@
         self.showAddNew = function () {
             self.showGrid(false);
             self.itemToAdd(cloneObservable(self.emptyItem));//self.setEdited(ko.toJS(self.emptyItem));
-            IsEditMode = false;
+            IsCDEditMode = false;
 
             @*//Redo autopopulate
             var BrandID = $('#BrandID'); BrandID = (BrandID != null) ? BrandID.val() : "";*@
@@ -105,7 +105,7 @@
             BrandID = (BrandID != null) ? BrandID.val() : "";*@
             fillItemsForBrand(null, false);//BrandID
 
-            IsEditMode = true;
+            IsCDEditMode = true;
         }
         self.setEditedFlag = function (item) {
             item._Edited(!item._Added());
@@ -117,7 +117,7 @@
                 alert("Item is a required field");
             else {
                 @*//self.itemToAdd().PostedOn = Date111;//ko.mapping.fromJS(new Date())*@
-                if (!IsEditMode) {
+                if (!IsCDEditMode) {
                     item.ID = NextNewItemID;
                     self.allItems.push(ko.mapping.fromJS(cloneObservable(item))); // self.allItems.push(item);
                     NextNewItemID = NextNewItemID - 1;
@@ -128,7 +128,7 @@
                     self.allItems.replace(old, self.itemToAdd); //self.locations.valueHasMutated();*@
                 }
                 
-                IsEditMode = false;
+                IsCDEditMode = false;
                 //HT: How to reset the add new obj
                 self.cancelItem(item);@*//ko.toJS(self.emptyItem) // ko.mapping.fromJS(ko.toJS(self.emptyItem), self.itemToAdd);*@
                 self.showGrid(true);
@@ -161,7 +161,7 @@
 
 
         self.cancelItem = function (item) {
-            IsEditMode = false;
+            IsCDEditMode = false;
             @*//self.itemToAdd(null); //ko.toJS(self.emptyItem) // ko.mapping.fromJS(ko.toJS(self.emptyItem), self.itemToAdd);*@
             self.itemToAdd(cloneObservable(self.emptyItem));
             self.showGrid(true);
@@ -176,7 +176,7 @@
 var viewModelItems = new itemsModel();        
  function createItemsKO()
  {
-        $.getJSON('@Url.Action("ItemsKOVM", "Claim")',
+        $.getJSON('@Html.Raw(Url.Action("ItemsKOVM", "Claim", new { ClaimGUID = ViewData["ClaimGUID"] }))',
          function (data) {
              @* Because we need to show/hide file upload if (data.ItemToAdd.ID != -1) data.ItemToAdd.ID = NextNewItemID;*@
 

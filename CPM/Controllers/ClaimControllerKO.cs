@@ -117,26 +117,22 @@ namespace CPM.Controllers
 
         [HttpPost]
         [AccessClaim("ClaimID")]
-        public ActionResult ManageKO(int ClaimID, bool isAddMode, [FromJson]vw_Claim_Master_User_Loc claimObj, [FromJson] IEnumerable<ClaimDetail> items)
+        public ActionResult ManageKO(int ClaimID, bool isAddMode,
+            [FromJson]vw_Claim_Master_User_Loc claimObj, [FromJson] IEnumerable<ClaimDetail> items,
+            [FromJson] IEnumerable<Comment> comments, [FromJson] IEnumerable<FileHeader> files)
         {
             bool success = false;
-            return new JsonResult() { Data = new{ msg = "success"}};
-
-            /*
-            if (!ModelState.IsValid)//Ref: base.IsAutoPostback() || //Request.Form["chkDone"] must be present
-            {
-                ClaimKOModel vmClaim = doAddEditPopulateKO(claimObj);
-                return View(vmClaim);
-            }
+            //return new JsonResult() { Data = new{ msg = "success"}};
+            
             //HT: Note the following won't work now as we insert a record in DB then get it back in edit mode for Async edit
             //bool isAddMode = (claimObj.ID <= Defaults.Integer); 
 
             #region Perform operation proceed and set result
 
-            int result = new CAWclaim(false).AddEdit(claimObj, claimObj.StatusIDold);
+            int result = new CAWclaim(false).AsyncBulkAddEditDelKO(claimObj, claimObj.StatusIDold, items, comments, files);
             success = result > 0;
 
-            if (!success) return View(claimObj);
+            if (!success) {/*return View(claimObj);*/}
             else //Log Activity based on mode
             {
                 claimObj.ClaimNo = result;// Set Claim #
@@ -149,7 +145,7 @@ namespace CPM.Controllers
             base.operationSuccess = success;//Set opeaon success
             _Session.ResetClaimInSessionAndEmptyTempUpload(claimObj.ClaimGUID); // reset because going back to Manage will automatically creat new session
 
-            return RedirectToAction("ManageKO", new { ClaimID = result});*/
+            return RedirectToAction("ManageKO", new { ClaimID = result});
         }
 
         [AccessClaim("ClaimID")]
@@ -214,6 +210,7 @@ namespace CPM.Controllers
                 //ClaimModel = new System.Web.Script.Serialization.JavaScriptSerializer().Serialize(claimData)
             };
             //ViewData["IsEditMode"] = (id != Defaults.Integer);
+            vm.CVM.AssignedToOld = vm.CVM.AssignedTo;
 
             vm.Statuses = new LookupService().GetLookup(LookupService.Source.Status);
             vm.Brands = !_Session.IsOnlyVendor?new LookupService().GetLookup(LookupService.Source.BrandItems):

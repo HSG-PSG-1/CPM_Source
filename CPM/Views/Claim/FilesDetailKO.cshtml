@@ -27,7 +27,6 @@
     <br />
     @{ 
         bool isArchived = (bool)ViewData["Archived"];
-        string ClaimGUID = ViewData["ClaimGUID"].ToString();
         string ClaimDetailD = ViewData["ClaimDetailID"].ToString();
         string maxFileSizMB = "(" + Config.MaxFileSizMB + " MB max)";
     }
@@ -38,7 +37,7 @@
                 @* File upload solution with AJAX http://stackoverflow.com/questions/166221/how-can-i-upload-files-asynchronously-with-jquery*@
                 <td align="center">
                     @using (Html.BeginForm("FileDetailPostKO", "Claim",
-                        new { ClaimDetailD = ClaimDetailD, ClaimGUID = ClaimGUID }, FormMethod.Post,
+                        new { ClaimDetailD = ClaimDetailD, ClaimGUID = ViewData["ClaimGUID"] }, FormMethod.Post,
         new { id = "frmFilesDetail", enctype = "multipart/form-data", style = "display:inline" }))
                     {
                         <div id="fileDetailOprMsg" style="text-align: center; display: inline">&nbsp;</div>
@@ -47,13 +46,12 @@
                                 <td colspan="4" align="center">                                    
                                     <div style="display:none">
                                         <input type="checkbox" data-bind="checked:_Added" />
-                                        ID: <input id="ID" data-bind="value:ID" />
-                                        <br />
-                                        Claim ID: <input id="ClaimID" data-bind="value:ClaimID" />
-                                        Item ID: <input id="ClaimID" data-bind="value:ClaimDetailID" />
-                                        <br />
+                                        ID: <input id="ID" data-bind="value:ID" /><br />
+                                        Claim ID: <input id="ClaimID" name="ClaimID" data-bind="value:ClaimID" />
+                                        ClaimGUID:<input id="ClaimGUID" name="ClaimGUID" data-bind="value:ClaimGUID" /><br />
+                                        Item ID: <input id="ClaimDetailID" name="ClaimDetailID" data-bind="value:ClaimDetailID" /><br />
                                         UploadedOn:<input type="text" id="UploadedOn" data-bind="date: UploadedOn" /><br />
-                                        UserID:<input id="UserID" type="text" data-bind="value:UserID" /><br />
+                                        UserID:<input id="UserID" name="UserID" type="text" data-bind="value:UserID" /><br />
                                         <br />
                                     </div>
                                 </td>
@@ -68,18 +66,19 @@
                                     <span
                                         class="small">@maxFileSizMB</span>
                                     <div class="progress" style="display:inline"><div class="bar" style="display:inline"></div >
-                                    <div class="percent" style="display:inline"></div ></div><div id="status" style="display:inline" class="error"></div>
+                                    <div class="percent note" style="display:inline"></div ></div><div id="status" style="display:inline" class="error"></div>
                                     @*<input id="FileDetailNameNEW" type="text" data-bind="value:FileDetailNameNEW" />*@
-                                    <input id="FileName" type="text" style="display:none" data-bind="value:FileName" onchange='if($(this).val() != ""){$("#btnFDSubmit").removeAttr("disabled");} else {$("#btnFDSubmit").attr("disabled", true);}' />                                    
+                                    <input id="FileName" name="FileName" type="text" style="display:none" data-bind="value:FileName"
+                                     onchange='if($(this).val() != ""){$("#btnFDSubmit").removeAttr("disabled");} else {$("#btnFDSubmit").attr("disabled", true);}' />                                    
                                 </td>
                                 <td valign="middle" align="right" nowrap="nowrap" width="5%">
                                     &nbsp;&nbsp;File Type
                                 </td>
                                 <td width="20%">
-                                    <select id="FileType" value="FileType" class="dropbox" data-bind="options: $parent.FileDetailTypes, value:FileType, optionsText: 'value', optionsValue:'id'"
+                                    <select id="FileType" name="FileType" value="FileType" class="dropbox" data-bind="options: $parent.FileDetailTypes, value:FileType, optionsText: 'value', optionsValue:'id'" style="width:99%"
                                         onchange='javascript:$(this).parent().children("input:first").val($(this).children("option").filter(":selected").text());$(this).parent().children("input:first").trigger("change");'>
                                     </select>
-                                    <input id="FileTypeTitle" type="hidden" data-bind="value:FileTypeTitle" />
+                                    <input id="FileTypeTitle" name="FileTypeTitle" type="hidden" data-bind="value:FileTypeTitle" />
                                 </td>
                             </tr>
                             <tr>
@@ -90,7 +89,7 @@
                                     <textarea data-bind="value:Comment" class="textbox required" cols="60" id="Comment"
                                         name="Comment" onblur="return trimTextAreaMaxLen(this,250);" rows="2" style="width: 90%"></textarea>
                                 </td>
-                                <td colspan="2" valign="top" align="right">
+                                <td colspan="2" valign="top" align="left">
                                     <input type="submit" data-bind="click:$parent.addFile, enable: (FileName.length > 0)" value="Add" class="button" 
                                     onclick1="javascript:$('#frmFilesDetail').submit();" title="Select a file, set type and click Add" id="btnFDSubmit" />@*onclick="setDDLtext('FileType', 'FileTypeTitle');"*@
                                     <input type="reset" data-bind="click:$parent.cancelFile" value="Cancel" class="button" id="btnFDReset" />
@@ -107,7 +106,7 @@
                             <tr>
                                 @if (!isArchived)
                                 {
-                                    <th width="3%" align="left">
+                                    <th width="3%" align="left" nowrap="nowrap" style="display:none">
                                         id &nbsp;&nbsp; A &nbsp;&nbsp; E &nbsp;&nbsp; D
                                     </th>
                                     <th width="3%">
@@ -134,11 +133,11 @@
                             </tr>
                         </thead>
                         <tbody data-bind="foreach: allFiles">
-                            <tr data-bind="attr:{class:_Deleted()?'deletedTR':'deletedTR_NO'}">
+                            <tr data-bind="attr:{className:_Deleted()?'deletedTR':'deletedTR_NO'}">
                                 @if (!isArchived)
                                 {
-                                    <td nowrap="nowrap">
-                                        <span data-bind='text:ID' style1="display:none"></span>
+                                    <td nowrap="nowrap" style="display:none">
+                                        <span data-bind='text:ID' style="display:none"></span>
                                         <input type="checkbox" data-bind="checked:_Added" />
                                         <input type="checkbox" data-bind="checked:_Edited" />
                                         <input type="checkbox" data-bind="checked:_Deleted" />
@@ -156,7 +155,7 @@
                                 </td>
                                 <td>
                                     <div style="overflow: hidden">
-                                        <select class="dropbox noBorder" style="width: 120%; overflow: hidden;" onclick="editable(this, true);" title="click to edit"
+                                        <select class="dropbox noBorder" style="width: 130%; overflow: hidden;" onclick="editable(this, true);" title="click to edit"
                                             onblur="editable(this, false);" data-bind="options:$parent.FileDetailTypes, value:FileType,
                                          optionsText: 'value', optionsValue:'id', event:{change:$parent.setEditedFlag}">
                                         </select>
@@ -231,13 +230,24 @@
             complete: function (xhr) {
                 //status.html(xhr.responseText); DON'T set or it'll have two result messages and it can't choose
                 percent.html("");
+                if (xhr.responseText.indexOf("fileDUploadResponse") == -1)
+                    viewModelFD.allFiles().pop(); // Something went wrong!
                 viewModelFD.cancelFile();
             },
             error: function (xhr, textStatus, errorThrown) {
                 status.html(xhr.responseText + ":" + textStatus + ":" + errorThrown);
+                viewModelFD.allFiles().pop();
             }
         });
-    }); 
+    });
+
+    function fileDUploadResponse(code,success, ID) {
+        if (success) {
+            ko.utils.arrayForEach(viewModelFD.allFiles(), function (file) {
+                if (file.ID() == ID) { file.CodeStr(code); return; }
+            });
+        }        
+    }
     </script>
     </text>
 }
