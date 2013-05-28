@@ -191,6 +191,7 @@ var viewModelItems = new itemsModel();
 
              viewModelItems.invalidateToRefreshComputed();
              viewModelItems.formatData();
+             @*alert('Claim-Items');*@
              ko.applyBindings(viewModelItems, document.getElementById("divItems"));
          });
  }    
@@ -200,10 +201,9 @@ var viewModelItems = new itemsModel();
         viewModelItems.allFilesDetail.push(dFiles);
  }*@
 
- // Put script at bottom to avoid early-references
-    $(document).ready(function () {        
-        //setFocus("Item1");        
+    function callDocReadyComments(){
+        setFocus("Item1");        
         createItemsKO();
-    });
+    }
     
     </script>   

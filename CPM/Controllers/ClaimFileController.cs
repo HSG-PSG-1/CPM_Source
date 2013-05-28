@@ -337,17 +337,17 @@ namespace CPM.Controllers
                 { code = Request.RawUrl.Split(new char[] { '?' })[1]; }//SPECIAL CASE for some odd codes!
 
                 string[] data = DecodeQSforFile(code);
-                string filename = data[0]; string ClaimId = data[1];
+                string filename = data[0];
 
                 #region SPECIAL CASE for Async uploaded file
                 if (string.IsNullOrEmpty(filename))
                 { // Can't use HttpUtility.UrlDecode in CodeStr property 
                   //- because it'll create issues with string.format and js function calls so handle in GetFile
                     data = DecodeQSforFile(HttpUtility.UrlDecode(code));
-                    filename = data[0]; ClaimId = data[1];
+                    filename = data[0];
                 }
                 #endregion
-
+                string ClaimId = data[1];
                 bool Async = bool.Parse(data[2]);//This must parse correctly
                 //Send file stream for download
                 return SendFile(ClaimId, null, (Async ? FileIO.mode.asyncHeader : FileIO.mode.header), filename);
@@ -362,18 +362,18 @@ namespace CPM.Controllers
             {
                 string code = Request.QueryString.ToString();
                 string[] data = DecodeQSforFile(code);
-                string filename = data[0]; string ClaimId = data[1]; int ClaimDetailId = int.Parse(data[2]);
-                bool Async = bool.Parse(data[3]); //This must parse correctly
-
+                string filename = data[0]; 
+                
                 #region SPECIAL CASE for Async uploaded file
                 if (string.IsNullOrEmpty(filename))
                 { // Can't use HttpUtility.UrlDecode in CodeStr property 
                     //- because it'll create issues with string.format and js function calls so handle in GetFile
                     data = DecodeQSforFile(HttpUtility.UrlDecode(code));
-                    filename = data[0]; ClaimId = data[1]; ClaimDetailId = int.Parse(data[2]);
-                    Async = bool.Parse(data[3]); //This must parse correctly
+                    filename = data[0];
                 }
                 #endregion
+                string ClaimId = data[1]; int ClaimDetailId = int.Parse(data[2]);
+                bool Async = bool.Parse(data[3]);//This must parse correctly
 
                 //Send file stream for download
                 return SendFile(ClaimId, ClaimDetailId, (Async ? FileIO.mode.asyncDetail : FileIO.mode.detail), filename);

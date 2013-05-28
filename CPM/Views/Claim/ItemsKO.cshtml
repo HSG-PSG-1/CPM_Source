@@ -115,8 +115,7 @@
 <body>
     @(Html.DropDownList("BrandID", new SelectList((IEnumerable)ViewData["Brands"],
             "id", "value"), new { @class = "dropDown required", @onchange = "fillItemsForBrand(this.value, true);" }))(this
-    will be in the Claim Header tab - kept here for testing)*@
-    <br />
+    will be in the Claim Header tab - kept here for testing)*@    
     <div id="divItems">
         @*<div style="text-align: right"><input type="button" data-bind="click:saveToServer" class="button" value="Submit to Server" /></div>*@
         <table style="width: 100%" border="0">
@@ -124,8 +123,7 @@
             <tr data-bind="visible:!showGrid()">
                 <td>
                     <table cellpadding="2" cellspacing="2" border="0" data-bind="with: itemToAdd">
-                        <tr>
-                        <td><b>Item Details</b></td>
+                        <tr>                        
                             <td align="right">
                                 <input type="button" data-bind="click:$parent.saveItem" value="Save" class="button" />
                                 <input id="btnReset" data-bind="click:$parent.cancelItem, visible:_Added" type="reset" value="Cancel"
@@ -311,13 +309,12 @@
             </tr>
             @*Add \ Edit Item : END*@
             <tr data-bind="visible:showGrid">
-                <td align="left">
-                    <div class="dDialog uline" style="text-align: right; display: inline; width: 5%"
+                <td align="right">
+                <div style=" padding-bottom:3px">
+                    <div class="dDialog uline" style="text-align: right; width: 5%;"
                         data-bind="click:showAddNew">
                         Add New
-                    </div>
-                    <br />
-                    <br />
+                    </div></div>
                     @* Items : START *@
                     <table class="thinBorder" width="99%" id="tblItems">
                         <thead class="header">

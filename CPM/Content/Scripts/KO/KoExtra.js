@@ -92,13 +92,13 @@ var doTDHover = true;
 
 function editable(ctrl, show) 
 {
-    if (show) $(ctrl).removeAttr('readonly').removeClass('noBorder').addClass('note');
-    else $(ctrl).attr('readonly', true).removeClass('note').addClass('noBorder');
+    if (show) $(ctrl).attr('readOnly', '').removeClass('noBorder').addClass('note');
+    else $(ctrl).attr('readOnly', true).removeClass('note').addClass('noBorder');
     }
 
 function doEditable(editDiv)
 {
-    $(editDiv).closest('tr').find("td input[class='noBorder']").focus().trigger("click");
+    try{$(editDiv).closest('tr').find("td input[class='noBorder']").focus().trigger("click");}catch(e){alert(e);}
     //editDiv.parentElement.parentElement.children[4].click();
 }
 

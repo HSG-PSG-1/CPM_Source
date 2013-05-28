@@ -22,7 +22,6 @@
     /*script src="@Url.Content("~/Content/Scripts/jquery.hint.js")" type="text/javascript"></script>    
     <script src="http://www.json.org/json2.js" type="text/javascript"></script*/
 </head><body>*@
-<br />
 <div id="divComments">
     @*<div style="text-align: right">
         <input type="button" data-bind="click:saveToServer" class="button" value="Submit to Server" /></div>*@
@@ -32,8 +31,9 @@
                 <form>
                 <table cellpadding="2" cellspacing="2" border="0" data-bind="with: commentToAdd">
                     <tr>
-                        <td id="addComment" valign="top">
-                            <div style="display: none">
+                        <td colspan="4" align="center">                            
+                        <div id="cmtOprMsg" style="text-align:center">&nbsp;</div>
+                        <div style="display: none">
                                 <input type="checkbox" data-bind="checked:_Added" />
                                 ID: <span data-bind="text:ID"></span>
                                 <br />
@@ -45,11 +45,13 @@
                                 <input class="button" type="text" data-bind="value:CommentBy" /><br />
                                 <br />
                             </div>
-                            New Comment:
                         </td>
-                        <td>
+                    </tr>
+                    <tr>
+                        <td valign="top" rowspan="2" align="right" width="5%">New Comment</td>
+                        <td rowspan="2" width="80%">
                             <textarea data-bind="value:Comment1" class="textbox required" cols="60" id="Comment1"
-                                name="Comment1" onblur="return trimTextAreaMaxLen(this,4000);" rows="2" style="width: 90%"
+                                name="Comment1" onblur="return trimTextAreaMaxLen(this,4000);" rows="3" style="width: 98%"
                                 onchange='setSubmitBtn(this,"btnCmtAdd")'></textarea>
                         </td>
                         <td valign="top" nowrap="nowrap" align="right" width="5%">Assign To</td>
@@ -60,13 +62,12 @@
                             </select> <br/>                           
                             <input id="AssignToVal" name="AssignToVal" type="hidden" data-bind="value:$parent.AssignToVal" /> 
                             <input id="AssignToOLD" name="AssignToOLD" type="hidden" />
-                        </td>
-                        <td valign="top">
-                            <input id="btnCmtAdd" type="button" data-bind="click:$parent.addComment" value="Add"
-                                class="button" />
-                            <input id="btnCmtReset" data-bind="click:$parent.cancelComment" type="reset" value="Cancel"
-                                class="button" />
-                            <br />                            
+                        </td>                        
+                    </tr>
+                    <tr>
+                        <td align="right" nowrap="nowrap" colspan="2" valign="top">
+                            <input id="btnCmtAdd" type="button" data-bind="click:$parent.addComment" value="Add" class="button" />
+                            <input id="btnCmtReset" data-bind="click:$parent.cancelComment" type="reset" value="Cancel" class="button" />
                         </td>
                     </tr>
                 </table>
@@ -96,7 +97,7 @@
                             </th>
                         </tr>
                     </thead>
-                    <tbody data-bind="foreach: allComments">
+                    <tbody data-bind="foreach: allComments()">
                         <tr data-bind="attr:{className:_Deleted()?'deletedTR':'deletedTR_NO'}">
                             <td nowrap="nowrap">
                                 <span data-bind='text:ID' style1="display:none"></span>
@@ -120,7 +121,7 @@
                             </td>@*http://forums.asp.net/t/1651593.aspx/1*@
                             <td>
                                 <input class="noBorder" data-bind="value:Comment1, event:{change:$parent.setEditedFlag}"
-                                    readonly="readonly" style="border: none; width: 99%" type="text" onclick="editable(this, true);"
+                                    readOnly="readOnly" style="border: none; width: 99%" type="text" onclick="editable(this, true);"
                                     onblur="editable(this, false);" title="click to edit" />
                             </td>
                             @*<td onclick="$('input:first', this).show().focus();$('span:first', this).hide();">

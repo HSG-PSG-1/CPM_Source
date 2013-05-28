@@ -29,6 +29,8 @@
                    alert("Please select a file to upload"); return false; 
                 }
             else {
+            // SO: 857618/javascript-how-to-extract-filename-from-a-file-input-control
+                file.FileName = file.FileName.split(/(\\|\/)/g).pop(); //file.FileName.replace("C:\\fakepath\\","");
                 if (!IsFHEditMode) {
                     file.ID = NextNewFileID;
                     self.allFiles.push(ko.mapping.fromJS(cloneObservable(file)));
@@ -44,13 +46,12 @@
             if (file == null)return false;
             
             if(!file._Added()) {file._Deleted(true); return false;}
-
+            
             var data = {}; data["delFH"] = ko.mapping.toJSON(file);
             var url = '@Url.Action("FileHeaderKODelete", "Claim", new { ClaimGUID = ViewData["ClaimGUID"] })';
             $.post(url, data, function(data, textStatus, jqXHR)
                 {
-                    //alert(data);
-                    file._Deleted(true);
+;                    file._Deleted(true);
                     file._Added(false);
                     self.allFiles.remove(file);                        
                 }
@@ -92,15 +93,14 @@
                 viewModelFH.allFiles = ko.observableArray();
 
              viewModelFH.FileTypes = ko.mapping.fromJS(data.FileTypes);
-             //alert('Claim-FilesHeader');
+             @*alert('Claim-FilesHeader');*@
              ko.applyBindings(viewModelFH, document.getElementById("divFiles"));
          });
  }
       
-    // Put script at bottom to avoid early-references
-    $(document).ready(function () {
+    function callDocReadyFiles(){
         setFocus("Comment");        
         createFilesHeaderKO();
-    });
+    }
 
     </script>    

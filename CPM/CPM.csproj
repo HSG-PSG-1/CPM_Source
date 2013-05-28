@@ -254,6 +254,7 @@
     <Content Include="Content\Scripts\jquery.blockUI.js" />
     <Content Include="Content\Scripts\jquery.hint.js" />
     <Content Include="Content\Scripts\jquery.validate.1.11.0.min.js" />
+    <Content Include="Content\Scripts\json2.js" />
     <Content Include="Content\Scripts\KO\jquery.tmpl.js" />
     <Content Include="Content\Scripts\KO\knockout-2.2.0.js" />
     <Content Include="Content\Scripts\KO\knockout.mapping-latest.js" />

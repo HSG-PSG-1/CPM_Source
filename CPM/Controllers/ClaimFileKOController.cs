@@ -66,6 +66,7 @@ namespace CPM.Controllers
         }
 
         [HttpPost]
+        [OutputCache(NoStore = true, Duration = 0, VaryByParam = "*")] //SO: 2570051/error-returning-ajax-in-ie7
         public ActionResult FilePostKO(int ClaimID, string ClaimGUID, FileHeader FileHdrObj)
         { 
             HttpPostedFileBase hpFile = Request.Files["FileNameNEW"];
@@ -153,6 +154,7 @@ namespace CPM.Controllers
                 ID = -1,
                 _Added = true,
                 ClaimID = ClaimID,
+                ClaimDetailID = ClaimDetailID,
                 ClaimGUID = ClaimGUID,
                 UploadedBy = _SessionUsr.Email,
                 LastModifiedBy = _SessionUsr.ID,
@@ -196,6 +198,7 @@ namespace CPM.Controllers
         }
 
         [HttpPost]
+        [OutputCache(NoStore = true, Duration = 0, VaryByParam = "*")] //SO: 2570051/error-returning-ajax-in-ie7
         public ActionResult FileDetailPostKO(int ClaimID, int ClaimDetailD, string ClaimGUID, FileDetail FileDetailObj)
         {
             HttpPostedFileBase hpFile = Request.Files["FileDetailNameNEW"];
@@ -220,7 +223,7 @@ namespace CPM.Controllers
             //Taconite XML
             return this.Content(Defaults.getTaconiteResult(success,
                 Defaults.getOprResult(success, result), "fileDetailOprMsg",
-                "fileDUploadResponse('" + FileDetailObj.FileName + "'," + success.ToString().ToLower() + "," + FileDetailObj.ID + ")"), "text/xml");
+                "fileDUploadResponse('" + FileDetailObj.CodeStr + "'," + success.ToString().ToLower() + "," + FileDetailObj.ID + ")"), "text/xml");
         }
 
         [SkipModelValidation]

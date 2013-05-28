@@ -120,8 +120,6 @@
             var proceed = false;
             proceed = !(comment == null || _AssignedTo == null || _ClaimNo == null);
             
-            alert(ko.mapping.toJSON(comment));
-
             if(proceed){
                 $.post('@Url.Action("CommentsKOEmail", "Claim", new { ClaimGUID = ViewData["ClaimGUID"] })',
                       { 
@@ -168,7 +166,7 @@ var viewModelComments = new commentsViewModel();
              // viewModelComments.jsonText = ko.dependentObservable(function() {
              // if(this.allComments() != null)  return ("JSON: " + ko.toJSON(this.allComments())); }, this);
              *@
-             //alert('Claim-Comments');
+             @*alert('Claim-Comments');*@
              ko.applyBindings(viewModelComments, document.getElementById("divComments"));
          });
  }
@@ -181,10 +179,12 @@ var viewModelComments = new commentsViewModel();
     }
      
      // Put script at bottom to avoid early-references
+    @*
+    HT:CAUTION - using document.ready causes duplicate call which replicates the binding!
     $(document).ready(function () {
         setFocus("Comment1");        
         createCommentsKO();
-    });
+    });*@
 
     function callDocReadyComments()
     {

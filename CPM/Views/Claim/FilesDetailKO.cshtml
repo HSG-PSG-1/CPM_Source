@@ -46,7 +46,7 @@
                                 <td colspan="4" align="center">                                    
                                     <div style="display:none">
                                         <input type="checkbox" data-bind="checked:_Added" />
-                                        ID: <input id="ID" data-bind="value:ID" /><br />
+                                        ID: <input id="ID" name="ID" data-bind="value:ID" /><br />
                                         Claim ID: <input id="ClaimID" name="ClaimID" data-bind="value:ClaimID" />
                                         ClaimGUID:<input id="ClaimGUID" name="ClaimGUID" data-bind="value:ClaimGUID" /><br />
                                         Item ID: <input id="ClaimDetailID" name="ClaimDetailID" data-bind="value:ClaimDetailID" /><br />
@@ -231,7 +231,7 @@
                 //status.html(xhr.responseText); DON'T set or it'll have two result messages and it can't choose
                 percent.html("");
                 if (xhr.responseText.indexOf("fileDUploadResponse") == -1)
-                    viewModelFD.allFiles().pop(); // Something went wrong!
+                    viewModelFD.allFiles.pop(); // Something went wrong!
                 viewModelFD.cancelFile();
             },
             error: function (xhr, textStatus, errorThrown) {

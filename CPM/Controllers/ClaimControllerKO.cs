@@ -18,9 +18,10 @@ namespace CPM.Controllers
 
         [AccessClaim("ClaimID")]
         [CacheControl(HttpCacheability.NoCache), HttpGet]
-        public ActionResult ManageKO(int ClaimID)
+        public ActionResult ManageKO(int ClaimID, bool? printClaimAfterSave)
         {
-            ViewData["oprSuccess"] = base.operationSuccess;//oprSuccess will be reset after this
+            ViewData["oprSuccess"] = base.operationSuccess; //oprSuccess will be reset after this
+            ViewData["printClaimAfterSave"] = (TempData["printClaimAfterSave"]??false);
 
             #region Add mode - add new and return it in editmode
             if (ClaimID <= Defaults.Integer)
@@ -119,7 +120,7 @@ namespace CPM.Controllers
         [AccessClaim("ClaimID")]
         public ActionResult ManageKO(int ClaimID, bool isAddMode,
             [FromJson]vw_Claim_Master_User_Loc claimObj, [FromJson] IEnumerable<ClaimDetail> items,
-            [FromJson] IEnumerable<Comment> comments, [FromJson] IEnumerable<FileHeader> files)
+            [FromJson] IEnumerable<Comment> comments, [FromJson] IEnumerable<FileHeader> files, bool? printClaimAfterSave)
         {
             bool success = false;
             //return new JsonResult() { Data = new{ msg = "success"}};
@@ -144,8 +145,11 @@ namespace CPM.Controllers
 
             base.operationSuccess = success;//Set opeaon success
             _Session.ResetClaimInSessionAndEmptyTempUpload(claimObj.ClaimGUID); // reset because going back to Manage will automatically creat new session
-
-            return RedirectToAction("ManageKO", new { ClaimID = result});
+            
+            if(success)
+                TempData["printClaimAfterSave"] = printClaimAfterSave.HasValue && printClaimAfterSave.Value;
+            
+            return RedirectToAction("ManageKO", new { ClaimID = result });
         }
 
         [AccessClaim("ClaimID")]

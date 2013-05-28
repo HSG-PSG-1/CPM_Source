@@ -34,6 +34,7 @@
                    alert("Please select a file to upload"); return false; 
                 }
             else {
+                    file.FileName = file.FileName.replace("C:\\fakepath\\","");
                 if (!IsFDEditMode) {
                     file.ID = NextNewFileDetailID;
                     self.allFiles.push(ko.mapping.fromJS(cloneObservable(file)));

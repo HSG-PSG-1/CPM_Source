@@ -1,11 +1,15 @@
 ﻿@model CPM.DAL.ClaimKOModel
 @using System.Collections
 @using CPM.Helper
-@{ ViewBag.Title = "ClaimKO"; Layout = Defaults.masterLayout; bool IsOnlyCustomer = _Session.IsOnlyCustomer;}
+@{ ViewBag.Title = "ClaimKO"; Layout = Defaults.masterLayout; 
+   bool IsOnlyCustomer = _Session.IsOnlyCustomer; 
+   bool printClaimAfterSave = (bool) ViewData["printClaimAfterSave"];
+   string claimPrintopenWindow = "openWinScrollable('" + Url.Action("Print", "Claim", new { ClaimID = Model.CVM.ID }) + "',648,838);";}
 @section HeadContent {
     <script type="text/javascript">        
         @* *********** Make sure common.js is included*********** *@
         $().ready(function() {
+        @if (printClaimAfterSave){@Html.Raw(claimPrintopenWindow)}
         try{DisableSubmitButtons(false);/*$.unblockUI();*/}catch(e){}
         @if (!IsOnlyCustomer)
         {
@@ -63,8 +67,8 @@
         {
             width: 270px;
         }
-    </style>
-}
+    </style>    
+        }
 @{ bool isNewClaim = (Model.CVM.ID <= Defaults.Integer);//StatusIDold
    string cancelorDelete = isNewClaim ? "Cancel" : "Delete";
    bool? oprSuccess = ((bool?)ViewData["oprSuccess"]);
@@ -101,7 +105,7 @@
                             <input type="submit" value="@archiveVal" title="@archiveVal this claim" class="button" onclick="if(confirmDeleteM(event, 'Are you sure you want to @archiveVal this claim?'))skipCommitChk=true; else return false;" />@Html.Raw("&nbsp;")}
                         }@* END: Archive*@@if (!isNewClaim)
                           { //&& !IsOnlyCustomer
-            <input type="button" value="Print" class="button" onclick="javascript:openWinScrollable('@Url.Action("Print", "Claim", new { ClaimID = Model.CVM.ID })',648,838);" />@Html.Raw("&nbsp;")}
+            <input type="button" value="Print" class="button" onclick="return checkAndPrint(this, event);" />@Html.Raw("&nbsp;")}
                         @if (_Session.IsInternal && !isNewClaim){
                             <a href='@Url.Action("PrintPDF")' target="_blank">PDF</a>@Html.Raw("&nbsp;")@Html.Raw("&nbsp;")
                         }
@@ -259,6 +263,7 @@
         </td>
     </tr>
 </table>
+<div id="taco_niteDIV1" name="taco_niteDIV1" style="display:none">&nbsp;</div>
 <script src="@Url.Content("~/Content/Scripts/KO/knockout-2.2.0.js")" type="text/javascript"></script>
 <script src="@Url.Content("~/Content/Scripts/KO/knockout.mapping-latest.js")" type="text/javascript"></script>
 <script src="@Url.Content("~/Content/Scripts/KO/KoExtra.js")" type="text/javascript"></script>
@@ -280,7 +285,8 @@
                     claimObj: claimObj,
                     items: ko.mapping.toJS(viewModelItems.allItems()),
                     comments: ko.mapping.toJS(viewModelComments.allComments()),  
-                    files: ko.mapping.toJS(viewModelFH.allFiles())  
+                    files: ko.mapping.toJS(viewModelFH.allFiles()),
+                    printClaimAfterSave: printClaimAfterSave  
                 });
                 return false;
             }
@@ -288,17 +294,16 @@
     }
 
       function LoadKOAndOther() {
-           setFocus("StatusID");           
+           @if (!printClaimAfterSave){<text>setFocus("StatusID");</text>}@* Set focus will hide the print window - if invoked *@                      
            // Create KO binding based UI
            if(createClaimKO())
            {
                @*Pre-Load tabs*@
-               reload('@Url.Action("ItemsKO", new { ClaimGUID = Model.CVM.ClaimGUID.ToString() })','',"#tabs-2");
-               @if (!IsOnlyCustomer)
-               {<text>@*reloadWithCallback('@Url.Action("CommentsKO", new { ClaimGUID = Model.CVM.ClaimGUID.ToString() })','',"#tabs-3", function(){callDocReadyComments();});*@
-                   reload('@Url.Action("CommentsKO", new { ClaimGUID = Model.CVM.ClaimGUID.ToString(), AssignedTo = Model.CVM.AssignedTo })','',"#tabs-3");
+               reloadWithCallback('@Url.Action("ItemsKO", new { ClaimGUID = Model.CVM.ClaimGUID.ToString() })','',"#tabs-2", function(){createItemsKO();});
+               @if (!IsOnlyCustomer){<text>
+                reloadWithCallback('@Url.Action("CommentsKO", new { ClaimGUID = Model.CVM.ClaimGUID.ToString(), AssignedTo = Model.CVM.AssignedTo })','',"#tabs-3", function(){callDocReadyComments();});                   
                </text>}
-               reload('@Url.Action("FilesKO", new { ClaimGUID = Model.CVM.ClaimGUID.ToString() })','',"#tabs-4");
+               reloadWithCallback('@Url.Action("FilesKO", new { ClaimGUID = Model.CVM.ClaimGUID.ToString() })','',"#tabs-4", function(){callDocReadyFiles();});
             }
       }
 
@@ -312,7 +317,7 @@
             claimVM.Statuses(claimJSON.Statuses);
             claimVM.Brands(claimJSON.Brands);
             
-            //alert('Claim-Header');
+            @*alert('Claim-Header');*@
             ko.applyBindings(claimVM, document.getElementById("tabs-1"));
             return true;
       }
@@ -370,6 +375,18 @@
                 fillItemsForBrand(ddl.value, true);
             } catch(err){alert(err);}
         }
+        var printClaimAfterSave = false;
+        function checkAndPrint(btn, evt){
+            if(confirmDeleteM(evt, 'Do you want to save any claim changes before printing? Click cancel to continue print.')){
+                skipCommitChk=true;
+                printClaimAfterSave = true;
+                $("#btnCommit").click();
+                return false;
+            }
+            else
+                @Html.Raw(claimPrintopenWindow)
+                @*openWinScrollable('@Url.Action("Print", "Claim", new { ClaimID = Model.CVM.ID })',648,838);*@
+        }
         function getCachedItemFilesDetail(ClaimDetailID)
         {
             if(viewModelItems.itemToAdd != null && viewModelItems.itemToAdd() != null && viewModelItems.itemToAdd().aDFiles() != null)
@@ -389,3 +406,6 @@
 <script language="javascript" src="@Url.Content("~/Content/Scripts/jquery.numeric.js")" type="text/javascript"></script>
 <script src="@Url.Content("~/Content/Scripts/jquery.taconite.js")" type="text/javascript" ></script>
 @*<script src="@Url.Content("~/Content/Scripts/jquery.blockUI.js")" type="text/javascript"></script>*@
+<!--[if lt IE 8]>
+<script src="@Url.Content("~/Content/Scripts/json2.js")" type="text/javascript" ></script>
+<![endif]-->
