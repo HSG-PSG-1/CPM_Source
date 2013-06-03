@@ -132,6 +132,9 @@ namespace CPM.Services
                 item.LastModifiedDate = DateTime.Now;
                 item.UploadedOn = DateTime.Now; // double ensure dates are not null !
 
+                //Special case handling for IE with KO - null becomes "null"
+                if (item.Comment == "null") item.Comment = "";
+
                 if (item._Deleted)
                     Delete(item, false);
                 else if (item._Edited)//Make sure Delete is LAST

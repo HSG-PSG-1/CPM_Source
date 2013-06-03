@@ -70,8 +70,8 @@
 
         self.formatData = function () {
             ko.utils.arrayForEach(self.allItems(), function (item) {
-                item.InvoiceAmt1(parseFloat(item.InvoiceAmt1().toFixed(2)));
-                item.CreditAmt1(parseFloat(item.CreditAmt1().toFixed(2)));
+                item.InvoiceAmt1(item.InvoiceAmt1().toFixed(2));
+                item.CreditAmt1(item.CreditAmt1().toFixed(2));
             });
         }
 
@@ -82,29 +82,24 @@
         }
 
         self.showAddNew = function () {
-            self.showGrid(false);
-            self.itemToAdd(cloneObservable(self.emptyItem));//self.setEdited(ko.toJS(self.emptyItem));
-            IsCDEditMode = false;
+            if(!brandHasItems()){alert("Please select a Brand which has atleast one item"); return;}
 
-            @*//Redo autopopulate
-            var BrandID = $('#BrandID'); BrandID = (BrandID != null) ? BrandID.val() : "";*@
-            fillItemsForBrand(null, false);//BrandID
+            self.itemToAdd(cloneObservable(self.emptyItem));//self.itemToAdd(ko.mapping.fromJS(self.emptyItem));
+
+            self.showGrid(false);
+            doBrandsFillAndNumericTXT();
+            IsCDEditMode = false;
         }
 
         self.setEdited = function (item) {
             item._Edited(!item._Added());
             item.LastModifiedDate(Date111);
-
             @*if(item.aDFilesJSON == null || item.aDFilesJSON() == null){item.aDFilesJSON = ko.observable("[]");}*@            
             
             self.itemToAdd(item); //ko.mapping.fromJS(ko.toJS(item), self.itemToAdd);
 
             self.showGrid(false);
-            @*//Redo autopopulate
-            var BrandID = $('#BrandID');
-            BrandID = (BrandID != null) ? BrandID.val() : "";*@
-            fillItemsForBrand(null, false);//BrandID
-
+            doBrandsFillAndNumericTXT();            
             IsCDEditMode = true;
         }
         self.setEditedFlag = function (item) {
@@ -120,8 +115,7 @@
                 if (!IsCDEditMode) {
                     item.ID = NextNewItemID;
                     self.allItems.push(ko.mapping.fromJS(cloneObservable(item))); // self.allItems.push(item);
-                    NextNewItemID = NextNewItemID - 1;
-                    self.emptyItem.ID = NextNewItemID; // NOT WORKING as expected
+                    NextNewItemID = NextNewItemID - 1;                    
                 }
                 else {                        
                     @*var old = ko.utils.arrayFirst(self.allItems(), function (item) {return item.ID() == self.itemToAdd.ID(); });
@@ -163,7 +157,7 @@
         self.cancelItem = function (item) {
             IsCDEditMode = false;
             @*//self.itemToAdd(null); //ko.toJS(self.emptyItem) // ko.mapping.fromJS(ko.toJS(self.emptyItem), self.itemToAdd);*@
-            self.itemToAdd(cloneObservable(self.emptyItem));
+            self.itemToAdd(cloneObservable(self.emptyItem)); //self.itemToAdd(ko.mapping.fromJS(self.emptyItem));
             self.showGrid(true);
         };
 
@@ -181,12 +175,12 @@ var viewModelItems = new itemsModel();
              @* Because we need to show/hide file upload if (data.ItemToAdd.ID != -1) data.ItemToAdd.ID = NextNewItemID;*@
 
              viewModelItems.emptyItem = data.ItemToAdd;
-             viewModelItems.itemToAdd(data.ItemToAdd);
+             viewModelItems.itemToAdd(data.ItemToAdd);             
              viewModelItems.allFilesDetail = new Array();
              
              viewModelItems.allItems = ko.mapping.fromJS(data.AllItems); 
 
-             viewModelItems.Defects = ko.mapping.fromJS(data.Defects); 
+             viewModelItems.Defects = ko.mapping.fromJS(data.Defects);
              viewModelItems.showGrid(data.showGrid); // viewModelItems.showGrid = ko.mapping.fromJS(data.showGrid);
 
              viewModelItems.invalidateToRefreshComputed();
@@ -200,10 +194,4 @@ var viewModelItems = new itemsModel();
     if(viewModelItems.allFilesDetail != null && dFiles != null && dFiles.length > 0)
         viewModelItems.allFilesDetail.push(dFiles);
  }*@
-
-    function callDocReadyComments(){
-        setFocus("Item1");        
-        createItemsKO();
-    }
-    
     </script>   

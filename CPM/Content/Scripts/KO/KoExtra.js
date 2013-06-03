@@ -92,9 +92,9 @@ var doTDHover = true;
 
 function editable(ctrl, show) 
 {
-    if (show) $(ctrl).attr('readOnly', '').removeClass('noBorder').addClass('note');
-    else $(ctrl).attr('readOnly', true).removeClass('note').addClass('noBorder');
-    }
+    if (show) $(ctrl).removeClass('noBorder').addClass('note'); //.attr('readOnly', '')
+    else $(ctrl).removeClass('note').addClass('noBorder');//.attr('readOnly', true)
+}
 
 function doEditable(editDiv)
 {
@@ -105,6 +105,17 @@ function doEditable(editDiv)
 function setSubmitBtn(ctrl, btnID) {
     if ($(ctrl).val() != "") { $("#" + btnID).removeAttr("disabled"); }
     else { $("#" + btnID).attr("disabled", true); }
+}
+
+function doRequiredChk(ctrl)
+{
+    var val = $(ctrl).val();
+    if (val == null || val.length < 1) {
+        alert("This field is required")
+        $(ctrl).focus();
+        return false;
+    }
+    return true;
 }
 
 /*<span data-bind="text:new Date(parseInt(PostedOn.toString().substr(6))).toLocaleFormat('%d/%m/%Y')"></span>*/

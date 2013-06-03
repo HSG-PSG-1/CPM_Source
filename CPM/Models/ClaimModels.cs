@@ -361,9 +361,14 @@ namespace CPM.DAL
         public string UploadedBy { get; set; }
         public string FileNameNEW { get; set; }
         public string FileTypeTitle { get; set; }
-        public string CodeStr { get { return HttpUtility.UrlEncode(CPM.Helper.Crypto.EncodeStr
-            (FileName + sep + ClaimGUID.ToString() + sep + IsAsync, true));
-        }
+        public string CodeStr
+        {
+            get
+            {
+                if (_Added) return string.Empty;
+                else
+                    return HttpUtility.UrlEncode(CPM.Helper.Crypto.EncodeStr(FileName + sep + ClaimGUID.ToString() + sep + IsAsync, true));
+            }
         } // Can't use HttpUtility.UrlDecode - because it'll create issues with string.format and js function calls so handle in GetFile
         
         public string FilePath { //HT: Usage: <a href='<%= Url.Content("~/" + item.FilePath) %>' target="_blank">
@@ -496,9 +501,11 @@ namespace CPM.DAL
         {
             get
             {
-                return HttpUtility.UrlEncode(CPM.Helper.Crypto.EncodeStr
+                if (_Added) return string.Empty;
+                else
+                    return HttpUtility.UrlEncode(CPM.Helper.Crypto.EncodeStr
                     (FileName + sep + ClaimGUID + sep + ClaimDetailID.ToString() + sep + IsAsync, true));
-            }
+            }// Can't use HttpUtility.UrlDecode - because it'll create issues with string.format and js function calls so handle in GetFile
         }
         
         public string FilePath { //HT: Usage: <a href='<%= Url.Content("~/" + item.FilePath) %>' target="_blank">

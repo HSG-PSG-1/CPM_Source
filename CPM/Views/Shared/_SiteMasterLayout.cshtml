@@ -130,8 +130,8 @@
                         }                   
                         @if (_Session.RoleRights.ViewActivity)
                         { <li>@Html.ActionLink("Activity", "Log", "Activity")</li>}
-                          <li><a href="javascript:(function(){document.cookie='glimpsePolicy=On;%20path=/;%20expires=Sat,%2001%20Jan%202050%2012:00:00%20GMT;';%20window.location.reload();})();" title="Start Glimpse plugin" >Glimpse ON</a></li>
-                          <li><a href="javascript:(function(){document.cookie='glimpsePolicy=;%20path=/;%20expires=Sat,%2001%20Jan%202050%2012:00:00%20GMT;';%20window.location.reload();})();" title="Start Glimpse plugin" >Glimpse OFF</a></li>
+                          @*<li><a href="javascript:(function(){document.cookie='glimpsePolicy=On;%20path=/;%20expires=Sat,%2001%20Jan%202050%2012:00:00%20GMT;';%20window.location.reload();})();" title="Start Glimpse plugin" >Glimpse ON</a></li>
+                          <li><a href="javascript:(function(){document.cookie='glimpsePolicy=;%20path=/;%20expires=Sat,%2001%20Jan%202050%2012:00:00%20GMT;';%20window.location.reload();})();" title="Start Glimpse plugin" >Glimpse OFF</a></li>*@
                                                                              
                         @*<li>@Html.ActionLink("Log Off", "LogOff", "Common") @</li>
                             <li><a href="#">Reports</a>

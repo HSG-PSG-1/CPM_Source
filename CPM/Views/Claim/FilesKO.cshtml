@@ -106,7 +106,7 @@
                         <tr>
                             @if (!isArchived)
                             {
-                                <th width="3%" align="left" nowrap="nowrap">
+                                <th align="left" nowrap="nowrap" style="width:3%;display:none">
                                     id &nbsp;&nbsp; A &nbsp;&nbsp; E &nbsp;&nbsp; D
                                 </th>
                                 <th width="3%">
@@ -136,8 +136,8 @@
                         <tr data-bind="attr:{className:_Deleted()?'deletedTR':'deletedTR_NO'}">
                             @if (!isArchived)
                             {
-                                <td nowrap="nowrap">
-                                    <span data-bind='text:ID' style1="display:none"></span>
+                                <td nowrap="nowrap" style="display:none">
+                                    <span data-bind='text:ID'></span>
                                     <input type="checkbox" data-bind="checked:_Added" />
                                     <input type="checkbox" data-bind="checked:_Edited" />
                                     <input type="checkbox" data-bind="checked:_Deleted" />
@@ -165,15 +165,15 @@
                             </td>
                             <td>
                                 <input class="noBorder" data-bind="value:Comment, event:{change:$parent.setEditedFlag}"
-                                    readOnly="readOnly" style="border: none; width: 99%" type="text" onclick="editable(this, true);"
-                                    onblur="editable(this, false);" />
+                                    style="border: none; width: 99%" type="text" onclick="editable(this, true);"
+                                    onblur="if(trimTextAreaMaxLen(this,250))editable(this, false);" />
                             </td>
                             <td data-bind="text:UploadedBy">
                             </td>
                             <td data-bind="date: UploadedOn">
                             </td>
                             <td align="center">
-                                <div class="dDialog" data-bind="click:$parent.TriggerOpenWin">@Html.Raw(Defaults.clipImg)</div>                                
+                                <div class="dDialog" data-bind="click:$parent.TriggerOpenWin, visible:CodeStr().length > 0">@Html.Raw(Defaults.clipImg)</div>                                
                             </td>
                         </tr>
                     </tbody>
@@ -185,6 +185,7 @@
         </tr>
     </table>
 </div>
+<div id="taco_niteDIVFH" name="taco_niteDIVFH" style1="display:none">&nbsp;</div>
 @*</body> </html>*@
 @if (!isArchived)
 {    
@@ -199,34 +200,49 @@
 
             $('#frmFiles').ajaxForm({
                 dataType: 'xml',
-                target: '#taco_niteDIV1',
+                target: '#taco_niteDIVFH',
                 beforeSend: function () {
                     status.empty();
                     var percentVal = '0%';
                     bar.width(percentVal)
-                    percent.html(percentVal);
+                    percent.html("uploading:" + percentVal);
                 },
                 uploadProgress: function (event, position, total, percentComplete) {
                     var percentVal = percentComplete + '%';
                     bar.width(percentVal)
-                    percent.html(percentVal);
+                    percent.html("uploaded:" + percentVal);
                 },
                 success: function (responseXML, statusText, xhr, frm) {
                     var percentVal = '100%';
                     bar.width(percentVal)
-                    percent.html(percentVal);
-                    var xmlTxt = (xhr.responseXML != null) ? xhr.responseXML : xhr.responseText;
-                    //http://malsup.com/jquery/form/#tab4
-                    //alert(xmlTxt); // + ":" + xhr.responseXML.documentElement.textContent);
-                    //$("#taco_niteDIV1").html(xhr.responseXML.xml); // esp for IE
-                    if (
-                    (xhr.responseXML && xhr.responseXML.documentElement.textContent.indexOf("fileUploadResponse") == -1) || // IE
-                    (xhr.responseText && xhr.responseText.indexOf("fileUploadResponse") == -1))                            // FF
-                        { viewModelFH.allFiles.pop(); } // Something went wrong!
-                    
-                    if (xhr.responseXML) $("#taco_niteDIV1").html(xhr.responseXML.xml); // For IE
+                    percent.html("Done:" + percentVal);
                     //Reset add new
                     viewModelFH.cancelFile(xhr);
+
+                    var xmlTxt = (xhr.responseXML != null) ? xhr.responseXML.xml : xhr.responseText;
+                    @*//IE : xhr.responseXML.xml                //FF: xhr.responseText*@
+
+                    if (xmlTxt == null || xmlTxt.length < 1) {
+                    @* //HT: Special case handling for IE *@
+                        if (xhr.responseXML.xml != null)
+                            xmlTxt = xhr.responseXML.xml;
+                        else if (xhr.responseXML.documentElement.textContent != null)
+                            xmlTxt = xhr.responseXML.documentElement.textContent;
+                    }
+                    @*//http://malsup.com/jquery/form/#tab4
+                    //alert(xmlTxt); // + ":" + xhr.responseXML.documentElement.textContent);
+                    //$("#taco_niteDIV1").html(xhr.responseXML.xml); // esp for IE*@
+                    if (xmlTxt.indexOf("fileUploadResponse") == -1) {
+                        viewModelFH.allFiles.pop();
+                    } // Something went wrong!
+                    
+                    @*if (xhr.responseXML != null){// For IE
+                      //$("#taco_niteDIVFH").append(xmlTxt);art();
+                      try{ 
+                            //eval(xhr.responseXML.getElementsByTagName("eval")[0].text);
+                            eval(xhr.responseXML.getElementsByTagName("eval")[0].textContent);
+                      }catch(e){alert(e);}
+                    }*@
                 },
                 complete: function (xhr) {
                     //status.html(xhr.responseText); DON'T set or it'll have two result messages and it can't choose
@@ -239,11 +255,11 @@
                 }
             });
         });
-        function fileUploadResponse(code, success, ID) {
-            //alert(2);
+        function fileUploadResponse(code, success, ID) {            
+            //alert("ok");
             if (success) {
                 ko.utils.arrayForEach(viewModelFH.allFiles(), function (file) {
-                    if (file.ID() == ID) { /*alert(3);*/ file.CodeStr(code); return; }
+                    if (file.ID() == ID) { file.CodeStr(code); return; }
                 });
             }
         }    

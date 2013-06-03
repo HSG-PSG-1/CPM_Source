@@ -49,7 +49,7 @@ namespace CPM.Controllers
                 }
                 // In case an archived entry is accessed
                 if (vw.Archived)
-                    return RedirectToAction("ArchivedKO", new { ClaimID = ClaimID });
+                    return RedirectToAction("Archived", new { ClaimID = ClaimID });
                 //Empty so invalid ClaimID - go to Home
                 if (vw == new ClaimService().emptyView)
                     return RedirectToAction("List", "Dashboard");
@@ -69,7 +69,7 @@ namespace CPM.Controllers
 
         [HttpPost]
         [AccessClaim("ClaimID")]
-        public ActionResult DeleteKO(int ClaimID, string ClaimGUID)
+        public ActionResult DeleteKO(int ClaimID, string ClaimGUID, int ClaimNo)
         {
             //http://www.joe-stevens.com/2010/02/16/creating-a-delete-link-with-mvc-using-post-to-avoid-security-issues/
             //http://stephenwalther.com/blog/archive/2009/01/21/asp.net-mvc-tip-46-ndash-donrsquot-use-delete-links-because.aspx
@@ -80,7 +80,7 @@ namespace CPM.Controllers
             new ClaimService().Delete(new Claim() { ID = ClaimID });
             //Log Activity (before directory del and sesion clearing)
             new ActivityLogService(ActivityLogService.Activity.ClaimDelete).Add(
-                new ActivityHistory() { ClaimID = ClaimID, ClaimText = _Session.Claims[ClaimGUID].ClaimNo.ToString() });
+                new ActivityHistory() { ClaimID = ClaimID, ClaimText = ClaimNo.ToString() });
 
             #endregion
 
@@ -94,13 +94,13 @@ namespace CPM.Controllers
 
         [HttpPost]
         [AccessClaim("ClaimID")]
-        public ActionResult ArchiveKO(int ClaimID, string ClaimGUID, bool Archive)
+        public ActionResult ArchiveKO(int ClaimID, string ClaimGUID, bool Archive, int ClaimNo)
         {
             new ClaimService().Archive(ClaimID, Archive);// Delete claim
             //Log Activity (before directory del and sesion clearing)
             new ActivityLogService(
                 Archive ? ActivityLogService.Activity.ClaimArchive : ActivityLogService.Activity.ClaimUnarchive)
-                .Add(new ActivityHistory() { ClaimID = ClaimID, ClaimText = _Session.Claims[ClaimGUID].ClaimNo.ToString() });
+                .Add(new ActivityHistory() { ClaimID = ClaimID, ClaimText = ClaimNo.ToString() });
             _Session.ResetClaimInSessionAndEmptyTempUpload(ClaimGUID);//reset after act log!
             if (Archive) return Redirect("~/Dashboard");
             else return RedirectToAction("ManageKO", new { ClaimID = ClaimID, ClaimGUID = ClaimGUID });

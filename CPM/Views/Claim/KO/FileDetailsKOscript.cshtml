@@ -33,8 +33,8 @@
                    //http://knockoutjs.com/documentation/event-binding.html
                    alert("Please select a file to upload"); return false; 
                 }
-            else {
-                    file.FileName = file.FileName.replace("C:\\fakepath\\","");
+            else {// SO: 857618/javascript-how-to-extract-filename-from-a-file-input-control
+                    file.FileName = file.FileName.split(/(\\|\/)/g).pop(); //file.FileName.replace("C:\\fakepath\\","");
                 if (!IsFDEditMode) {
                     file.ID = NextNewFileDetailID;
                     self.allFiles.push(ko.mapping.fromJS(cloneObservable(file)));

@@ -238,7 +238,7 @@ namespace CPM.Controllers
 
                 //If its Async - we can delete the TEMP file, if its sync the file is not present in TEMP folder so delete is not effective
                 // HT: infer: send async because the file resides in the temp folder
-                if (FileIO.DeleteClaimFile(delFD.FileName, ClaimGUID, delFD.ClaimDetailID, FileIO.mode.asyncHeader))
+                if (FileIO.DeleteClaimFile(delFD.FileName, ClaimGUID, delFD.ClaimDetailID, FileIO.mode.asyncDetail))
                 {
                     //HT: INFER: Delete file for Async, Sync and (existing for Async - 
                     //the above delete will cause no effect coz path is diff)

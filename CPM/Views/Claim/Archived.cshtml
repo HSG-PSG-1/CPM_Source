@@ -27,7 +27,7 @@
                         <td nowrap="nowrap" align="right">
                         @*START: Archive*@
                         @if (_Session.RoleRights.ArchiveClaim){
-                            using (Html.BeginForm("Archive", "Claim", new { id = Model.ID, ClaimGUID = Model.ClaimGUID, archive = !Model.Archived }, FormMethod.Post, new { @style = "display:inline", @onsubmit = "$('#btnUnarchive').prop('disabled', true);" }))
+                            using (Html.BeginForm("ArchiveKO", "Claim", new { ClaimID = Model.ID, ClaimGUID = Model.ClaimGUID, Archive = !Model.Archived, ClaimNo = Model.ClaimNo }, FormMethod.Post, new { @style = "display:inline", @onsubmit = "$('#btnUnarchive').prop('disabled', true);" }))
            { <input type="submit" id="btnUnarchive" value="Unarchive" title="Unarchive this claim" class="button" onclick="if(confirmDeleteM(event, 'Are you sure you want to unarchive this claim?')){skipCommitChk=true;return true;} else return false;" />  }
                          } 
                         @* END: Archive*@

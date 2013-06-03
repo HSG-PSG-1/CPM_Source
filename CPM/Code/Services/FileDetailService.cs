@@ -121,6 +121,9 @@ namespace CPM.Services
                 item.ClaimDetailID = claimDetailId;
                 item.ClaimID = claimObj.ID;
 
+                //Special case handling for IE with KO - null becomes "null"
+                if (item.Comment == "null") item.Comment = "";
+
                 if (item._Deleted)
                     Delete(item, false);
                 else if (item._Edited)//Make sure Delete is LAST
