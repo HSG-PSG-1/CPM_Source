@@ -127,7 +127,7 @@
                 <span class="small">&nbsp;</span>
                 @if (items.Count > 0 || true) {
                 @*Items : START *@
-                <table class="thinBorder" width="99%" cellpadding="1" cellspacing="1">
+                <table class="thinBorder" width="100%" cellpadding="1" cellspacing="1">
                     <thead class="header">
                         <tr class="small">
                             <th width="1%">#</th>
@@ -160,7 +160,7 @@
                             <td nowrap="nowrap" align="right">$@item.CreditAmt1.ToString("#0.00")</td>
                         </tr>
                             <tr>                            
-                            <td colspan="10" align="left"><i>&nbsp;Claim Status: @item.Note</i></td>
+                            <td colspan="10" align="left"><i>&nbsp;Claim Status: @item.Note??""</i></td>
                             </tr>
                         } 
                     </tbody>

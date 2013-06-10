@@ -43,10 +43,10 @@ namespace CPM.Controllers
             //Make sure searchOpts is assigned to set ViewState
             populateData(false);
             
-            var profiler = MiniProfiler.Current; // it's ok if this is null
+            //var profiler = MiniProfiler.Current; // it's ok if this is null
 
             List<vw_Claim_Dashboard> result = new List<vw_Claim_Dashboard>();
-            using (profiler.Step("Fetch Dashboard Data"))
+            //using (profiler.Step("Fetch Dashboard Data"))
             {
                 result = new DashboardService().Search(sortExpr, index, gridPageSize, (vw_Claim_Dashboard)searchOpts, false, _Session.IsOnlyCustomer);
             }

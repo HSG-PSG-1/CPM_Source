@@ -81,12 +81,19 @@
             //winFD.onunload = 
         }
 
+        self.openAttachFilesDetailDirect = function (item) { 
+                    var url = "@Url.Action("FilesDetailKO", "Claim")" + "?ClaimDetailID=" + item.ID() + "&ClaimGUID=@ViewData["ClaimGUID"]";
+                    var winFD = openWin(url,450,650);
+                    
+                    self.itemToAdd(item);
+        }
+
         self.showAddNew = function () {
             if(!brandHasItems()){alert("Please select a Brand which has atleast one item"); return;}
 
             self.itemToAdd(cloneObservable(self.emptyItem));//self.itemToAdd(ko.mapping.fromJS(self.emptyItem));
 
-            self.showGrid(false);
+            self.showGrid(false);   $("#itmEntryDailog").dialog("open");
             doBrandsFillAndNumericTXT();
             IsCDEditMode = false;
         }
@@ -98,7 +105,7 @@
             
             self.itemToAdd(item); //ko.mapping.fromJS(ko.toJS(item), self.itemToAdd);
 
-            self.showGrid(false);
+            self.showGrid(false);   $("#itmEntryDailog").dialog("open");
             doBrandsFillAndNumericTXT();            
             IsCDEditMode = true;
         }
@@ -125,7 +132,7 @@
                 IsCDEditMode = false;
                 //HT: How to reset the add new obj
                 self.cancelItem(item);@*//ko.toJS(self.emptyItem) // ko.mapping.fromJS(ko.toJS(self.emptyItem), self.itemToAdd);*@
-                self.showGrid(true);
+                self.showGrid(true);    $("#itmEntryDailog" ).dialog("close");
             }
         };
 
@@ -158,7 +165,7 @@
             IsCDEditMode = false;
             @*//self.itemToAdd(null); //ko.toJS(self.emptyItem) // ko.mapping.fromJS(ko.toJS(self.emptyItem), self.itemToAdd);*@
             self.itemToAdd(cloneObservable(self.emptyItem)); //self.itemToAdd(ko.mapping.fromJS(self.emptyItem));
-            self.showGrid(true);
+            self.showGrid(true);    $("#itmEntryDailog").dialog("close");
         };
 
         self.saveToServer = function () {
@@ -187,6 +194,14 @@ var viewModelItems = new itemsModel();
              viewModelItems.formatData();
              @*alert('Claim-Items');*@
              ko.applyBindings(viewModelItems, document.getElementById("divItems"));
+
+             $("#itmEntryDailog").dialog({
+                 modal: true,
+                 autoOpen: false,
+                 height:420,
+                 width:639,
+                 close: function( event, ui ) {viewModelItems.showGrid(true);}
+             });
          });
  }    
  @*

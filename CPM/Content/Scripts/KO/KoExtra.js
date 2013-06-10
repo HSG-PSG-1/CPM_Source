@@ -102,6 +102,11 @@ function doEditable(editDiv)
     //editDiv.parentElement.parentElement.children[4].click();
 }
 
+function doEditableTA(td) {
+    try { $(td).closest('tr').find("td textarea[class='noBorder']").focus().trigger("click"); } catch (e) { alert(e); }
+    //editDiv.parentElement.parentElement.children[4].click();
+}
+
 function setSubmitBtn(ctrl, btnID) {
     if ($(ctrl).val() != "") { $("#" + btnID).removeAttr("disabled"); }
     else { $("#" + btnID).attr("disabled", true); }

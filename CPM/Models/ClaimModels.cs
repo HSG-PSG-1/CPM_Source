@@ -80,8 +80,8 @@ namespace CPM.DAL
         [Required(ErrorMessage = "Status" + Defaults.RequiredMsgAppend)]
         public int StatusID { get; set; }
 
-        [DisplayName("Customer #")]
-        [Required(ErrorMessage = "Customer #" + Defaults.RequiredMsgAppend)]
+        [DisplayName("Customer")]
+        [Required(ErrorMessage = "Customer" + Defaults.RequiredMsgAppend)]
         public int CustID { get; set; }
 
         [DisplayName("Brand")]

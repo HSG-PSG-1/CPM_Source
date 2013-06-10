@@ -141,6 +141,9 @@ namespace CPM.Services
                 item.LastModifiedDate = DateTime.Now;
                 int oldClaimDetailId = item.ID;//store old id
 
+                //Special case handling for IE with KO - null becomes "null"
+                if (item.Note == "null") item.Note = "";
+
                 if (item._Deleted)
                 {
                     Delete(item, false);

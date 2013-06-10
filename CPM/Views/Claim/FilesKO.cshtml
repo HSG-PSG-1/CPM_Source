@@ -133,7 +133,7 @@
                         </tr>
                     </thead>
                     <tbody data-bind="foreach: allFiles()">
-                        <tr data-bind="attr:{className:_Deleted()?'deletedTR':'deletedTR_NO'}">
+                        <tr data-bind="css:{deletedTR:_Deleted(),deletedTR_NO:!_Deleted()}">
                             @if (!isArchived)
                             {
                                 <td nowrap="nowrap" style="display:none">
@@ -145,7 +145,7 @@
                                 <td nowrap="nowrap">
                                     <div class="dDialog" onclick="doEditable(this);" data-bind="visible:!_Deleted(), click:$parent.setEdited">@Html.Raw(@Defaults.editImg)</div>
                                     &nbsp;
-                                    <div class="dDialog" data-bind="visible:!_Deleted(), click:$parent.removeSelected">@Html.Raw(@Defaults.delImg)</div>
+                                    <div class="dDialog" data-bind="visible:!_Deleted(), click:$parent.removeSelected">@Html.Raw(@Defaults.delImgForObj("file"))</div>
                                     &nbsp;
                                     <div class="dDialog" data-bind="visible:_Deleted(), click:$parent.unRemoveSelected">@Html.Raw(@Defaults.cancelImgOnly)
                                         &nbsp; &nbsp;
@@ -155,7 +155,7 @@
                             }
                             <td data-bind="text:FileName">
                             </td>
-                            <td>
+                            <td title="click to edit">
                                 <div style="overflow: hidden">
                                     <select class="dropbox noBorder" style="width: 120%; overflow: hidden;" onclick="editable(this, true);"
                                         onblur="editable(this, false);" data-bind="options:$parent.FileTypes, value:FileType,
@@ -163,7 +163,7 @@
                                     </select>
                                 </div>
                             </td>
-                            <td>
+                            <td title="click to edit">
                                 <input class="noBorder" data-bind="value:Comment, event:{change:$parent.setEditedFlag}"
                                     style="border: none; width: 99%" type="text" onclick="editable(this, true);"
                                     onblur="if(trimTextAreaMaxLen(this,250))editable(this, false);" />
@@ -185,7 +185,6 @@
         </tr>
     </table>
 </div>
-<div id="taco_niteDIVFH" name="taco_niteDIVFH" style1="display:none">&nbsp;</div>
 @*</body> </html>*@
 @if (!isArchived)
 {    
@@ -200,7 +199,6 @@
 
             $('#frmFiles').ajaxForm({
                 dataType: 'xml',
-                target: '#taco_niteDIVFH',
                 beforeSend: function () {
                     status.empty();
                     var percentVal = '0%';
@@ -229,25 +227,25 @@
                         else if (xhr.responseXML.documentElement.textContent != null)
                             xmlTxt = xhr.responseXML.documentElement.textContent;
                     }
-                    @*//http://malsup.com/jquery/form/#tab4
-                    //alert(xmlTxt); // + ":" + xhr.responseXML.documentElement.textContent);
-                    //$("#taco_niteDIV1").html(xhr.responseXML.xml); // esp for IE*@
+                    
                     if (xmlTxt.indexOf("fileUploadResponse") == -1) {
                         viewModelFH.allFiles.pop();
                     } // Something went wrong!
                     
-                    @*if (xhr.responseXML != null){// For IE
-                      //$("#taco_niteDIVFH").append(xmlTxt);art();
-                      try{ 
-                            //eval(xhr.responseXML.getElementsByTagName("eval")[0].text);
-                            eval(xhr.responseXML.getElementsByTagName("eval")[0].textContent);
-                      }catch(e){alert(e);}
-                    }*@
+                    if (xhr.responseXML != null){// For IE
+                      //IE8 $("#taco_niteDIVFH").append(xhr.responseXML.documentElement.xml);//xmlTxt);
+                      //eval(xhr.responseXML.documentElement.xml);
+                      var tc = new $.taconite(responseXML); // might work in IE8
+                      @*try{ 
+                            // only to execute the function - kept for ref
+                            //eval(xhr.responseXML.getElementsByTagName("eval")[0].text); // IE8 - xhr.responseXML.documentElement.xml
+                            //eval(xhr.responseXML.getElementsByTagName("eval")[0].textContent); // IE9
+                      }catch(e){alert(e);}*@
+                    }
                 },
                 complete: function (xhr) {
-                    //status.html(xhr.responseText); DON'T set or it'll have two result messages and it can't choose
-                    percent.html("");
-                    //alert($("#taco_niteDIV1").html());
+                    @*//status.html(xhr.responseText); DON'T set or it'll have two result messages and it can't choose*@
+                    percent.html("");                    
                 },
                 error: function (xhr, textStatus, errorThrown) {
                     status.html(xhr.responseText + ":" + textStatus + ":" + errorThrown);
@@ -255,8 +253,7 @@
                 }
             });
         });
-        function fileUploadResponse(code, success, ID) {            
-            //alert("ok");
+        function fileUploadResponse(code, success, ID) {  
             if (success) {
                 ko.utils.arrayForEach(viewModelFH.allFiles(), function (file) {
                     if (file.ID() == ID) { file.CodeStr(code); return; }
@@ -266,3 +263,8 @@
     </script>
     </text>
 }
+@* HT: IE9 doesn't allow to use var tc = new $.taconite(responseXML); *@
+<script  language="javascript" src="@Url.Content("~/Content/Scripts/jquery.taconite.js?")" type="text/javascript" ></script>
+<!--[if lt IE 8]>
+<script src="@Url.Content("~/Content/Scripts/json2.js")" type="text/javascript" ></script>
+<![endif]-->

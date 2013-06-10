@@ -6,12 +6,14 @@
 <script type="text/javascript">
     $().ready(function () {
         $('form').submit(function () { $('#btnSubmit').prop('disabled', true); });
+        //SO: 2823471/jquery-how-to-find-first-visible-input-select-textarea-excluding-buttons
+        $('#tblSettings').find('input[type=text],textarea,select').filter(':visible:first').focus();
     });
 </script>
 }
     @using (Html.BeginForm())
     {@Html.ValidationSummary(true)
-    <table width="100%" border="0">
+    <table width="100%" border="0" id="tblSettings">
         <tr>
             <td colspan="2">
                 <b class="smallHeading">Manage Settings</b>

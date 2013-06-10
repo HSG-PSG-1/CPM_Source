@@ -173,7 +173,7 @@
         </div>       
     </td></tr></table>
     }     
-    <script language="javascript" type="text/javascript" defer="defer">        setFocus("FirstName");
+    <script language="javascript" type="text/javascript" defer="defer">        setFocus("Name");
         function checkReq1(ctrl, impactCtrl) { if (!(ctrl.value.length > 0)) $("#" + impactCtrl).val(''); }
 
         function fillOrgs(reset) {
@@ -236,7 +236,7 @@
             */
             switch (ui.newTab.index()) {
                 case 0: //Details
-                    setFocus("FirstName"); break;
+                    setFocus("Name"); break;
                 case 1: //Locations
                     var OrgID = $("#OrgID").val();
                     @{string url = "~/User/UserLocation?UserId=" + Model.ID.ToString() + "&CustOrgId=";}

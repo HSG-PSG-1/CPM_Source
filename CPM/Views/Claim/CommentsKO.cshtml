@@ -49,24 +49,24 @@
                     </tr>
                     <tr>
                         <td valign="top" rowspan="2" align="right" width="5%">New Comment</td>
-                        <td rowspan="2" width="80%">
+                        <td rowspan="2" width="70%">
                             <textarea data-bind="value:Comment1" class="textbox required" cols="60" id="Comment1"
                                 name="Comment1" onblur="return trimTextAreaMaxLen(this,4000);" rows="3" style="width: 98%"
-                                onchange='setSubmitBtn(this,"btnCmtAdd")'></textarea>
+                                onkeyup='setSubmitBtn(this,"btnCmtAdd")'></textarea>
                         </td>
                         <td valign="top" nowrap="nowrap" align="right" width="5%">Assign To</td>
-                        <td valign="top" align="right" width="10%">                            
-                            <select id="AssignTo" class="dropbox" name="AssignTo" 
+                        <td valign="top" align="right" width="20%">
+                            <select id="AssignTo" class="dropbox" name="AssignTo" style="width:90%"
                             data-bind="options: $parent.Users, value:$parent.AssignTo, optionsText: 'value', optionsValue:'id'"
                             onchange="setAssignedTo(this)">
-                            </select> <br/>                           
+                            </select><br/>
                             <input id="AssignToVal" name="AssignToVal" type="hidden" data-bind="value:$parent.AssignToVal" /> 
                             <input id="AssignToOLD" name="AssignToOLD" type="hidden" />
                         </td>                        
                     </tr>
                     <tr>
                         <td align="right" nowrap="nowrap" colspan="2" valign="top">
-                            <input id="btnCmtAdd" type="button" data-bind="click:$parent.addComment" value="Add" class="button" />
+                            <input id="btnCmtAdd" type="button" data-bind="click:$parent.addComment" value="Add" class="button" />@*, enable: (Comment1 != null)*@
                             <input id="btnCmtReset" data-bind="click:$parent.cancelComment" type="reset" value="Cancel" class="button" />
                         </td>
                     </tr>
@@ -98,7 +98,7 @@
                         </tr>
                     </thead>
                     <tbody data-bind="foreach: allComments()">
-                        <tr data-bind="attr:{className:_Deleted()?'deletedTR':'deletedTR_NO'}">
+                        <tr data-bind="css:{deletedTR:_Deleted(),deletedTR_NO:!_Deleted()}">
                             <td nowrap="nowrap" style="display:none">
                                 <span data-bind='text:ID'></span>
                                 <input type="checkbox" data-bind="checked:_Added" />
@@ -106,9 +106,9 @@
                                 <input type="checkbox" data-bind="checked:_Deleted" />
                             </td>
                             <td nowrap="nowrap">
-                                <div class="dDialog" onclick="doEditable(this);" data-bind="visible:!_Deleted(), click:$parent.setEdited">@Html.Raw(@Defaults.editImg)</div>
+                                <div class="dDialog" onclick="doEditableTA(this);" data-bind="visible:!_Deleted(), click:$parent.setEdited">@Html.Raw(@Defaults.editImg)</div>
                                 &nbsp;
-                                <div class="dDialog" data-bind="visible:!_Deleted(), click:$parent.removeSelected">@Html.Raw(@Defaults.delImg)</div>
+                                <div class="dDialog" data-bind="visible:!_Deleted(), click:$parent.removeSelected">@Html.Raw(@Defaults.delImgForObj("comment"))</div>
                                 &nbsp;
                                 <div class="dDialog" data-bind="visible:_Deleted(), click:$parent.unRemoveSelected">@Html.Raw(@Defaults.cancelImgOnly)
                                     &nbsp; &nbsp;
@@ -119,7 +119,7 @@
                             @*<td data-bind="text:new Date(parseInt(PostedOn.substr(6)))"></td>*@
                             <td data-bind="date: PostedOn()">
                             </td>@*http://forums.asp.net/t/1651593.aspx/1*@
-                            <td>
+                            <td title="click to edit">
                                 <textarea class="noBorder" data-bind="value:Comment1, event:{change:$parent.setEditedFlag}"
                                     style="border: none; width: 99%" type="text" onclick="editable(this, true);"
                                     onblur="if(doRequiredChk(this))editable(this, false);" title="click to edit" rows="1" />

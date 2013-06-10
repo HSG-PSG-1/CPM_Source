@@ -63,7 +63,14 @@ namespace CPM.Services
             dasQ = dasQ.Where(o => o.Archived == das.Archived);
 
             if (!string.IsNullOrEmpty(das.ClaimNos))// Filter for multiple Claim No.s
-                dasQ = dasQ.Where(o => Defaults.stringToIntList(das.ClaimNos).Contains(o.ClaimNo));
+            {
+                int SingleClaimNo = -1;
+
+                if (int.TryParse(das.ClaimNos, out SingleClaimNo))
+                    dasQ = dasQ.Where(o => SqlMethods.Like(o.ClaimNo.ToString(),"%" + SingleClaimNo.ToString() + "%"));                
+                else
+                    dasQ = dasQ.Where(o => Defaults.stringToIntList(das.ClaimNos).Contains(o.ClaimNo));
+            }
 
             if (!string.IsNullOrEmpty(das.CustRefNo))
                 dasQ = dasQ.Where(o => SqlMethods.Like(o.CustRefNo.ToLower(), das.CustRefNo.ToLower()));

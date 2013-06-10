@@ -344,7 +344,7 @@ return (val.attr('checked') != null)? val.attr('checked'): val.val(); //checkbox
 var doFurtherProcessing = function(success) { };
 function showOprResult(spanId, success) {   
     // Highlight, fadeOut and finally REMOVE!
-    $(spanId).effect('highlight', {}, 4000).fadeOut((success == 1) ? 1000 : 8000, function() { $(spanId).remove(); });
+    $(spanId).effect('highlight', {}, 4000).fadeOut((success == 1) ? 1000 : 8000, function () { $(spanId).html("&nbsp;").show(); /* remove();*/ });
     
     //Special case for forms which need to do post processing        
     //doFurtherProcessing(success); HT: Handled at the end of effect call back    

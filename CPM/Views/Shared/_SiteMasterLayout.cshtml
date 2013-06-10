@@ -102,11 +102,11 @@
                             <ul>
                                 @if (_Session.RoleRights.ManageUser)
                                 {<li>@Html.ActionLink("Users", "List", "User")
-                                    <ul>
-                                        <li>@Html.ActionLink("Users KO", "ListKO", "User")</li>
+                                    @*<ul>
+                                        <li>@Html.ActionLink("Users", "List", "User")</li>
                                         <li>@Html.ActionLink("Users KOGrid", "ListKOGrid", "User")</li>
                                         <li>@Html.ActionLink("Users KO mobile", "ListKO", "User", new { source = "mobile" }, null)</li>
-                                    </ul>
+                                    </ul>*@
                                   </li>    
                                 } 
                                 @if (_Session.RoleRights.ManageRole)
