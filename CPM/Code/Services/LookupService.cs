@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Dynamic;
@@ -62,7 +63,7 @@ namespace CPM.Services
         /// <param name="term">Term to be searched as contains search</param>
         /// /// <param name="extras">Any extra data passed (required for special cases like Item1)</param>
         /// <returns>IEnumerable LINQ query</returns>       
-        public System.Collections.IEnumerable GetLookup(Source src, bool addEmpty = true, string term = null, string extras=null)
+        public IQueryable GetLookup(Source src, bool addEmpty = true, string term = null, string extras=null)
         {
             IQueryable results;
             bool noTerm = string.IsNullOrEmpty(term), noExtra = (string.IsNullOrEmpty(extras) || int.Parse(extras) <= Defaults.Integer);
@@ -72,6 +73,7 @@ namespace CPM.Services
             switch (src)
             {
                 #region Orgs,OrgType, Item & Brand
+
                 case Source.Org:
                     //src = noTerm ? Source.Customer : _Enums.ParseEnum<LookupService.Source>(extras);
                     results = new OrgService().GetOrgsByRoleId(int.Parse(extras),term);//GetOrgs(src, term);
@@ -134,11 +136,12 @@ namespace CPM.Services
                               where (noTerm || i.Name.ToLower().Contains(term))
                               orderby i.Name//not SortOrder because its not set during import
                               select new { id = i.ID, value = i.Name };// + " (" + i.Locs.Value.ToString() + ")"
-
                     break;
+
                 #endregion
 
                 #region Master
+                
                 case Source.ShipLoc:
                     // Impose Cust Org specific location constraint
                     if(!_Session.SkipCustLocCheck)
@@ -155,22 +158,24 @@ namespace CPM.Services
                                   //i.Name + " (" + i.Code.Substring(Config.CustCodeLenInLocCode) + ")" };
                     break;
                 case Source.FileHeader:
-                    results = from i in dbc.MasterFileTypeHeaders
-                              where (noTerm || i.Title.ToLower().Contains(term))
+                    // http://social.msdn.microsoft.com/forums/en-US/linqprojectgeneral/thread/64fc5db3-38d7-41d3-8510-2df9eae2081a/
+                    results = (from i in new MasterService(MasterService.Table.File_Type_Header).FetchAllCached() //dbc.MasterFileTypeHeaders
+                               where i.ID > Defaults.Integer && // Special case added while fetching from Master service which adds a default new [Title] entry
+                               (noTerm || i.Title.ToLower().Contains(term))
                               orderby i.SortOrder
-                              select new { id = i.ID, value = i.Title };
+                              select new { id = i.ID, value = i.Title }).AsQueryable();
                     break;
                 case Source.FileDetail:
-                    results = from i in dbc.MasterFileTypeDetails
-                              where (noTerm || i.Title.ToLower().Contains(term))
+                    results = (from i in new MasterService(MasterService.Table.File_Type_Detail).FetchAllCached() //in dbc.MasterFileTypeDetails
+                               where i.ID > Defaults.Integer && (noTerm || i.Title.ToLower().Contains(term))
                               orderby i.SortOrder
-                              select new { id = i.ID, value = i.Title };
+                              select new { id = i.ID, value = i.Title }).AsQueryable();
                     break;
                 case Source.Defect:
-                    results = from i in dbc.MasterDefects
-                              where (noTerm || i.Title.ToLower().Contains(term))
+                    results = (from i in new MasterService(MasterService.Table.Defect).FetchAllCached() //dbc.MasterDefects
+                               where i.ID > Defaults.Integer && (noTerm || i.Title.ToLower().Contains(term))
                               orderby i.SortOrder
-                              select new { id = i.ID, value = i.Title };
+                              select new { id = i.ID, value = i.Title }).AsQueryable();
                     break;
                 #region HT: Kept for future ref
                 /*
@@ -183,10 +188,10 @@ namespace CPM.Services
                     break; */
                 #endregion
                 case Source.Status:
-                    results = from i in dbc.MasterClaimStatus
-                              where (noTerm || i.Title.ToLower().Contains(term))
+                    results = (from i in new MasterService(MasterService.Table.Claim_Status).FetchAllCached() //dbc.MasterClaimStatus
+                               where i.ID > Defaults.Integer && (noTerm || i.Title.ToLower().Contains(term))
                               orderby i.SortOrder
-                              select new { id = i.ID, value = i.Title };
+                              select new { id = i.ID, value = i.Title }).AsQueryable();
 
                     break;                
 
@@ -217,7 +222,7 @@ namespace CPM.Services
                 #region Others & default
                 case Source.Error_Detail_Level:
                     return new List<Lookup>(){new Lookup(){ id = "0", value = "Summary" },
-                    new Lookup(){ id = "1", value = "Detailed" }};
+                    new Lookup(){ id = "1", value = "Detailed" }}.AsQueryable();
                     break;
 
                 default: results = null; break;
@@ -238,5 +243,8 @@ namespace CPM.Services
             return results;
 
         }
+
+        // HT: Kept for future ref
+        // public static T ConvertObj<T>(object obj) { return (T)obj; }
     }
 }

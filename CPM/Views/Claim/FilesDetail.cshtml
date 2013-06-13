@@ -1,153 +1,276 @@
-﻿@{Layout = ""; /* Master page is NOT needed here */}
-@{ Response.CacheControl = "no-cache"; }
-@{ Response.AddHeader("Pragma", "no-cache"); }
-@{ Response.Expires = -1; }
-@model IEnumerable<CPM.DAL.FileDetail>
-@using System.Collections
+﻿@*@model CPM.DAL.CommentKOModel*@
 @using CPM.Helper
+@using System.Collections
+@using System.Web.Script.Serialization
+@using System.Collections
+@using Webdiyer.WebControls.Mvc
+@using CPM.Services
+@using CPM.Helper
+@{ ViewBag.Title = "Claim FileDetail";}
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
-<title>Detail Files</title>
+    <link rel="shortcut icon" href="@Url.Content("~/Content/favicon.ico")" type="image/x-icon" />
+    <link rel="icon" href="@Url.Content("~/Content/favicon.ico")" type="image/ico" />
     <link href="@Url.Content("~/Content/Site.css")" rel="stylesheet" type="text/css" />
+    <script language="javascript" src="@Url.Content("~/Content/Scripts/common.js")" type="text/javascript"></script>
+    @*SOME scripts are better persisted in head *@
     <script src="@Url.Content("~/Content/jQUI/min/jquery-1.9.1.min.js")" type="text/javascript"></script>
     <script src="@Url.Content("~/Content/jQUI/min/jquery-migrate-1.1.0.min.js")" type="text/javascript"></script>
-    <script src="@Url.Content("~/Content/jQUI/min/jquery-ui-1.10.0.custom.min.js")" type="text/javascript"></script>
-    <script src="@Url.Content("~/Content/Scripts/jquery.validate.1.9.0.min.js")" type="text/javascript"></script>    
-    <link href="@Url.Content("~/Content/jQUI/ui-lightness/jquery-ui-1.10.0.custom.min.css")" rel="stylesheet"type="text/css" />
+    <script src="@Url.Content("~/Content/Scripts/KO/knockout-2.2.0.js")" type="text/javascript"></script>
+    <script src="@Url.Content("~/Content/Scripts/KO/knockout.mapping-latest.js")" type="text/javascript"></script>
+    <script src="@Url.Content("~/Content/Scripts/KO/KoExtra.js")" type="text/javascript"></script>
+    @*<script src="@Url.Content("~/Content/Scripts/jquery.hint.js")" type="text/javascript"></script>    
+    <script src="http://www.json.org/json2.js" type="text/javascript"></script>*@
 </head>
-<body style="background-color: #ffffff; margin: 10px 10px 10px 10px; text-align: center">
-    @{         
-        CPM.DAL.FileDetail FileDetailObj = (CPM.DAL.FileDetail)((ViewData["FileDetailObj"]) ?? new CPM.DAL.FileDetail());
-        bool isArchived = FileDetailObj.Archived;
+<body>
+    <br />
+    @{ 
+        bool isArchived = (bool)ViewData["Archived"];
+        string ClaimDetailD = ViewData["ClaimDetailID"].ToString();
         string maxFileSizMB = "(" + Config.MaxFileSizMB + " MB max)";
-     }
-    @using (Html.BeginForm("FilesDetail", "Claim", new { ClaimGUID = FileDetailObj.ClaimGUID }, FormMethod.Post, new { id = "frmFilesDetail", enctype = "multipart/form-data", @onsubmit = "$('#btnSubmit').prop('disabled', true);" }))
-    {
-    <table align="center" width="100%">
-        <tr>
-            <td><span id="msg">&nbsp;</span></td>
-        </tr>
-        @if (!isArchived){
-            <text>
-        <tr>
-            <td valign="top">
-                <table cellpadding="2" cellspacing="2" width="100%">
-                    <tr>
-                        <td colspan="4">
-                            @Html.ValidationSummary(true)
-                            @Html.Hidden("ID", FileDetailObj.ID)
-                            @Html.Hidden("ClaimID", FileDetailObj.ClaimID)
-                            @Html.Hidden("ClaimDetailID", FileDetailObj.ClaimDetailID)
-                            @Html.Hidden("UserID", FileDetailObj.UserID)
-                            @Html.Hidden("UploadedOn", FileDetailObj.UploadedOn)
-                            @Html.ValidationMessage("FileName")
-                        </td>
-                    </tr>
-                    <tr>
-                        <td valign="middle" align="right" width="5%">File</td>
-                        <td align="left"  width="70%" nowrap="nowrap">@* HT : DON'T class="required" because it'll err in edit mode*@
-                            <input type="file" id="FileNameNEW" name="FileNameNEW" title="@maxFileSizMB" /><span class="small">@maxFileSizMB</span>
-                             <span class="small">@FileDetailObj.FileName</span>@Html.Hidden("FileName", FileDetailObj.FileName)
-                        </td>
-                        <td valign="middle" align="right" nowrap="nowrap" width="5%">&nbsp;&nbsp;File Type</td>
-                        <td width="20%">
-                            @Html.DropDownList("FileType", new SelectList((IEnumerable)ViewData["FileTypes"], "id", "value", FileDetailObj.FileType), 
-                            new { @class = "dropDown required", @onchange = "setDDLtext('FileType', 'FileTypeTitle');", @style = "width:99%" })
-                            @Html.ValidationMessage("FileType")
-                            @Html.Hidden("FileTypeTitle", FileDetailObj.FileTypeTitle)
-                        </td>
-                    </tr>
-                    <tr>
-                        <td valign="top" align="right">Comment</td>
-                        <td rowspan="2">@Html.TextArea("Comment", FileDetailObj.Comment, 3, 60, new { @class = "textbox", @style = "width:99%", @onblur = "return trimTextAreaMaxLen(this,250);" })</td>
-                        <td colspan="2">&nbsp;</td>
-                    </tr>
-                    <tr>
-                        <td align="right" colspan="4">
-                        @Html.Hidden("ClaimGUID", FileDetailObj.ClaimGUID)
-                            &nbsp;&nbsp;<input id="btnSubmit" type="submit" value="Save" class="button" onclick="setDDLtext('FileType', 'FileTypeTitle');" />
-                            <input id="btnReset" type="reset" value="Cancel" class="button" onclick="window.close();" />
-                        </td>
-                    </tr>
-                </table>        
-            </td>
-        </tr>
-            </text>
-        } 
-        <tr>
-            <td align="center">
-            @*Files Grid : START*@
-                <table class="thinBorder" width="100%">
-                    <thead class="header">
-                        <tr>
-                            @if (!isArchived){<th></th>} 
-                            <th>File</th>
-                            <th>Type</th>
-                            <th>Comment</th>
-                            <th nowrap="nowrap">Uploaded By</th>
-                            <th nowrap="nowrap">Uploaded Date</th>
-                            <th></th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach (var item in Model){
-                            if (!item._Deleted){ //Avoid deleted records 
-                                <text>
-                        <tr>
-                            @if (!isArchived)
-                            {
-                                <td nowrap="nowrap">
-                                <a href='@Html.Raw(Url.Action("FilesDetail", new { ClaimID = item.ClaimID, ClaimDetailID = item.ClaimDetailID, FileDetailID = item.ID, ClaimGUID = FileDetailObj.ClaimGUID }))'>
-                                    @Html.Raw(Defaults.editImg)</a>&nbsp;                                    
-                                    @Html.Raw(Defaults.delPOSTImgTACO("FileDetailID", item.ID))
-                            </td> }
-                            <td>@item.FileName</td>
-                            <td>@item.FileTypeTitle</td>
-                            <td>@item.Comment</td>
-                            <td>@item.UploadedBy</td>
-                            <td>@item.UploadedOn.ToString(Defaults.dtFormat, Defaults.ci)</td>
-                            <td align="center">
-                                @{ string sepr = CPM.DAL.FileHeader.sep;
-                                   string codeStr = item.FileName + sepr + item.ClaimGUID.ToString() + sepr +
-                                   item.ClaimDetailID.ToString() + sepr + item.IsAsync;
-                                   // Make sure you do UrlEncode TWICE in code to get the code!!!
-                                   codeStr = HttpUtility.UrlEncode(CPM.Helper.Crypto.EncodeStr(codeStr, true)); 
-                                }
-                                @* For Debug: string clipImgLink=string.Format(Defaults.clipImgLink, Url.Action("GetFileD?" + codeStr, "Claim")); @clipImgLink *@
-                                <div class="dDialog" onclick="javascript:openWin('@Url.Action("GetFileD", "Claim")@( "?" + Html.Raw(codeStr))',1,1);">
-                                @Html.Raw(Defaults.clipImg)
-                                </div>
-                            </td>                            
-                        </tr>
-                                </text>
-                            }
-                        } 
-                    </tbody>
-                    <tfoot>@Html.Raw(Defaults.chkNoRecords(Model.Count(), 7))</tfoot>                            
-                </table>
-            @*Files Grid : END*@
-            </td>
-        </tr>
-    </table>
     }
-   <script src="@Url.Content("~/Content/Scripts/common.js")" type="text/javascript"></script>@*HT: JQ required for setDDLtext*@
-   @if (!isArchived){
-       <text>   
-    <script src="@Url.Content("~/Content/Scripts/jquery.taconite.js")" type="text/javascript" ></script>
-    <script language="javascript" type="text/javascript" defer="defer">        setFocus("FileNameNEW");
-        function doDelPost(txtId, txtVal) {
-            var data = {}; data[txtId] = txtVal;
-            @{ int ClaimDetailId1 = (Model.Count() > 0 ? Model.First().ClaimDetailID : -1);
-            string url = Url.Action("FilesDetailDeleteTaco", new { ClaimDetailID =  ClaimDetailId1, ClaimGUID = FileDetailObj.ClaimGUID}); }
-            var url = '@Html.Raw(url)';
-            //$(frm).attr('action');  //Claim/45/FilesDetailDelete?ClaimDetailID=37&FileDetailID=-1
-            $.post(url, data);
-            return false; // prevent any postback
-        }
-        $(document).ready(function () { $("#frmFilesDetail").validate({ @Defaults.validatorJQsetting }); });
-        </script>   
-       </text>       
-  }
+    <div id="divFilesDetail">
+        <table style="width: 100%" border="0">
+            @if (!isArchived)
+            {<tr>
+                @* File upload solution with AJAX http://stackoverflow.com/questions/166221/how-can-i-upload-files-asynchronously-with-jquery*@
+                <td align="center">
+                    @using (Html.BeginForm("FileDetailPostKO", "Claim",
+                        new { ClaimDetailD = ClaimDetailD, ClaimGUID = ViewData["ClaimGUID"] }, FormMethod.Post,
+        new { id = "frmFilesDetail", enctype = "multipart/form-data", style = "display:inline" }))
+                    {
+                        <div id="fileDetailOprMsg" style="text-align: center; display: inline">&nbsp;</div>
+                        <table cellpadding="2" cellspacing="2" style="width: 100%" border="0" data-bind="with: fileDetailToAdd">
+                            <tr>
+                                <td colspan="4" align="center">                                    
+                                    <div style="display:none">
+                                        <input type="checkbox" data-bind="checked:_Added" />
+                                        ID: <input id="ID" name="ID" data-bind="value:ID" /><br />
+                                        Claim ID: <input id="ClaimID" name="ClaimID" data-bind="value:ClaimID" />
+                                        ClaimGUID:<input id="ClaimGUID" name="ClaimGUID" data-bind="value:ClaimGUID" /><br />
+                                        Item ID: <input id="ClaimDetailID" name="ClaimDetailID" data-bind="value:ClaimDetailID" /><br />
+                                        UploadedOn:<input type="text" id="UploadedOn" data-bind="date: UploadedOn" /><br />
+                                        UserID:<input id="UserID" name="UserID" type="text" data-bind="value:UserID" /><br />
+                                        <br />
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td valign="middle" align="right" width="5%">
+                                    File
+                                </td>
+                                <td align="left" width="70%" nowrap="nowrap">@* HT : DON'T class="required" because it'll err in edit mode*@
+                                    <input type="file" id="FileDetailNameNEW" name="FileDetailNameNEW" title="@maxFileSizMB"
+                                    onchange='javascript:var fName = $(this).parent().children("input[type=text]:first");fName.val($(this).val());fName.trigger("change");' />
+                                    <span
+                                        class="small">@maxFileSizMB</span>
+                                    <div class="progress" style="display:inline"><div class="bar" style="display:inline"></div >
+                                    <div class="percent note" style="display:inline"></div ></div><div id="status" style="display:inline" class="error"></div>
+                                    @*<input id="FileDetailNameNEW" type="text" data-bind="value:FileDetailNameNEW" />*@
+                                    <input id="FileName" name="FileName" type="text" style="display:none" data-bind="value:FileName"
+                                     onchange='if($(this).val() != ""){$("#btnFDSubmit").removeAttr("disabled");} else {$("#btnFDSubmit").attr("disabled", true);}' />                                    
+                                </td>
+                                <td valign="middle" align="right" nowrap="nowrap" width="5%">
+                                    &nbsp;&nbsp;File Type
+                                </td>
+                                <td width="20%">
+                                    <select id="FileType" name="FileType" value="FileType" class="dropbox" data-bind="options: $parent.FileDetailTypes, value:FileType, optionsText: 'value', optionsValue:'id'" style="width:100%"
+                                        onchange='javascript:$(this).parent().children("input:first").val($(this).children("option").filter(":selected").text());$(this).parent().children("input:first").trigger("change");'>
+                                    </select>
+                                    <input id="FileTypeTitle" name="FileTypeTitle" type="hidden" data-bind="value:FileTypeTitle" />
+                                </td>
+                            </tr>
+                            <tr>
+                                <td valign="top" align="right">
+                                    Comment
+                                </td>
+                                <td rowspan="2" align="left">
+                                    <textarea data-bind="value:Comment" class="textbox required" cols="60" id="Comment"
+                                        name="Comment" onblur="return trimTextAreaMaxLen(this,250);" rows="2" style="width: 90%"></textarea>
+                                </td>
+                                <td colspan="2" valign="top" align="right">
+                                    <input type="submit" data-bind="click:$parent.addFile, enable: (FileName.length > 0)" value="Add" class="button" 
+                                    onclick1="javascript:$('#frmFilesDetail').submit();" title="Select a file, set type and click Add" id="btnFDSubmit" />@*onclick="setDDLtext('FileType', 'FileTypeTitle');"*@
+                                    <input type="reset" data-bind="click:$parent.cancelFile" value="Cancel" class="button" id="btnFDReset" />
+                            </tr>
+                        </table>
+                    }
+                </td>
+            </tr>
+            }
+            <tr>
+                <td align="center">
+                    <table class="thinBorder" width="100%" border="0" data-bind="visible:allFiles().length > 0">
+                        <thead class="header">
+                            <tr>
+                                @if (!isArchived)
+                                {
+                                    <th align="left" nowrap="nowrap" style="display:none;width:3%">
+                                        id &nbsp;&nbsp; A &nbsp;&nbsp; E &nbsp;&nbsp; D
+                                    </th>
+                                    <th width="3%">
+                                    </th>
+                            
+                                }
+                                <th>
+                                    File
+                                </th>
+                                <th style="width:20%">
+                                    Type
+                                </th>
+                                <th style="width:30%">
+                                    Comment
+                                </th>
+                                <th nowrap="nowrap">
+                                    Uploaded By
+                                </th>
+                                <th nowrap="nowrap">
+                                    Uploaded Date
+                                </th>
+                                <th>
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody data-bind="foreach: allFiles">
+                            <tr data-bind="css:{deletedTR:_Deleted(),deletedTR_NO:!_Deleted()}">
+                                @if (!isArchived)
+                                {
+                                    <td nowrap="nowrap" style="display:none">
+                                        <span data-bind='text:ID'></span>
+                                        <input type="checkbox" data-bind="checked:_Added" />
+                                        <input type="checkbox" data-bind="checked:_Edited" />
+                                        <input type="checkbox" data-bind="checked:_Deleted" />
+                                    </td>
+                                    <td nowrap="nowrap">
+                                        <div class="dDialog" onclick="doEditable(this);" data-bind="visible:!_Deleted(), click:$parent.setEdited">@Html.Raw(@Defaults.editImg)</div>
+                                        &nbsp;
+                                        <div class="dDialog" data-bind="visible:!_Deleted(), click:$parent.removeSelected">@Html.Raw(@Defaults.delImgForObj("file"))</div>
+                                        &nbsp;
+                                        <div class="dDialog" data-bind="visible:_Deleted(), click:$parent.unRemoveSelected">@Html.Raw(@Defaults.cancelImgOnly) &nbsp; &nbsp; </div>
+                                        @*@Html.Raw(Defaults.delPOSTImgTACO("CommentID", -1, "doCmtDelPost"))*@
+                                    </td>
+                                }
+                                <td data-bind="text:FileName">
+                                </td>
+                                <td title="click to edit">
+                                    <div style="overflow: hidden">
+                                        <select class="dropbox noBorder" style="width: 140%; overflow: hidden;" onclick="editable(this, true);" title="click to edit"
+                                            onblur="editable(this, false);" data-bind="options:$parent.FileDetailTypes, value:FileType,
+                                         optionsText: 'value', optionsValue:'id', event:{change:$parent.setEditedFlag}">
+                                        </select>
+                                    </div>
+                                </td>
+                                <td title="click to edit">
+                                    <input class="noBorder" data-bind="value:Comment, event:{change:$parent.setEditedFlag}"
+                                        style="border: none; width: 99%" type="text" onclick="editable(this, true);"
+                                        onblur="if(trimTextAreaMaxLen(this,250))editable(this, false);" title="click to edit" />
+                                </td>
+                                <td data-bind="text:UploadedBy">
+                                </td>
+                                <td data-bind="date: UploadedOn">
+                                </td>
+                                <td align="center">
+                                    <div class="dDialog" data-bind="click:$parent.TriggerOpenWin, visible:CodeStr().length > 0">@Html.Raw(Defaults.clipImg)</div>
+                                </td>
+                            </tr>
+                        </tbody>
+                        <tfoot>
+                            @*@Html.Raw(Defaults.chkNoRecords(Model.Count(), 7))*@
+                        </tfoot>
+                    </table>
+                </td>
+            </tr>
+        </table>
+    </div>
 </body>
 </html>
+@if (!isArchived)
+{    
+<text>
+@{ Html.RenderPartial("KO/FileDetailsKOscript"); }
+@*HT: Remove after including master page (it alrady has this script reference)*@
+<script language="javascript" src="@Url.Content("~/Content/Scripts/jquery.form.js")" type="text/javascript"></script>
+
+<script type="text/javascript" language="javascript" defer="defer">
+
+    $(document).ready(function () {
+
+        window.onbeforeunload = function () {
+            //if (window.opener != null)
+            try {
+                window.opener.addFilesDetail(ko.mapping.toJSON(viewModelFD.allFiles()));
+            } catch (e) { alert(e.message); }
+        }
+
+        var bar = $('.bar');
+        var percent = $('.percent');
+        var status = $('#status');
+
+        $('#frmFilesDetail').ajaxForm({
+            dataType: 'xml',
+            beforeSend: function () {
+                status.empty();
+                var percentVal = '0%';
+                bar.width(percentVal)
+                percent.html("uploading:" + percentVal);
+            },
+            uploadProgress: function (event, position, total, percentComplete) {
+                var percentVal = percentComplete + '%';
+                bar.width(percentVal)
+                percent.html("uploaded:" + percentVal);
+            },
+            success: function (responseXML, statusText, xhr, frm) {
+                var percentVal = '100%';
+                bar.width(percentVal)
+                percent.html("Done:" + percentVal);
+                //Reset add new
+                viewModelFD.cancelFile(xhr);
+
+                var xmlTxt = (xhr.responseXML != null) ? xhr.responseXML.xml : xhr.responseText;
+                @*//IE : xhr.responseXML.xml                //FF: xhr.responseText*@
+
+                if (xmlTxt == null || xmlTxt.length < 1) {
+                    if (xhr.responseXML.xml != null)
+                        xmlTxt = xhr.responseXML.xml;
+                    else if (xhr.responseXML.documentElement.textContent != null)
+                        xmlTxt = xhr.responseXML.documentElement.textContent;
+                }
+                
+                if (xmlTxt.indexOf("fileDUploadResponse") == -1) {
+                    viewModelFD.allFiles.pop();
+                } // Something went wrong!
+
+                if (xhr.responseXML != null){@*// For IE (explicitly evalute the taconite script *@
+                      var tc = new $.taconite(responseXML); // might work in IE8                      
+                    }
+            },
+            complete: function (xhr) {
+                @*//status.html(xhr.responseText); DON'T set or it'll have two result messages and it can't choose *@
+                percent.html("");                
+            },
+            error: function (xhr, textStatus, errorThrown) {
+                status.html(xhr.responseText + ":" + textStatus + ":" + errorThrown);
+                viewModelFD.allFiles().pop();
+            }
+        });
+    });
+
+    function fileDUploadResponse(code,success, ID) {
+        if (success) {
+            ko.utils.arrayForEach(viewModelFD.allFiles(), function (file) {
+                if (file.ID() == ID) { file.CodeStr(code); return; }
+            });
+        }        
+    }
+    </script>
+    
+    @*HT: Remove after including Manage page (it already has this script reference)*@
+<script src="@Url.Content("~/Content/Scripts/jquery.taconite.js")" type="text/javascript" ></script>
+<script src="@Url.Content("~/Content/jQUI/min/jquery-ui.1.10.2.min.js")" type="text/javascript"></script>@* HT: required for .effect() in upload response *@
+<!--[if lt IE 8]>
+<script src="@Url.Content("~/Content/Scripts/json2.js")" type="text/javascript" ></script>
+<![endif]-->
+
+</text>
+}

@@ -141,6 +141,9 @@ namespace CPM.Services
                 item.LastModifiedDate = DateTime.Now;
                 int oldClaimDetailId = item.ID;//store old id
 
+                //Special case handling for IE with KO - null becomes "null"
+                if (item.Note == "null") item.Note = "";
+
                 if (item._Deleted)
                 {
                     Delete(item, false);
@@ -159,104 +162,12 @@ namespace CPM.Services
                     dbc.SubmitChanges();
 
                 // Finally, If Item is NOT deleted then process its Files
-                if (!item._Deleted) // Make sure item is not deleted
+                if (!item._Deleted && item.aDFiles != null && item.aDFiles.Count() > 0) // Make sure item is not deleted
                     new FileDetailService(dbc).BulkAddEditDel(item.aDFiles, claimObj, oldClaimDetailId, item.ID, doSubmit, dbcContext);
             }
             
         }
 
-        #endregion
-    }
-
-    public class CAWItem : CAWBase
-    {
-        #region Variables & Constructor
-        public CAWItem(bool Async) : base(Async) { ;}
-        #endregion
-
-        #region Search / Fetch
-        
-        public List<ClaimDetail> Search(int claimID, string claimGUID, int? userID)
-        {
-            List<ClaimDetail> result = new List<ClaimDetail>();
-            Claim clmObj = _Session.Claims[claimGUID];
-            int sessionClaimDetailCount = clmObj.aItems.Count;
-
-            if (!IsAsync || sessionClaimDetailCount < 1) // Not Async so fetch from DB
-                result = new ClaimDetailService().Search(claimID, userID);
-
-            if (IsAsync && sessionClaimDetailCount < 1) // Async so fetch from Session
-                _Session.Claims[claimGUID] = ClaimDetail.lstAsync(clmObj, result);
-
-            return IsAsync ? _Session.Claims[claimGUID].aItems : result;//.Cast<ClaimDetail>()
-        }
-
-        public ClaimDetail GetClaimDetailById(int? id, Claim claimobj)
-        {
-            // IMP: It cn have -ve values for newly inserted records which are in session
-            ClaimDetail newObj = new ClaimDetailService().newObj;
-
-            try
-            {
-                if (id.HasValue && id.Value != Defaults.Integer) // don't use id > or <
-                {
-                    if (IsAsync) 
-                        newObj = ((claimobj.aItems ?? new List<ClaimDetail>())
-                            .SingleOrDefault(c => c.ID == id.Value)) ?? newObj;
-                        //_Session.Claims[claimobj.ClaimGUID]
-                    else
-                        newObj = new ClaimDetailService().GetClaimDetailById(id.Value);
-                }
-            }
-            catch (Exception ex) 
-            { newObj = new ClaimDetailService().newObj; } // worst worst case handling.
-            
-            //HT: Make sure ClaimId is assigned after the above Claim obj is created
-            newObj.ClaimID = claimobj.ID;
-            newObj.ClaimGUID = claimobj.ClaimGUID;
-            newObj.Archived = claimobj.Archived;
-
-            return newObj;            
-        }
-        
-        #endregion
-
-        #region Add / Edit / Delete
-        
-        public int AddEdit(ClaimDetail itemObj)
-        {
-            if (IsAsync)// Do Async add/edit
-            {
-                Claim data = _Session.Claims[itemObj.ClaimGUID];
-                data.aItems = itemObj.setProp().doOpr(data.aItems);
-                _Session.Claims[itemObj.ClaimGUID] = data;
-                return itemObj.ID;
-            }
-            else
-                return new ClaimDetailService().AddEdit(itemObj.setProp(), true);
-        }
-
-        public void Delete(ClaimDetail itemObj)
-        {
-            itemObj._Deleted = true; itemObj._Added = itemObj._Edited = false;
-
-            if (IsAsync)// Do Async delete
-            {
-                Claim data = _Session.Claims[itemObj.ClaimGUID];
-                data.aItems = itemObj.doOpr(data.aItems);
-                _Session.Claims[itemObj.ClaimGUID] = data;
-
-                // Make sure the "Async"(temp) files are deleted
-                FileIO.EmptyDirectory(FileIO.GetClaimDirPathForDelete(itemObj.ClaimID, itemObj.ID, data.ClaimGUID, true));
-            }
-            else
-            {
-                new ClaimDetailService().Delete(itemObj, true);
-                // Make sure the files are also deleted
-                FileIO.EmptyDirectory(FileIO.GetClaimDirPathForDelete(itemObj.ClaimID, itemObj.ID, null, false));
-            }            
-        }
-        
         #endregion
     }
 }

@@ -3,10 +3,10 @@
 @using System.Collections
 @{
    bool isMyRole = (Model.Title == _SessionUsr.RoleName);
-   string onClickForCANCEL = " onclick='" + (Model.IsDeleted ? " if(confirmDelete(event))deleteTR(this)" : 
+   string onClickForCANCEL = " onclick='" + (Model.IsDeleted ? " if(confirmDeleteCustom(event))deleteTR(this)" : 
        "deleteTR(this)") + " ;return false;'";
-   string onClickForDEL = " onclick='" + (Model.IsDeleted ? "deleteTR(this)" : 
-       " if(confirmDelete(event))deleteTR(this)") + " ;return false;'";
+   string onClickForDEL = " onclick='" + (Model.IsDeleted ? "deleteTR(this)" :
+       " if(confirmDeleteCustom(event))deleteTR(this)") + " ;return false;'";
    
     string trClass = Model.IsDeleted?"deletedTR":"deletedTR_NO";   
     string trNewDspStyle = Model.IsAdded?"":"none";

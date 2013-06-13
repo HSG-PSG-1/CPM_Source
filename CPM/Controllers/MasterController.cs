@@ -46,7 +46,7 @@ namespace CPM.Controllers
             ViewData["oprSuccess"] = base.operationSuccess;//For successful operation
 
             ModelState.Clear();//Start FRESH
-            return View(new MasterService(_Session.MasterTbl).FetchAll());
+            return View(new MasterService(_Session.MasterTbl).FetchAllCached());
         }
 
         [HttpPost]

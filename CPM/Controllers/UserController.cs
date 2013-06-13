@@ -187,7 +187,7 @@ namespace CPM.Controllers
             if (fetchOtherData)
             {
                 //ViewData["Orgs"] = new OrgService().GetOrgs(); - useful in case ORgs filter is needed
-                ViewData["Roles"] = new SecurityService().GetRoles();
+                ViewData["Roles"] = new SecurityService().GetRolesCached();
             }
         }
 

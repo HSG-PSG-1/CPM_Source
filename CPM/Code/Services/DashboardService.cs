@@ -50,12 +50,12 @@ namespace CPM.Services
                     return dasQ.OrderBy(orderBy).ToPagedList(pgIndex ?? 1, pageSize);
 
                 /* Apply pagination and return - kept for future ref
-                return userQuery.Skip(startRow).Take(pageSize).ToList<vw_User_Org_UserRole>();
+                return dasQ.OrderBy(orderBy).Skip(pgIndex.Value).Take(pageSize).ToList<vw_Claim_Dashboard>(); 
                 */
                 #endregion
             }
         }
-
+        
         public static IQueryable<vw_Claim_Dashboard> PrepareQuery(IQueryable<vw_Claim_Dashboard> dasQ, vw_Claim_Dashboard das)
         {
             #region Append WHERE clause if applicable
@@ -63,7 +63,14 @@ namespace CPM.Services
             dasQ = dasQ.Where(o => o.Archived == das.Archived);
 
             if (!string.IsNullOrEmpty(das.ClaimNos))// Filter for multiple Claim No.s
-                dasQ = dasQ.Where(o => Defaults.stringToIntList(das.ClaimNos).Contains(o.ClaimNo));
+            {
+                int SingleClaimNo = -1;
+
+                if (int.TryParse(das.ClaimNos, out SingleClaimNo))
+                    dasQ = dasQ.Where(o => SqlMethods.Like(o.ClaimNo.ToString(),"%" + SingleClaimNo.ToString() + "%"));                
+                else
+                    dasQ = dasQ.Where(o => Defaults.stringToIntList(das.ClaimNos).Contains(o.ClaimNo));
+            }
 
             if (!string.IsNullOrEmpty(das.CustRefNo))
                 dasQ = dasQ.Where(o => SqlMethods.Like(o.CustRefNo.ToLower(), das.CustRefNo.ToLower()));

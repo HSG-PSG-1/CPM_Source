@@ -24,6 +24,8 @@
     @** HT: Required on top **@
     <script src="@Url.Content("~/Content/jQUI/min/jquery-1.9.1.min.js")" type="text/javascript"></script>    
     <link href="@Url.Content("~/Content/jQUI/ui-lightness/jquery-ui-1.10.0.custom.css")" rel="stylesheet"type="text/css" />
+
+    @*@StackExchange.Profiling.MiniProfiler.RenderIncludes()*@
 </head>
 <body class="back" id="bodyLogin">
     @using (Html.BeginForm())
@@ -100,7 +102,8 @@
         <table border="0" cellpadding="2" cellspacing="2" width="1%" align="center">
             <tr><td colspan="2" nowrap="nowrap" align="center">
             @{bool? oprSuccess = ((bool?)ViewData["oprSuccess"]);}
-            @if (oprSuccess.HasValue){
+            @if (oprSuccess.HasValue)
+            {
             @Html.Raw(CPM.Helper.Defaults.getOprResult(oprSuccess.Value, Defaults.ForgotPWDInvalidEmail))
             } 
             @Html.ValidationMessage("UserEmail")
@@ -110,7 +113,7 @@
                     Email
                 </td>
                 <td align="left" nowrap="noWrap">
-                    &nbsp;@Html.TextBox("UserEmail","", new { @class = "required email" })
+                    &nbsp;@Html.TextBox("UserEmail", "", new { @class = "required email" })
                 </td>
             </tr>
             <tr>
@@ -140,7 +143,7 @@
     <script type="text/javascript" language="javascript" defer="defer">
     var isInIFrame = (window.location != window.parent.location) ? true : false;
     
-    // @** HANDLE DIFF USE-CASE: When the Login page is reached by session timeout (from dialog, ajax or any other place) **@
+    @** HANDLE DIFF USE-CASE: When the Login page is reached by session timeout (from dialog, ajax or any other place) **@
     
     if (isInIFrame) {// ------- Make sure that the parent is refreshed
         window.onbeforeunload = null;
@@ -180,11 +183,14 @@
 
         
     }
-    //@** Render call to openSendPassword only if required **@
-    @if((bool)(ViewData["showSendPWD"]??false)){ 
-    /* Prevent the opr success result effect twice */
+    @** Render call to openSendPassword only if required **@
+    @if ((bool)(ViewData["showSendPWD"] ?? false))
+    {
+        /* Prevent the opr success result effect twice */
     @Html.Raw("$(\"#oprResult\").attr('done', '1');openSendPassword();")
-    }else{ @Html.Raw("$(document).ready(function () { $('#Email').focus(); });") }
+    }
+    else
+    { @Html.Raw("$(document).ready(function () { $('#Email').focus(); });") }
 
     function IsForgotPassword(yes){
          $("#IsForgotPassword").attr('checked', yes);

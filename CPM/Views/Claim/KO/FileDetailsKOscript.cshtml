@@ -1,0 +1,131 @@
+﻿@using CPM.Helper
+@using System.Collections
+@using System.Web.Script.Serialization
+@using System.Collections
+@using CPM.Services
+@using CPM.Helper
+
+<script type="text/javascript" language="javascript" defer="defer">        
+    var IsFDEditMode = false;
+    var NextNewFileDetailID = -1;
+    var filesDetailModel = function () {
+        var self = this;        
+        self.emptyFile = "";@*//ko.observable(); HT: DON'T keep it observable or it'll be set to NULL!*@
+
+        self.fileDetailToAdd = ko.observable();
+        self.allFiles = ko.observableArray(); // Initial items
+        
+        self.TriggerOpenWin = function (fileFD) {
+            openWin("@Url.Action("GetFileD", "Claim")?" + fileFD.CodeStr(),1,1);
+        }
+        
+        self.setEdited = function (file) {
+            file._Edited(!file._Added()); 
+            file.UploadedOn(Date111);
+        }
+        self.setEditedFlag = function (file) {
+            file._Edited(!file._Added());
+            file.LastModifiedDate(Date111);
+        }
+        self.addFile = function (file) {
+            if (file.FileName == null || file.FileName == "")
+                {
+                   //http://knockoutjs.com/documentation/event-binding.html
+                   alert("Please select a file to upload"); return false; 
+                }
+            else {// SO: 857618/javascript-how-to-extract-filename-from-a-file-input-control
+                    file.FileName = file.FileName.split(/(\\|\/)/g).pop(); //file.FileName.replace("C:\\fakepath\\","");
+                if (!IsFDEditMode) {
+                    file.ID = NextNewFileDetailID;
+                    self.allFiles.push(ko.mapping.fromJS(cloneObservable(file)));
+                    NextNewFileDetailID = NextNewFileDetailID - 1;
+                    self.emptyFile.ID = NextNewFileDetailID; // NOT WORKING as expected
+                }
+                else { /* Editmode Handled by KO */ }
+            }
+            return true; // for ajax submit
+        };
+
+        @*self.setSelected = function (file) {
+            if (file != null) // Prevent blanks and duplicates
+                self.fileDetailToAdd(file);
+            file._Edited(!file._Added());
+            self.selectedFile(cloneObservable(file)); IsFDEditMode = true;            
+        };*@
+
+        self.removeSelected = function (file) {
+            if (file == null)return false;
+            
+            if(!file._Added()) {file._Deleted(true); return false;}
+
+            var data = {}; data["delFD"] = ko.mapping.toJSON(file);
+            var url = '@Url.Action("FileDetailKODelete", "Claim", new { ClaimGUID = ViewData["ClaimGUID"] })';
+            $.post(url, data, function(data, textStatus, jqXHR)
+                {
+                    file._Deleted(true);
+                    file._Added(false);
+                    self.allFiles.remove(file);
+                }
+            );                        
+        };
+
+        self.unRemoveSelected = function (file) {
+            if (file != null)
+            {
+                file._Deleted(false);
+            }
+        };
+
+        self.cancelFile = function (file) {
+            IsFDEditMode = false;
+            self.fileDetailToAdd(cloneObservable(self.emptyFile));
+        };
+
+        self.saveToServer = function () {
+            ko.utils.postJson(location.href, { files: ko.mapping.toJS(self.allFiles) }); //ko.toJSON(self.allFiles)
+           
+            return false;
+        }
+    }; 
+ 
+ var viewModelFD = new filesDetailModel();
+ function createFilesDetailKO()
+ {      
+    var aDFiles = null;
+    if(window.opener != null) @* SPECIAL CASE for FD: If Files were added need to get them from local cache *@
+        aDFiles = window.opener.getCachedItemFilesDetail(@ViewData["ClaimDetailID"].ToString());
+    
+    $.getJSON('@Html.Raw(Url.Action("FilesDetailKOVM", "Claim", 
+    new {ClaimDetailID = ViewData["ClaimDetailID"], ClaimGUID = ViewData["ClaimGUID"] }))',
+        function (data) {
+            if (data.FileDetailToAdd.ID != -1) data.fileDetailToAdd.ID = NextNewFileDetailID;
+
+            viewModelFD.emptyFile = data.EmptyFileDetail; // THIS SHUD NOT BE AN OBSERVABLE
+        @*viewModelFD.fileDetailToAdd = ko.mapping.fromJS(data.FileDetailToAdd); *@
+            viewModelFD.fileDetailToAdd(data.FileDetailToAdd); 
+             
+            if(aDFiles == null)@*SPECIAL CASE *@
+                {
+                    viewModelFD.allFiles = ko.mapping.fromJS(data.AllFiles);   
+                }
+            else{
+                    @*2295496/convert-javascript-array-to-json*@                    
+                    viewModelFD.allFiles = ko.mapping.fromJSON(aDFiles);   //ko.observableArray([]);
+                    @*//viewModelFD.allFiles = ko.mapping.fromJSON(ko.mapping.toJSON(aDFiles));*@
+                }
+
+            @*// viewModelFD.allItems(ko.mapping.fromJS(data.AllItems)); // viewModelFD.allFiles(data.AllFiles);*@
+
+            viewModelFD.FileDetailTypes = ko.mapping.fromJS(data.FileDetailTypes);
+             
+            try{ko.applyBindings(viewModelFD, document.getElementById("divFilesDetail"));}catch(e){alert(e);}
+        });
+ }
+      
+          // Put script at bottom to avoid early-references
+    $(document).ready(function () {
+        setFocus("FileDetailNameNEW");        
+        createFilesDetailKO();
+    });
+
+    </script>

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
@@ -13,20 +14,14 @@ namespace CPM.Controllers
     [IsAuthorize(IsAuthorizeAttribute.Rights.NONE)]//Special case for some dirty session-abandoned pages and hacks
     public partial class ClaimController : BaseController
     {
-        bool IsAsync
-        {
-            get { return true; }
-            /* until we upgrade code in future for Sync mode where changes will take place on the go instead of waiting until final commit */
-            set{;} 
-        }
-
         #region Actions for Claim (Secured)
 
         [AccessClaim("ClaimID")]
         [CacheControl(HttpCacheability.NoCache), HttpGet]
-        public ActionResult Manage(int ClaimID)
+        public ActionResult Manage(int ClaimID, bool? printClaimAfterSave)
         {
-            ViewData["oprSuccess"] = base.operationSuccess;//oprSuccess will be reset after this
+            ViewData["oprSuccess"] = base.operationSuccess; //oprSuccess will be reset after this
+            ViewData["printClaimAfterSave"] = (TempData["printClaimAfterSave"]??false);
 
             #region Add mode - add new and return it in editmode
             if (ClaimID <= Defaults.Integer)
@@ -34,11 +29,10 @@ namespace CPM.Controllers
                 // Also handles special case for customer to set default SP for him
                 string spNameForCustomer = string.Empty;
                 Claim NewClaim = new ClaimService().AddDefault(_SessionUsr.ID, _SessionUsr.OrgID, _Session.IsOnlyCustomer, ref spNameForCustomer);
-                //_Session.Claim = NewClaim;
-                _Session.Claims[NewClaim.ClaimGUID] = NewClaim;
+                //Session.Claims[NewClaim.ClaimGUID] = NewClaim;
                 //return RedirectToAction("Manage", new { ClaimID = NewClaim.ID, ClaimGUID = NewClaim.ClaimGUID });
-                doAddEditPopulate();                
-                return View(ClaimService.GetVWFromClaimObj(NewClaim,  spNameForCustomer));
+                ClaimKOModel vmClaim = doAddEditPopulateKO(ClaimService.GetVWFromClaimObj(NewClaim, spNameForCustomer));
+                return View(vmClaim);
             }
             #endregion
 
@@ -65,17 +59,17 @@ namespace CPM.Controllers
                 //Reset the Session Claim object
                 Claim claimObj = ClaimService.GetClaimObjFromVW(vw);
                 //_Session.Claim = claimObj;
-                _Session.Claims[claimObj.ClaimGUID] = claimObj;// Populate original obj
+                //_Session.Claims[claimObj.ClaimGUID] = claimObj;// Populate original obj
 
-                doAddEditPopulate();
-                return View(vw);
+                ClaimKOModel vmClaim = doAddEditPopulateKO(vw);
+                return View(vmClaim);
             }
             #endregion
         }
 
         [HttpPost]
         [AccessClaim("ClaimID")]
-        public ActionResult Delete(int ClaimID, string ClaimGUID)
+        public ActionResult Delete(int ClaimID, string ClaimGUID, int ClaimNo)
         {
             //http://www.joe-stevens.com/2010/02/16/creating-a-delete-link-with-mvc-using-post-to-avoid-security-issues/
             //http://stephenwalther.com/blog/archive/2009/01/21/asp.net-mvc-tip-46-ndash-donrsquot-use-delete-links-because.aspx
@@ -86,7 +80,7 @@ namespace CPM.Controllers
             new ClaimService().Delete(new Claim() { ID = ClaimID });
             //Log Activity (before directory del and sesion clearing)
             new ActivityLogService(ActivityLogService.Activity.ClaimDelete).Add(
-                new ActivityHistory() { ClaimID = ClaimID, ClaimText = _Session.Claims[ClaimGUID].ClaimNo.ToString() });
+                new ActivityHistory() { ClaimID = ClaimID, ClaimText = ClaimNo.ToString() });
 
             #endregion
 
@@ -100,13 +94,13 @@ namespace CPM.Controllers
 
         [HttpPost]
         [AccessClaim("ClaimID")]
-        public ActionResult Archive(int ClaimID, string ClaimGUID, bool Archive)
+        public ActionResult Archive(int ClaimID, string ClaimGUID, bool Archive, int ClaimNo)
         {
             new ClaimService().Archive(ClaimID, Archive);// Delete claim
             //Log Activity (before directory del and sesion clearing)
             new ActivityLogService(
                 Archive ? ActivityLogService.Activity.ClaimArchive : ActivityLogService.Activity.ClaimUnarchive)
-                .Add(new ActivityHistory() { ClaimID = ClaimID, ClaimText = _Session.Claims[ClaimGUID].ClaimNo.ToString() });
+                .Add(new ActivityHistory() { ClaimID = ClaimID, ClaimText = ClaimNo.ToString() });
             _Session.ResetClaimInSessionAndEmptyTempUpload(ClaimGUID);//reset after act log!
             if (Archive) return Redirect("~/Dashboard");
             else return RedirectToAction("Manage", new { ClaimID = ClaimID, ClaimGUID = ClaimGUID });
@@ -124,24 +118,22 @@ namespace CPM.Controllers
 
         [HttpPost]
         [AccessClaim("ClaimID")]
-        public ActionResult Manage(int ClaimID, vw_Claim_Master_User_Loc claimObj, bool isAddMode)
+        public ActionResult Manage(int ClaimID, bool isAddMode,
+            [FromJson]vw_Claim_Master_User_Loc claimObj, [FromJson] IEnumerable<ClaimDetail> items,
+            [FromJson] IEnumerable<Comment> comments, [FromJson] IEnumerable<FileHeader> files, bool? printClaimAfterSave)
         {
             bool success = false;
-
-            if (!ModelState.IsValid)//Ref: base.IsAutoPostback() || //Request.Form["chkDone"] must be present
-            {
-                doAddEditPopulate();
-                return View(claimObj);
-            }
+            //return new JsonResult() { Data = new{ msg = "success"}};
+            
             //HT: Note the following won't work now as we insert a record in DB then get it back in edit mode for Async edit
             //bool isAddMode = (claimObj.ID <= Defaults.Integer); 
 
             #region Perform operation proceed and set result
 
-            int result = new CAWclaim(IsAsync).AddEdit(claimObj, claimObj.StatusIDold);
+            int result = new CAWclaim(false).AsyncBulkAddEditDelKO(claimObj, claimObj.StatusIDold, items, comments, files);
             success = result > 0;
 
-            if (!success) return View(claimObj);
+            if (!success) {/*return View(claimObj);*/}
             else //Log Activity based on mode
             {
                 claimObj.ClaimNo = result;// Set Claim #
@@ -153,29 +145,55 @@ namespace CPM.Controllers
 
             base.operationSuccess = success;//Set opeaon success
             _Session.ResetClaimInSessionAndEmptyTempUpload(claimObj.ClaimGUID); // reset because going back to Manage will automatically creat new session
-
-            return RedirectToAction("Manage", new { ClaimID = result});
+            
+            if(success)
+                TempData["printClaimAfterSave"] = printClaimAfterSave.HasValue && printClaimAfterSave.Value;
+            
+            return RedirectToAction("Manage", new { ClaimID = result });
         }
 
         [AccessClaim("ClaimID")]
         [CacheControl(HttpCacheability.NoCache), HttpGet]
         public ActionResult Archived(int ClaimID)
         {
-            vw_Claim_Master_User_Loc vw = new ClaimService().GetClaimById(ClaimID);
+            ClaimInternalPrint printView = new ClaimInternalPrint();
+
+            List<Comment> comments = new List<Comment>();
+            List<FileHeader> filesH = new List<FileHeader>();
+            List<ClaimDetail> items = new List<ClaimDetail>();
+
+            #region Fetch Claim data and set Viewstate
+            vw_Claim_Master_User_Loc vw = new ClaimService().GetClaimByIdForPrint(ClaimID,
+                ref comments, ref filesH, ref items, !_Session.IsOnlyCustomer);
+            
+            vw.ClaimGUID = System.Guid.NewGuid().ToString();
+
+            //Set data in View
+            ViewData["comments"] = comments;
+            ViewData["filesH"] = filesH;
+            ViewData["items"] = items;
+
+            printView.view = vw;
+            printView.comments = comments;
+            printView.filesH = filesH;
+            printView.items = items;
+            #endregion
 
             if (vw.ID == Defaults.Integer && vw.StatusID == Defaults.Integer && vw.AssignedTo == Defaults.Integer)
             { ViewData["Message"] = "Claim not found"; return View("DataNotFound"); /* deleted claim accessed from Log*/}
                         
             //Reset the Session Claim object
-            Claim claimObj = ClaimService.GetClaimObjFromVW(vw);
-            //_Session.Claim = claimObj;
-            _Session.Claims[claimObj.ClaimGUID] = claimObj;// Populate original obj
+            //Claim claimObj = ClaimService.GetClaimObjFromVW(vw);
             
-            if (vw == new ClaimService().emptyView)//Empty so invalid ClaimID - go to Home
+            if (vw == null || vw.ID < 1)//Empty so invalid ClaimID - go to Home
                 return RedirectToAction("List", "Dashboard");
 
-            return View(vw);
+            return View(printView);
         }
+
+        #endregion        
+                
+        #region Actions for Status (Secured)
 
         [HttpPost]
         [AccessClaim("ClaimID")]
@@ -194,16 +212,12 @@ namespace CPM.Controllers
                 Defaults.getOprResult(result, String.Empty), "msgStatusHistory", "updateStatusHistory()"), "text/xml");
         }
 
-        #endregion        
-                
-        #region Actions for Status (Secured)
-       
         [AccessClaim("ClaimID")]
         [CacheControl(HttpCacheability.NoCache), HttpGet]
         public ActionResult Status(int ClaimID, bool? Archived)
         {
             //http://localhost:4915/Claim/1/Status
-            ViewData["IsReadOnly"] = (Archived.HasValue? Archived.Value: true);
+            ViewData["IsReadOnly"] = (Archived.HasValue ? Archived.Value : true);
             // NOT need because in MAnage claim we show it as readonly || _Session.Claim.Archived;
             return View(new StatusHistoryService().FetchAll(ClaimID));
         }
@@ -211,15 +225,32 @@ namespace CPM.Controllers
         #endregion
 
         #region Extra Functions (for Claim actions)
-        public void doAddEditPopulate()
+        public ClaimKOModel doAddEditPopulateKO(vw_Claim_Master_User_Loc claimData)
         {
+            ClaimKOModel vm = new ClaimKOModel()
+            {
+                CVM = claimData
+                //ClaimModel = new System.Web.Script.Serialization.JavaScriptSerializer().Serialize(claimData)
+            };
             //ViewData["IsEditMode"] = (id != Defaults.Integer);
+            vm.CVM.AssignedToOld = vm.CVM.AssignedTo;
 
-            ViewData["Statuses"] = new LookupService().GetLookup(LookupService.Source.Status);
-            ViewData["Brands"] = !_Session.IsOnlyVendor?new LookupService().GetLookup(LookupService.Source.BrandItems):
+            vm.Statuses = new LookupService().GetLookup(LookupService.Source.Status);
+            vm.Brands = !_Session.IsOnlyVendor?new LookupService().GetLookup(LookupService.Source.BrandItems):
                 //Special case for Vendor users (they must see only their Brands)
                 new LookupService().GetLookup(LookupService.Source.BrandVendorItems,extras:_SessionUsr.OrgID.ToString());
+
+            return vm;
         }
         #endregion
+    }
+}
+namespace CPM.DAL
+{
+    public class ClaimKOModel
+    {
+        public vw_Claim_Master_User_Loc CVM { get; set; }
+        public IEnumerable Statuses { get; set; }
+        public IEnumerable Brands { get; set; }
     }
 }

@@ -71,4 +71,8 @@
         $("#sortable").tablesorter({textExtraction: sorterTextExtraction/*,headers: {  5: { sorter: false }} */});
         $("#@formID").validate({ @Defaults.validatorJQsetting });
     });    
+    function confirmDeleteCustom(evt){
+            var GoAhead = window.confirm("Are you sure you want to delete this Role?");
+            return stopEvent(evt, GoAhead);            
+        }
 	</script>

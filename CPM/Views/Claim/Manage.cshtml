@@ -1,248 +1,357 @@
-﻿@model CPM.DAL.vw_Claim_Master_User_Loc
+﻿@model CPM.DAL.ClaimKOModel
 @using System.Collections
 @using CPM.Helper
-@{ ViewBag.Title = "Claim"; Layout = Defaults.masterLayout; bool IsOnlyCustomer = _Session.IsOnlyCustomer;}
+@{ ViewBag.Title = "Claim"; Layout = Defaults.masterLayout; 
+   bool IsOnlyCustomer = _Session.IsOnlyCustomer; 
+   bool printClaimAfterSave = (bool) ViewData["printClaimAfterSave"];
+   string claimPrintopenWindow = "openWinScrollable('" + Url.Action("Print", "Claim", new { ClaimID = Model.CVM.ID }) + "',648,838);";}
 @section HeadContent {
     <script type="text/javascript">        
-        //Make sure common.js is included
+        @* *********** Make sure common.js is included*********** *@
         $().ready(function() {
+        @if (printClaimAfterSave){@Html.Raw(claimPrintopenWindow)}
         try{DisableSubmitButtons(false);/*$.unblockUI();*/}catch(e){}
-        @if (!IsOnlyCustomer)
-        {
-        <text>
-        renderAutoComplete('@Defaults.commonRoot/Lookup?id=OrgSalesperson', '#CustID', '#CustOrg');        
-        //bind the event which will auto-select salesperson and set in textbox for the selected customer
-        $( "#CustOrg" ).bind( "autocompleteselect", function(event, ui) {        
-            $("#CustID").val(ui.item ? ui.item.id : '');//DON'T forget
-            //set Interval Locations
-            fillLocations(true);
-            //Set Salesperson
-            $("#SalespersonID").val(ui.item ? ui.item.spid : '');
-            $("#SalespersonName").val(ui.item ? ui.item.spName : '').effect('highlight', {}, 2000);
-            if($("#SalespersonID").val() != '') $("#SalespersonName").valid();//perform validation so that err msg(if any) is cleared.
-        }); 
-        </text>
-        }
-        renderAutoComplete('@Defaults.commonRoot/Lookup?id=Salesperson', '#SalespersonID', '#SalespersonName');
-        //HT: Special case for Customer - select default SP
-        //$('#SalespersonName').autocomplete('search','@_SessionUsr.OrgID');
-            
-        fillLocations(false);//Special case to populate locations
-        
-        //Render tabs
-        //SO: 5246558/jquery-tabs-caching-to-be-disabled-temporary-for-switching-tab-and-refreshing-oth
+         @* Render autocomplete *@        
+        @************ Render tabs ***********
+        //SO: 5246558/jquery-tabs-caching-to-be-disabled-temporary-for-switching-tab-and-refreshing-oth*@
         $("#tabs").tabs({
-         /* cache: true, spinner: 'Loading...', ajaxOptions: { cache: false}, 
-         http://jqueryui.com/upgrade-guide/1.9/#deprecated-ajaxoptions-and-cache-options-added-beforeload-event */
+         @* cache: true, spinner: 'Loading...', ajaxOptions: { cache: false}, 
+         http://jqueryui.com/upgrade-guide/1.9/#deprecated-ajaxoptions-and-cache-options-added-beforeload-event *@
          beforeLoad: function( event, ui ) {
             ui.ajaxSettings.cache = false;
             if ( ui.tab.data( "loaded" ) ) {  event.preventDefault();  return;  } 
             ui.jqXHR.success(function() {   ui.tab.data( "loaded", true ); });
            },
         activate: function(event, ui) { setFocus1(event, ui) } 
-        }); //HT: cache: true - to prevent reload on each tab select!
+        }); @*//HT: cache: true - to prevent reload on each tab select!*@
         
-        //bind event to check claim commit
+        @*//bind event to check claim commit*@
         window.onbeforeunload = chkCommit;
-        // Add client side validation
-        var validator = $("#frmClaim").validate({@Defaults.validatorJQsetting, focusCleanup: false});
-        //,messages:{CustOrg:"This field is required.",Location:"This field is required." }
         
-        // Set blockUI for all forms (SO: 10753584)
-        $('form').submit(function () {
-             if($(this).valid())
-                { try{DisableSubmitButtons(true);/*$.blockUI();*/}catch(e){}}
-         });
-        
-        // Pre-Load tabs
-        //$("#tabs").tabs('load',1);
-        reload('@Url.Action("Items", new { ClaimGUID = Model.ClaimGUID.ToString() })','',"#tabs-2");
-        @if (!IsOnlyCustomer){<text>
-        //$("#tabs").tabs('load',2);
-        reload('@Url.Action("CommentsPg", new { ClaimGUID = Model.ClaimGUID.ToString() })','',"#tabs-3");
-        </text>}
-        reload('@Url.Action("FilesPg", new { ClaimGUID = Model.ClaimGUID.ToString() })','',"#tabs-4");
-        //$("#tabs").tabs('load',3);
+        LoadKOAndOther();
 
-        });
+        @*// Add client side validation*@
+        var validator = $("#frmClaim").validate({@Defaults.validatorJQsetting,ignore: [], focusCleanup: false});
+        @*//,messages:{CustOrg:"This field is required.",Location:"This field is required." }*@        
+        @*// Set blockUI for all forms (SO: 10753584)*@
+        $('form').submit(function () {            
+             if($(this).valid())
+                { try{DisableSubmitButtons(true);@*$.blockUI();*@}catch(e){}}
+         });
+         @*// Pre-Load tabs (done after ko.applybinding for Header
+            //$("#tabs").tabs('load',1);*@         
+       });
     </script>
     <style>
-    .autocomp { width:270px;}
-    </style>
+        .autocomp
+        {
+            width: 270px;
+        }
+    </style>    
+        }
+@{ bool isNewClaim = (Model.CVM.ID <= Defaults.Integer);//StatusIDold
+   string cancelorDelete = isNewClaim ? "Cancel" : "Delete";
+   bool? oprSuccess = ((bool?)ViewData["oprSuccess"]);
+   string archiveVal = Model.CVM.Archived ? "Unarchive" : "Archive";
+   string ClaimNo = isNewClaim ? "(new)" : Model.CVM.ClaimNo.ToString();
+   bool readonlySP = IsOnlyCustomer && (Model.CVM.SalespersonName ?? "").Trim().Length > 0;
+   object spNameTXT = new { @class = "required autocomp", data_bind = "value:SalespersonName" };
+   if (readonlySP)
+   { spNameTXT = new { @class = "required autocomp", @readonly = "readonly", data_bind = "value:SalespersonName" }; } 
 }
-    @{ bool isNewClaim = (Model.ID <= Defaults.Integer);//StatusIDold
-       string cancelorDelete = isNewClaim ? "Cancel" : "Delete";
-       bool? oprSuccess = ((bool?)ViewData["oprSuccess"]);
-       string archiveVal = Model.Archived ? "Unarchive" : "Archive";
-       string ClaimNo = isNewClaim ? "(new)" : Model.ClaimNo.ToString();
-       bool readonlySP = IsOnlyCustomer && (Model.SalespersonName ?? "").Trim().Length > 0;
-       object spNameTXT = new { @class = "required autocomp" };
-       if (readonlySP)
-       { spNameTXT = new { @class = "required autocomp", @readonly = "readonly" }; } 
-    }    
-    <table width="99%" align="center" border="0">
+<table width="99%" align="center" border="0">
     <tr>
         <td align="right">
-        <table style="width:90%;" border="0"><tr>
-        @if (oprSuccess.HasValue)
-        {
-        <td style="width:99%;" align="center">@Html.Raw(Defaults.getOprResult(oprSuccess.Value, CPM.Services.ClaimService.delRefChkMsg))</td>}   
-        <td nowrap="nowrap" align="right" id="tdButtons">
-        <input type="submit" value="Accept" class="button" onclick="skipCommitChk=true; document.getElementById('btnCommit').click();return false;" />&nbsp;
-        <input type="reset" value="Cancel" class="button" onclick="try{window.location.href='@Url.Action("Cancel", new { ClaimID = Model.ID, ClaimGUID = Model.ClaimGUID })'}catch(ex){;}"/>&nbsp;
-        @if (!isNewClaim && _Session.RoleRights.DeleteClaim)
-        {
-            using (Html.BeginForm("Delete", "Claim", new { id = Model.ID, ClaimGUID = Model.ClaimGUID }, FormMethod.Post, new { @style = "display:inline" }))
-            {
-                <input type="submit" value="Delete" title="Delete this claim" class="button" onclick="if(confirmDeleteM
+            <table style="width: 90%;" border="0">
+                <tr>
+                    @if (oprSuccess.HasValue)
+                    {
+                        <td style="width: 99%;" align="center">@Html.Raw(Defaults.getOprResult(oprSuccess.Value, CPM.Services.ClaimService.delRefChkMsg))
+                        </td>}
+                    <td nowrap="nowrap" align="right" id="tdButtons">
+                        @* HT: CAUTION - Make sure first tab is selected to trigger validation *@
+                        <input type="submit" value="Accept" class="button" onclick="skipCommitChk=true; document.getElementById('btnCommit').click();return false;" />&nbsp;
+                        <input type="reset" value="Cancel" class="button" onclick="try{window.location.href='@Url.Action("Cancel", new { ClaimID = Model.CVM.ID, ClaimGUID = Model.CVM.ClaimGUID })'}catch(ex){;}"/>&nbsp;
+                        @if (!isNewClaim && _Session.RoleRights.DeleteClaim)
+                        {
+                            using (Html.BeginForm("Delete", "Claim", new { ClaimID = Model.CVM.ID, ClaimGUID = Model.CVM.ClaimGUID, ClaimNo = Model.CVM.ClaimNo }, FormMethod.Post, new { @style = "display:inline" }))
+                            {
+                            <input type="submit" value="Delete" title="Delete this claim" class="button" onclick="if(confirmDeleteM
         (event, 'Are you sure you want to delete this claim and all the data related with this claim?'))skipCommitChk=true; else return false;" />@Html.Raw("&nbsp;")}
-        } 
-        @if (!isNewClaim && _Session.RoleRights.ArchiveClaim)
-        {@*START: Archive*@
-            using (Html.BeginForm("Archive", "Claim", new { id = Model.ID, ClaimGUID = Model.ClaimGUID, archive = !Model.Archived }, FormMethod.Post, new { @style = "display:inline" }))
-            {
-                <input type="submit" value="@archiveVal" title="@archiveVal this claim" class="button" onclick="if(confirmDeleteM(event, 'Are you sure you want to @archiveVal this claim?'))skipCommitChk=true; else return false;" />@Html.Raw("&nbsp;")}
-        }@* END: Archive*@@if (!isNewClaim)
+                        }
+                        @if (!isNewClaim && _Session.RoleRights.ArchiveClaim)
+                        {@*START: Archive*@
+                            using (Html.BeginForm("Archive", "Claim", new { ClaimID = Model.CVM.ID, ClaimGUID = Model.CVM.ClaimGUID, Archive = !Model.CVM.Archived, ClaimNo = Model.CVM.ClaimNo }, FormMethod.Post, new { @style = "display:inline" }))
+                            {
+                            <input type="submit" value="@archiveVal" title="@archiveVal this claim" class="button" onclick="if(confirmDeleteM(event, 'Are you sure you want to @archiveVal this claim?'))skipCommitChk=true; else return false;" />@Html.Raw("&nbsp;")}
+                        }@* END: Archive*@@if (!isNewClaim)
                           { //&& !IsOnlyCustomer
-                <input type="button" value="Print" class="button" onclick="javascript:openWinScrollable('@Url.Action("Print", "Claim", new { ClaimID = Model.ID })',648,838);" />@Html.Raw("&nbsp;")}
-@if (_Session.IsInternal && !isNewClaim)
-{<a href='@Url.Action("PrintPDF")' target="_blank">PDF</a>@Html.Raw("&nbsp;")}
-
-</td></tr></table>
+            <input type="button" value="Print" class="button" onclick="return checkAndPrint(this, event);" />@Html.Raw("&nbsp;")}
+                        @if (_Session.IsInternal && !isNewClaim){
+                            <a href='@Url.Action("PrintPDF")' target="_blank">PDF</a>@Html.Raw("&nbsp;")@Html.Raw("&nbsp;")
+                        }
+                    </td>
+                </tr>
+            </table>
         </td>
     </tr>
-        <tr>
-            <td>
+    <tr>
+        <td>
             <div id="tabs">
-            <ul>
-                        <li><a href="#tabs-1"><span>Header</span></a></li>
-                        <li><a href="#tabs-2" href1='@Url.Action("Items", new { ClaimGUID = Model.ClaimGUID.ToString() })'><span>Details</span></a></li>
-            @if (!IsOnlyCustomer)
-            { <li><a href="#tabs-3" href1='@Url.Action("CommentsPg", new { ClaimGUID = Model.ClaimGUID.ToString() })'><span>Comments</span></a></li>} 
-                        <li><a href="#tabs-4" href1='@Url.Action("FilesPg", new { ClaimGUID = Model.ClaimGUID.ToString() })'><span>Files</span></a></li>
-                    </ul>
-                    <div id="tabs-1">
-                    &nbsp;@using (Html.BeginForm("Manage", "Claim", new { ClaimID = Model.ID }, FormMethod.Post, new { id = "frmClaim" }))
-                          {@Html.HiddenFor(model => model.ID)@Html.CheckBox("isAddMode", isNewClaim, new { @style = "display:none" })<table width="50%" border="0" cellpadding="2" cellspacing="2">
-                                <tr>
-                                    <td nowrap="nowrap" width="1%" align="right">@Html.LabelFor(model => model.ClaimNo)</td>
-                                    <td nowrap="nowrap" width="40%">@ClaimNo@Html.HiddenFor(model => model.ClaimNo)</td>
-                                    <td nowrap="nowrap">&nbsp;&nbsp;</td>
-                                    <td nowrap="nowrap" width="1%" align="right">@Html.LabelFor(model => model.StatusID)</td>
-                                    <td nowrap="nowrap" width="40%">
-                                        @Html.DropDownList("StatusID", new SelectList((IEnumerable)ViewData["Statuses"], "id", "value", Model.StatusID), new { @class = "dropDown required" })
-                                        @Html.HiddenFor(model => model.StatusIDold)<br />
-                                        @Html.ValidationMessageFor(model => model.StatusID)
-                                    </td>
-                                    <td nowrap="nowrap" width="1%">
-                                    @if (!isNewClaim)
-                                    { 
-                                    <div class="dDialog uline" onclick="showDialog('#ddlg');">Status History</div>@Html.Raw("&nbsp;")
-                                    <div id="ddlg" style="text-align:right"></div> @*Show Status dialog*@
-                                    <script type="text/Javascript" language="javascript">
-                                        function showDialog(containerID)    
-                                    {
-                                        $(containerID).dialog({
-                                            modal: false,
-                                            open: function ()
-                                            {
-                                                $(this).html(loading);
-                                                $(this).load('@Url.Content("~/Claim/")@(Model.ID)/Status');
-                                            },
-                                            height: 360,
-                                            width: 650,
-                                            title: 'Status History'
-                                        });
-                                    }
-                                    </script>                                    
-                                    } 
-                                        </td>
-                                </tr>
-                                <tr>
-                                <td nowrap="nowrap" align="right">@Html.LabelFor(model => model.ClaimDate)</td>
-                                    <td nowrap="nowrap">&nbsp;@Model.ClaimDate.ToString(Defaults.dtFormat, Defaults.ci)@*Html.TextBoxFor(model => model.ClaimDate)*@ @Html.ValidationMessageFor(model => model.ClaimDate)
-                                    @Html.Hidden("ClaimDate", Model.ClaimDate.ToString("dd-MMM-yyyy hh:mm:ss tt"))</td>
-                                    <td nowrap="nowrap">&nbsp;</td>
-                                    <td nowrap="nowrap" align="right">@Html.LabelFor(model => model.BrandID)</td>
-                                    <td nowrap="nowrap">@(Html.DropDownList("BrandID", new SelectList((IEnumerable)ViewData["Brands"],
-    "id", "value", Model.BrandID), new { @class = "dropDown required", @onchange = "doBrandSelected(this)" }))
-                                        <br />@Html.ValidationMessageFor(model => model.BrandID)
-                                    </td>
-                                    <td nowrap="nowrap">&nbsp;</td>
-                                </tr>
-                                <tr>
-                                    <td nowrap="nowrap" align="right">@Html.LabelFor(model => model.CustID)</td>
-                                    <td nowrap="nowrap">@if (!IsOnlyCustomer)
-                                                        { 
-                                        @Html.TextBox("CustOrg", Model.CustOrg, new { @class = "required autocomp" })@Html.Raw("&nbsp;")@Html.Raw(string.Format(Defaults.lookupImgBtn, "CustOrg"))@Html.TextBox("CustID", Model.CustID)<br />@Html.ValidationMessageFor(model => model.CustID) }
-                                                        else
-                                                        {@_SessionUsr.OrgName@Html.Raw("&nbsp;&nbsp;")@Html.HiddenFor(model => model.CustID)} 
-                                    </td>
-                                    <td nowrap="nowrap">&nbsp;</td>
-                                    <td nowrap="nowrap" align="right">@Html.LabelFor(model => model.CustRefNo)</td>
-                                    <td nowrap="nowrap">@Html.CustomTextBoxFor(model => model.CustRefNo, new { @class = "autocomp" })</td>
-                                    <td nowrap="nowrap">&nbsp;</td>
-                                </tr>
-                                <tr>
-                                    <td nowrap="nowrap" align="right">@Html.LabelFor(model => model.ShipToLocationID)</td>
-                                    <td nowrap="nowrap">@Html.TextBox("Location", Model.LocationAndCode, new { @class = "required autocomp" })&nbsp;@Html.Raw(string.Format(Defaults.lookupImgBtn, "Location"))@Html.TextBox("ShipToLocationID", Model.ShipToLocationID)<br />@Html.ValidationMessageFor(model => model.ShipToLocationID)
-                                    </td>
-                                    <td nowrap="nowrap">&nbsp;</td>
-                                    <td nowrap="nowrap" align="right">@Html.LabelFor(model => model.SalespersonID)</td>
-                                    <td nowrap="nowrap">
-                                      @Html.TextBox("SalespersonName", Model.SalespersonName, spNameTXT)&nbsp;@Html.Raw(string.Format(Defaults.lookupImgBtn, "SalespersonName"))@Html.TextBox("SalespersonID", Model.SalespersonID)<br />@Html.ValidationMessageFor(model => model.SalespersonID)
-                                    </td>
-                                    <td nowrap="nowrap">&nbsp;</td>
-                                </tr>
-                                <tr style="display:none">
-                                    <td nowrap="nowrap" align="right">@Html.LabelFor(model => model.VendorID)</td>
-                                    <td nowrap="nowrap" colspan="5">@Html.TextBox("VendorID", Model.VendorID, new { @style = "width:200px" })
-                                    @* Might be needed in future  @Html.ValidationMessageFor(model => model.VendorID) *@
-                                    </td>                                    
-                                </tr>
-                                <tr style="display:none">
-                                    <td><br /><br /></td>
-                                    <td colspan="5">
-                                    @Html.Hidden("ClaimGUID", Model.ClaimGUID)
-                                    <input type="submit" value="Commit all" class="button" id="btnCommit" name="btnCommit" /></td>                                    
-                                </tr>
-                            </table>}
-                    </div>    
-                    <div id="tabs-2">
-                    { Html.RenderAction("Items", new { ClaimGUID = Model.ClaimGUID.ToString() }); }
-                    </div>
+                <ul>
+                    <li><a href="#tabs-1"><span>Header</span></a></li>
+                    <li><a href="#tabs-2" href1='@Url.Action("Items", new { ClaimGUID = Model.CVM.ClaimGUID.ToString() })'>
+                        <span>Details</span></a></li>
                     @if (!IsOnlyCustomer)
-                    {<div id="tabs-3"></div>}
-                    <div id="tabs-4"></div>
-                </div>
-            </td>
-        </tr>
-    </table>
-    <script language="javascript" type="text/javascript" defer="defer">        setFocus("StatusID");
+                    { <li><a href="#tabs-3" href1='@Url.Action("Comments", new { ClaimGUID = Model.CVM.ClaimGUID.ToString() })'>
+                <span>Comments</span></a></li>}
+                    <li><a href="#tabs-4" href1='@Url.Action("FilesPg", new { ClaimGUID = Model.CVM.ClaimGUID.ToString() })'>
+                        <span>Files</span></a></li>
+                </ul>
+                <div id="tabs-1" name = "tabs-1" data-bind="with:CVM">
+                    @using (Html.BeginForm("Manage", "Claim", new { ClaimID = Model.CVM.ID }, FormMethod.Post, new { id = "frmClaim" }))
+                          {@Html.Hidden("ID",Model.CVM.ID, new { data_bind = "value:ID" })@Html.CheckBox("isAddMode", isNewClaim, new { @style = "display:none" })<table
+                              width="50%" border="0" cellpadding="2" cellspacing="2">
+                              <tr>
+                                  <td nowrap="nowrap" width="1%" align="right">@Html.LabelFor(model => model.CVM.ClaimNo)
+                                  </td>
+                                  <td nowrap="nowrap" width="40%">@ClaimNo@Html.Hidden("ClaimNo",Model.CVM.ClaimNo, new { data_bind = "value:ClaimNo" })
+                                  @Html.Hidden("AssignedTo", Model.CVM.AssignedTo, new { data_bind = "value:AssignedTo" })@Html.Hidden("AssignedToVal", Model.CVM.AssignedToVal, new { data_bind = "value:AssignedToVal" })
+                                  @Html.Hidden("AssignedToOld", Model.CVM.AssignedToOld, new { data_bind = "value:AssignedToOld" })
+                                  </td>
+                                  <td nowrap="nowrap">
+                                      &nbsp;&nbsp;
+                                  </td>
+                                  <td nowrap="nowrap" width="1%" align="right">@Html.LabelFor(model => model.CVM.StatusID)
+                                  </td>
+                                  <td nowrap="nowrap" width="40%"><select id="StatusID" class = "dropDown required", data-bind = "options: $parent.Statuses, value:StatusID, optionsText: 'value', optionsValue:'id'"></select>
+                                      @Html.Hidden("StatusIDold",Model.CVM.StatusIDold, new { data_bind = "value:StatusIDold" })<br />@Html.ValidationMessageFor(model => model.CVM.StatusID)
+                                  </td>
+                                  <td nowrap="nowrap" width="1%">
+                                      @if (!isNewClaim)
+                                      { 
+                                          <div class="dDialog uline" onclick="showDialog('#ddlg');">
+                                              Status History</div>@Html.Raw("&nbsp;")
+                                          <div id="ddlg" style="text-align: right">
+                                          </div> @*Show Status dialog*@
+                                          <script type="text/Javascript" language="javascript">
+                                              function showDialog(containerID) {
+                                                  $(containerID).dialog({
+                                                      modal: false,
+                                                      open: function () {
+                                                          $(this).html(loading);
+                                                          $(this).load('@Url.Content("~/Claim/")@(Model.CVM.ID)/Status');
+                                                      },
+                                                      height: 360,
+                                                      width: 650,
+                                                      title: 'Status History'
+                                                  });
+                                              }
+                                          </script>                                    
+                                      }
+                                  </td>
+                              </tr>
+                              <tr>
+                                  <td nowrap="nowrap" align="right">@Html.LabelFor(model => model.CVM.ClaimDate)
+                                  </td>
+                                  <td nowrap="nowrap">
+                                      &nbsp;@Model.CVM.ClaimDate.ToString(Defaults.dtFormat, Defaults.ci)@Html.ValidationMessageFor(model => model.CVM.ClaimDate)
+                                      @Html.Hidden("ClaimDate", Model.CVM.ClaimDate.ToString("dd-MMM-yyyy hh:mm:ss tt"), new { data_bind = "value:ClaimDate" })
+                                  </td>
+                                  <td nowrap="nowrap">
+                                      &nbsp;
+                                  </td>
+                                  <td nowrap="nowrap" align="right">@Html.LabelFor(model => model.CVM.BrandID)
+                                  </td>
+                                  <td nowrap="nowrap">
+                                      <select id="BrandID" class = "dropDown required", onchange = "doBrandSelected(this)",
+                                      data-bind = "options: $parent.Brands, value:BrandID, optionsText: 'value', optionsValue:'id'" />
+                                      <br />@Html.ValidationMessageFor(model => model.CVM.BrandID)
+                                  </td>
+                                  <td nowrap="nowrap">
+                                      &nbsp;
+                                  </td>
+                              </tr>
+                              <tr>
+                                  <td nowrap="nowrap" align="right">@Html.LabelFor(model => model.CVM.CustID)
+                                  </td>
+                                  <td nowrap="nowrap">
+                                      @if (!IsOnlyCustomer)
+                                      { 
+                                          @Html.TextBox("CustOrg", Model.CVM.CustOrg, new { @class = "required autocomp", data_bind = "value:CustOrg" })@Html.Raw("&nbsp;")@Html.Raw(string.Format(Defaults.lookupImgBtn, "CustOrg"))@Html.TextBox("CustID", Model.CVM.CustID, new { data_bind = "value:CustID" })<br />
+                                          @Html.ValidationMessageFor(model => model.CVM.CustID) }
+                                      else
+                                      {@_SessionUsr.OrgName@Html.Raw("&nbsp;&nbsp;")@Html.HiddenFor(model => model.CVM.CustID, new { data_bind = "value:CustID" })}
+                                  </td>
+                                  <td nowrap="nowrap">
+                                      &nbsp;
+                                  </td>
+                                  <td nowrap="nowrap" align="right">@Html.LabelFor(model => model.CVM.CustRefNo)
+                                  </td>
+                                  <td nowrap="nowrap">@Html.TextBox("CustRefNo", Model.CVM.CustRefNo, new { @id = "CustRefNo", @class = "autocomp", data_bind = "value:CustRefNo", maxlength=30 })
+                                  </td>
+                                  <td nowrap="nowrap">
+                                      &nbsp;
+                                  </td>
+                              </tr>
+                              <tr>
+                                  <td nowrap="nowrap" align="right">@Html.LabelFor(model => model.CVM.ShipToLocationID)
+                                  </td>
+                                  <td nowrap="nowrap">@Html.TextBox("Location", Model.CVM.LocationAndCode, new { @class = "required autocomp", data_bind = "value:LocationAndCode" })&nbsp;@Html.Raw(string.Format(Defaults.lookupImgBtn, "Location"))
+                                      @Html.TextBox("ShipToLocationID", Model.CVM.ShipToLocationID, new { data_bind = "value:ShipToLocationID" })<br />@Html.ValidationMessageFor(model => model.CVM.ShipToLocationID)
+                                  </td>
+                                  <td nowrap="nowrap">
+                                      &nbsp;
+                                  </td>
+                                  <td nowrap="nowrap" align="right">@Html.LabelFor(model => model.CVM.SalespersonID)
+                                  </td>
+                                  <td nowrap="nowrap">
+                                      @Html.TextBox("SalespersonName", Model.CVM.SalespersonName, spNameTXT)&nbsp;@Html.Raw(string.Format(Defaults.lookupImgBtn, "SalespersonName"))
+                                      @Html.TextBox("SalespersonID", Model.CVM.SalespersonID, new { data_bind = "value:SalespersonID" })<br />@Html.ValidationMessageFor(model => model.CVM.SalespersonID)
+                                  </td>
+                                  <td nowrap="nowrap">
+                                      &nbsp;
+                                  </td>
+                              </tr>
+                              <tr style="display: none">
+                                  <td nowrap="nowrap" align="right">@Html.LabelFor(model => model.CVM.VendorID)
+                                  </td>
+                                  <td nowrap="nowrap" colspan="5">@Html.TextBox("VendorID", Model.CVM.VendorID, new { @style = "width:200px", data_bind = "value:VendorID" })
+                                      @* Might be needed in future  @Html.ValidationMessageFor(model => model.VendorID) *@
+                                  </td>
+                              </tr>
+                              <tr style="display: none">
+                                  <td>
+                                      <br />
+                                      <br />
+                                  </td>
+                                  <td colspan="5">
+                                      @Html.Hidden("ClaimGUID", Model.CVM.ClaimGUID, new { data_bind = "value:ClaimGUID" })
+                                      <input type="button" value="Commit all" data-bind="click:$parent.SubmitData" class="button" id="btnCommit" name="btnCommit" />
+                                  </td>
+                              </tr>
+                          </table>}
+                </div>                
+                <div id="tabs-2"></div>
+                @if (!IsOnlyCustomer){<div id="tabs-3"></div>}
+                <div id="tabs-4"></div>
+            </div>
+        </td>
+    </tr>
+</table>
+<div id="taco_niteDIV1" name="taco_niteDIV1" style1="display:none">&nbsp;</div>
+<script src="@Url.Content("~/Content/Scripts/KO/knockout-2.2.0.js")" type="text/javascript"></script>
+<script src="@Url.Content("~/Content/Scripts/KO/knockout.mapping-latest.js")" type="text/javascript"></script>
+<script src="@Url.Content("~/Content/Scripts/KO/KoExtra.js")" type="text/javascript"></script>
+<script language="javascript" type="text/javascript"> 
+    var claimViewModel = function () {
+        var self = this;
+        self.CVM = ko.observable();
+        self.Statuses = ko.observableArray([]);
+        self.Brands = ko.observableArray([]); // Initial items
+
+        self.SubmitData = function (claimObj) {
+            var proceed = $("#frmClaim").valid();
+            if(proceed){ try{DisableSubmitButtons(true);@*$.blockUI();*@}catch(e){}}
+            else { $('#tabs').tabs('option', 'active',0); }
+
+            if (proceed) {
+                ko.utils.postJson(location.href, 
+                { 
+                    isAddMode: @isNewClaim.ToString().ToLower(),
+                    claimObj: claimObj,
+                    items: ko.mapping.toJS(viewModelItems.allItems()),
+                    comments: ko.mapping.toJS(viewModelComments.allComments()),  
+                    files: ko.mapping.toJS(viewModelFH.allFiles()),
+                    printClaimAfterSave: printClaimAfterSave  
+                });
+                return false;
+            }
+        }@* END: self.SubmitData *@
+    }
+
+      function LoadKOAndOther() {
+           @if (!printClaimAfterSave){<text>setFocus("StatusID");</text>}@* Set focus will hide the print window - if invoked *@                      
+           
+           // Create KO binding based UI
+           if(createClaimKO())
+           {
+               @* For IE & autocomplete (KO binding might be altering the autocomplete binding)*@
+               doAutocomplete();
+
+               @*Pre-Load tabs*@
+               reloadWithCallback('@Url.Action("Items", new { ClaimGUID = Model.CVM.ClaimGUID.ToString() })','',"#tabs-2", function(){createItemsKO();});
+               @if (!IsOnlyCustomer){<text>
+                reloadWithCallback('@Url.Action("Comments", new { ClaimGUID = Model.CVM.ClaimGUID.ToString(), AssignedTo = Model.CVM.AssignedTo })','',"#tabs-3", function(){callDocReadyComments();});                   
+               </text>}
+               reloadWithCallback('@Url.Action("Files", new { ClaimGUID = Model.CVM.ClaimGUID.ToString() })','',"#tabs-4", function(){callDocReadyFiles();});
+            }
+
+            
+      }
+
+      function doAutocomplete(){
+        @if (!IsOnlyCustomer)
+        {
+            <text>
+                @************  render autocomplete ************@
+                renderAutoComplete('@Defaults.commonRoot/Lookup?id=OrgSalesperson', '#CustID', '#CustOrg');        
+                @*bind the event which will auto-select salesperson and set in textbox for the selected customer*@
+                $("#CustOrg").bind( "autocompleteselect", function(event, ui) {        
+                    $("#CustID").val(ui.item ? ui.item.id : '').trigger("change");//DON'T forget
+                    @*set Interval Locations*@
+                    fillLocations(true);
+                    @*Set Salesperson*@
+                    $("#SalespersonID").val(ui.item ? ui.item.spid : '').trigger("change");
+                    $("#SalespersonName").val(ui.item ? ui.item.spName : '').effect('highlight', {}, 2000).trigger("change");
+                    if($("#SalespersonID").val() != '') $("#SalespersonName").valid();@*perform validation to clear err msg(if any)*@
+                }); 
+            </text>
+        }
+        renderAutoComplete('@Defaults.commonRoot/Lookup?id=Salesperson', '#SalespersonID', '#SalespersonName');
+        @*//HT: Special case for Customer - select default SP //$('#SalespersonName').autocomplete('search','@_SessionUsr.OrgID');*@            
+        fillLocations(false);//Special case to populate locations
+      }
+
+      var claimVM = new claimViewModel();
+      function createClaimKO()
+      {
+        @{ string jsonData = new System.Web.Script.Serialization.JavaScriptSerializer().Serialize(Model);}
+           var claimJSON = @Html.Raw(jsonData);
+                
+            claimVM.CVM(claimJSON.CVM);
+            claimVM.Statuses(claimJSON.Statuses);
+            claimVM.Brands(claimJSON.Brands);
+            
+            @*alert('Claim-Header');*@
+            ko.applyBindings(claimVM, document.getElementById("tabs-1"));
+            return true;
+      }
+        
         function setFocus1(evt, ui) {
             // Objects available in the function context:
             // ui.tab     // anchor element of the selected (clicked) tab
-            // ui.panel   // element, that contains the selected/clicked tab contents
-            // ui.index   // zero-based index of the selected (clicked) tab
-            switch (ui.index) {
-                case 0: //Details
+            // ui.newPanel   // element, that contains the selected/clicked tab contents
+            // ui.newPanel.index()   // zero-based index of the selected (clicked) tab
+            switch (ui.newPanel.index()) {
+                case 1: //Details
                     setFocus("StatusID"); break;
-                case 1: //Items
+                case 2: //Items
                     //setFocus("ItemCode"); break; - Done in the cshtml (partial)
-                case 2: //Comments
+                case 3: //Comments
                     @if (IsOnlyCustomer)
                     { @Html.Raw("setFocus(\"FileNameNEW\");") }
                     else
                     { @Html.Raw("setFocus(\"Comment1\");") }  break;
-                case 3: //Files
+                case 4: //Files
                     setFocus("FileNameNEW"); break;
             }
         }
-        var oriCustID = '@Model.CustID';
+        var oriCustID = '@Model.CVM.CustID';
         function fillLocations(reset)
         {
             if (reset)
-             {$("#ShipToLocationID").val(''); $("#Location").val('');}
+             {$("#ShipToLocationID").val('').trigger("change"); $("#Location").val('').trigger("change");}
             
             var CustID = $("#CustID").val();
             CustID = (CustID==null || CustID.toString().length < 1)? oriCustID : CustID;//set or reset
@@ -270,9 +379,40 @@
             try{ // Re-initiate Items for the selected Brand
             if($("#ItemCode")[0]!= null)
                 fillItemsForBrand(ddl.value, true);
-            } catch(err){}            
+            } catch(err){alert(err);}
         }
-    </script>
-    <script language="javascript" src="@Url.Content("~/Content/Scripts/jquery.numeric.js")" type="text/javascript"></script>
-    <script src="@Url.Content("~/Content/Scripts/jquery.taconite.js")" type="text/javascript" ></script>
-    @*<script src="@Url.Content("~/Content/Scripts/jquery.blockUI.js")" type="text/javascript"></script>*@
+        var printClaimAfterSave = false;
+        function checkAndPrint(btn, evt){
+            if(confirmDeleteM(evt, 'Do you want to save any claim changes before printing? Click cancel to continue print.')){
+                skipCommitChk=true;
+                printClaimAfterSave = true;
+                $("#btnCommit").click();
+                return false;
+            }
+            else
+                @Html.Raw(claimPrintopenWindow)
+                @*openWinScrollable('@Url.Action("Print", "Claim", new { ClaimID = Model.CVM.ID })',648,838);*@
+        }
+        function getCachedItemFilesDetail(ClaimDetailID)
+        {
+            if(viewModelItems.itemToAdd != null && viewModelItems.itemToAdd() != null && viewModelItems.itemToAdd().aDFiles() != null)
+                return ko.mapping.toJSON(viewModelItems.itemToAdd().aDFiles);
+            else
+                return null;
+        }
+        function addFilesDetail(dFiles){
+            if(viewModelItems.allFilesDetail != null && dFiles != null)// && dFiles.length > 0)
+                viewModelItems.itemToAdd().aDFiles = ko.mapping.fromJSON(dFiles);//@*viewModelItems.allFilesDetail = jQuery.merge(viewModelItems.allFilesDetail, dFiles);*@
+                //viewModelItems.itemToAdd().aDFilesJSON = dFiles;// = ko.mapping.fromJSON
+                //$("#aDFilesJSON").val(dFiles).trigger("change"); // Indirectly set the property
+
+            //alert(viewModelItems.allFilesDetail.length);alert(viewModelItems.itemToAdd.aDFilesJSON.length);
+        }
+</script>
+@*<script language="javascript" src="@Url.Content("~/Content/Scripts/jquery.numeric.js")" type="text/javascript"></script>
+<script  language="javascript" src="@Url.Content("~/Content/Scripts/jquery.taconite.js")" type="text/javascript" ></script>
+<script src="@Url.Content("~/Content/Scripts/jquery.blockUI.js")" type="text/javascript"></script>
+<!--[if lt IE 8]>
+<script src="@Url.Content("~/Content/Scripts/json2.js")" type="text/javascript" ></script>
+<![endif]-->
+*@

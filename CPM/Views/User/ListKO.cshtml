@@ -1,0 +1,206 @@
+﻿@*@model PagedList<CPM.DAL.vw_Users_Role_Org>*@
+@using System.Collections
+@using Webdiyer.WebControls.Mvc
+@using CPM.Services
+@using CPM.Helper
+@{ ViewBag.Title = "User List KO"; Layout = Defaults.masterLayout;}
+@section HeadContent {
+    @*SOME scripts are better persisted in head *@ @*<script src="@Url.Content("~/Content/Scripts/KO/jquery-1.7.2.min.js")" type="text/javascript"></script>*@
+    <script src="@Url.Content("~/Content/Scripts/KO/knockout-2.2.0.js")" type="text/javascript"></script>
+    <script src="@Url.Content("~/Content/Scripts/KO/knockout.mapping-latest.js")" type="text/javascript"></script>    
+}
+@{ CPM.DAL.vw_Users_Role_Org usrSearch = ((CPM.DAL.vw_Users_Role_Org)(ViewData["SearchData"]));
+   object routeValues = new { qData = Request["qData"] };
+   Dictionary<string, object> txtAttr = new Dictionary<string, object>();
+   txtAttr.Add("class", "hdrTxt textBox");
+   txtAttr.Add("onchange", "setFiltered(1,this);");
+   bool? oprSuccess = ((bool?)ViewData["oprSuccess"]);
+}
+<table width="100%" border="0">
+    <tr>
+        <td class="sqz" valign="top">
+            <b class="smallHeading">Manage User</b>
+        </td>
+        <td align="center" style="width: 98%">
+            <span id="msg">@Html.ValidationSummary(true)<br /><br />
+            @if (oprSuccess.HasValue)
+            { @Html.Raw(Defaults.getOprResult(oprSuccess.Value, UserService.delRefChkMsg))} 
+            </span>
+        </td>
+        <td class="sqz" align="right" valign="top">
+            @Html.ActionLink("Create New", "AddEdit", new { id = Defaults.Integer })&nbsp;
+        </td>
+    </tr>
+    <tr>
+        <td colspan="3">
+            <fieldset>
+                <legend onclick="showHideDiv('tblSearch')" style="cursor: pointer">&nbsp;<img id="tblSearchImg"
+                    src="@Url.Content("~/Content/Images/aroB.gif")" alt="Show/Hide panel" />
+                    &nbsp;Search&nbsp;</legend>
+                <div id="tblSearch">
+                    <form action="@Url.Content("~/Users/ListKO")" method="post" id="frm" style="display: inline" onsubmit="return doAJAXSubmit(this);">
+                    <table id="tblSearch" cellpadding="2" cellspacing="2" border="0" width="100%">
+                        <tr>
+                            <td nowrap="nowrap" width="5%">
+                                Name
+                            </td>
+                            <td>@Html.TextBox("UserName", "", txtAttr)
+                            </td>
+                            <td nowrap="nowrap" width="5%">
+                                Email
+                            </td>
+                            <td>@Html.TextBox("Email", "", txtAttr)
+                            </td>
+                            <td nowrap="nowrap" width="5%">
+                                Role
+                            </td>
+                            <td nowrap="nowrap">@Html.DropDownList("RoleID", new SelectList((IEnumerable)ViewData["Roles"], "ID", "TEXT"), "All Roles", new { @class = "dropDown" })
+                            </td>
+                            <td nowrap="nowrap" align="right" colspan="6">
+                                <input type="submit" onclick="return doAJAXSubmit(this);" value="Search" class="button" />
+                                &nbsp;<input type="submit" value="Reset" class="button" onclick="clearForm(document.getElementById('frm')); document.getElementById('doReset').checked = true;" />
+                                <input type="checkbox" name="doReset" id="doReset" style="display: none;" />
+                            </td>
+                        </tr>
+                    </table>
+                    </form>                    
+                </div>
+            </fieldset>
+            <!-- END: Search Panel -->
+        </td>
+    </tr>
+    <tr>
+        <td colspan="3">
+                <div id="tdGrid">                        
+                    @{ Html.RenderPartial("EditorTemplates/UserListKO"); }
+                </div>
+        </td>
+    </tr>    
+</table>
+<script type="text/javascript" id="mailToCellTemplate">   
+var mailToCellTemplate = 
+'<u><a data-bind="attr:{href:\'javascript:MailTo(\' + \'\\\'\' + $parent.entity[\'Email\'] + \'\\\'\' + \')\'}, text: $parent.entity[\'Email\']"></a></u>';
+@*'<div data-bind="attr:{'href'},html: $data.getProperty($parent)"></div>';
+<div data-bind=" attr: { 'class': 'kgCellText colt' + $index()} }, html: $data.getProperty($parent)"></div>
+<a data-bind="attr: { 'href': 'mailto:' + $data.getProperty($parent)}, html: $data.getProperty($parent)">
+hmnt</a>*@
+</script>
+<script language="javascript" type="text/javascript" defer="defer">    setFocus("UserName");
+    var ListURL = '@Url.Action("UserListKO", "User")';
+    function doAJAXSubmit(frm) {
+        $.ajax({
+            type: "POST",
+            //contentType: "application/json; charset=utf-8",
+            //dataType: "json",
+            data: $("#frm").serialize(),
+            url: ListURL,
+            success: function (data) {
+                if (data != null) {
+                    viewModel.Users(data); //ko.observableArray
+                    document.getElementById('doReset').checked = false;
+                }
+            }
+        });
+
+        //event.preventDefault();
+        return false;
+    }
+    var userListModel = function () {
+        var self = this;
+        self.Users = ko.observableArray(); // Initial items        
+        self.removeSelected = function (user) {
+            if (user != null) // Prevent blanks and duplicates
+                self.Users.remove(user);
+        };
+    };
+
+    var viewModel = new userListModel();
+    function createKO() {
+        $.getJSON(ListURL, function (data) {
+            viewModel.Users = ko.observableArray(data); //ko.mapping.fromJS(data.AllComments); // Initial items                      
+            ko.applyBindings(viewModel);
+        });
+    }
+    $(document).ready(function () {
+        createKO();
+    });
+    var MailTo = function (data) {
+        alert("Send mail to : " + data);
+        //Try this while using external KO template: https://groups.google.com/forum/#!msg/knockoutjs/1WDUJNd-VQ0/SBVuJttE91UJ
+    }
+    </script>
+<script src="@Url.Content("~/Content/Scripts/jquery.taconite.js")" type="text/javascript" ></script>
+@*
+
+/* http://ericmbarnard.github.com/KoGrid/#/examples
+function pagingVm(){
+    var self = this; 
+    this.myData = ko.observableArray([]);
+  
+    this.filterOptions = {
+        filterText: ko.observable(""),
+        useExternalFilter: true
+    };
+  
+    this.pagingOptions = {
+        pageSizes: ko.observableArray([250, 500, 1000]),
+        pageSize: ko.observable(250),
+        totalServerItems: ko.observable(0),
+        currentPage: ko.observable(1)     
+    };
+  
+    this.setPagingData = function(data, page, pageSize){	
+        var pagedData = data.slice((page - 1) * pageSize, page * pageSize);
+        self.myData(pagedData);
+        self.pagingOptions.totalServerItems(data.length);
+    };
+  
+    this.getPagedDataAsync = function (pageSize, page, searchText) {
+        setTimeout(function () {
+            var data;
+            if (searchText) {
+                var ft = searchText.toLowerCase();
+                $.getJSON('largeLoad.json', function (largeLoad) {		
+                    data = largeLoad.filter(function(item) {
+                        return JSON.stringify(item).toLowerCase().indexOf(ft) != -1;
+                    });
+                    self.setPagingData(data,page,pageSize);
+                });            
+            } else {
+                $.getJSON('largeLoad.json', function (largeLoad) {
+	                self.setPagingData(largeLoad,page,pageSize);
+                });
+            }
+        }, 100);
+    };
+  
+    self.filterOptions.filterText.subscribe(function (data) {
+        self.getPagedDataAsync(self.pagingOptions.pageSize(), self.pagingOptions.currentPage(), self.filterOptions.filterText());
+    });   
+
+    self.pagingOptions.pageSizes.subscribe(function (data) {
+        self.getPagedDataAsync(self.pagingOptions.pageSize(), self.pagingOptions.currentPage(), self.filterOptions.filterText());
+    });
+    self.pagingOptions.pageSize.subscribe(function (data) {
+        self.getPagedDataAsync(self.pagingOptions.pageSize(), self.pagingOptions.currentPage(), self.filterOptions.filterText());
+    });
+    self.pagingOptions.totalServerItems.subscribe(function (data) {
+        self.getPagedDataAsync(self.pagingOptions.pageSize(), self.pagingOptions.currentPage(), self.filterOptions.filterText());
+    });
+    self.pagingOptions.currentPage.subscribe(function (data) {
+        self.getPagedDataAsync(self.pagingOptions.pageSize(), self.pagingOptions.currentPage(), self.filterOptions.filterText());
+    });
+  
+    self.getPagedDataAsync(self.pagingOptions.pageSize(), self.pagingOptions.currentPage());
+
+    this.gridOptions = {
+        data: self.myData,
+        enablePaging: true,
+        pagingOptions: self.pagingOptions,
+        filterOptions: self.filterOptions
+    };	
+};
+ko.applyBindings(new pagingVm());
+*/
+
+*@

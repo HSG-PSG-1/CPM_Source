@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
@@ -17,6 +18,8 @@ namespace CPM.DAL
     public abstract class Opr
     {
         #region Variables & Properties
+
+        public const string sep = ";";
 
         public bool _Added { get; set;}
         public bool _Edited { get; set; }
@@ -58,7 +61,8 @@ namespace CPM.DAL
     public partial class vw_Claim_Master_User_Loc
     {
         #region Extra Variables & Properties
-        
+
+        public int AssignedToOld { get; set; }
         public int StatusIDold { get; set; }
         public string ClaimGUID { get; set; }
         public string LocationAndCode { get { return Common.getLocationAndCode(this.Location, this.LocationCode); } }
@@ -76,8 +80,8 @@ namespace CPM.DAL
         [Required(ErrorMessage = "Status" + Defaults.RequiredMsgAppend)]
         public int StatusID { get; set; }
 
-        [DisplayName("Customer #")]
-        [Required(ErrorMessage = "Customer #" + Defaults.RequiredMsgAppend)]
+        [DisplayName("Customer")]
+        [Required(ErrorMessage = "Customer" + Defaults.RequiredMsgAppend)]
         public int CustID { get; set; }
 
         [DisplayName("Brand")]
@@ -116,17 +120,19 @@ namespace CPM.DAL
         public string ItemCode { get; set; }
         public string Defect { get; set; }
         public List<FileDetail> aDFiles { get; set; }
+        [System.Xml.Serialization.XmlIgnore]//[System.Runtime.Serialization.IgnoreDataMember]//[NonSerialized(), FromJson]
+        public string aDFilesJSON { get; set; }
 
         //HT: To save from divide by zero
         public decimal TDOriginal1 { get { return (TDOriginal > 0) ? TDOriginal : 1; } }
         
         public decimal RemainingTread1 { get { return TDRemaining * 100 / TDOriginal1; } }
-        public decimal CreditAmt1 { get { return RemainingTread1 * CurrentPrice / 100; } }
-        public decimal InvoiceAmt1 { get { return RemainingTread1 * CurrentCost / 100; } }
+        public decimal CreditAmt1 { get { return RemainingTread1 * CurrentPrice / 100; } }  public string CreditAmt1Str { get { return CreditAmt1.ToString("#0.00"); } }
+        public decimal InvoiceAmt1 { get { return RemainingTread1 * CurrentCost / 100; } }  public string InvoiceAmt1Str { get { return InvoiceAmt1.ToString("#0.00"); } }
 
         #endregion
 
-        // Set some required fields to proceed
+        /* Set some required fields to proceed
         public ClaimDetail setProp()
         {
             if (!_Deleted)
@@ -198,6 +204,7 @@ namespace CPM.DAL
             parent.aItems.AddRange(records);
             return parent;
         }
+        */
     }
 
     public class ClaimDetailMetadata
@@ -245,7 +252,7 @@ namespace CPM.DAL
         public string CommentBy { get; set; }
         #endregion
 
-        // Set some required fields to proceed
+        /* Set some required fields to proceed
         public Comment setProp()
         {
             if (!_Deleted)
@@ -314,7 +321,7 @@ namespace CPM.DAL
 
             return parent;
         }
-        
+        */
     }
 
     public class CommentMetadata
@@ -327,9 +334,6 @@ namespace CPM.DAL
 
         [DisplayName("Comment By")]
         public string CommentBy { get; set; }
-
-        //[NonSerialized]  -  Note: Not required now
-        //public Claim Claim { get; set; }
     }
     
     #endregion
@@ -352,11 +356,18 @@ namespace CPM.DAL
             set { _ClaimGUID = value; }
         }
 
-        public const string sep = ";";
-
         public string UploadedBy { get; set; }
         public string FileNameNEW { get; set; }
         public string FileTypeTitle { get; set; }
+        public string CodeStr
+        {
+            get
+            {
+                if (_Added) return string.Empty;
+                else
+                    return HttpUtility.UrlEncode(CPM.Helper.Crypto.EncodeStr(FileName + sep + ClaimGUID.ToString() + sep + IsAsync, true));
+            }
+        } // Can't use HttpUtility.UrlDecode - because it'll create issues with string.format and js function calls so handle in GetFile
         
         public string FilePath { //HT: Usage: <a href='<%= Url.Content("~/" + item.FilePath) %>' target="_blank">
             get { return FileIO.GetClaimFilePath
@@ -366,7 +377,7 @@ namespace CPM.DAL
 
         #endregion
 
-        // Set some required fields to proceed
+        /* Set some required fields to proceed
         public FileHeader setProp(bool Async)
         {
             if (!_Deleted)
@@ -439,6 +450,7 @@ namespace CPM.DAL
             parent.aFiles.AddRange(records);
             return parent;
         }
+        */
     }
 
     public class FileHeaderMetadata
@@ -484,6 +496,16 @@ namespace CPM.DAL
         public string UploadedBy { get; set; }
         public string FileNameNEW { get; set; }
         public string FileTypeTitle { get; set; }
+        public string CodeStr
+        {
+            get
+            {
+                if (_Added) return string.Empty;
+                else
+                    return HttpUtility.UrlEncode(CPM.Helper.Crypto.EncodeStr
+                    (FileName + sep + ClaimGUID + sep + ClaimDetailID.ToString() + sep + IsAsync, true));
+            }// Can't use HttpUtility.UrlDecode - because it'll create issues with string.format and js function calls so handle in GetFile
+        }
         
         public string FilePath { //HT: Usage: <a href='<%= Url.Content("~/" + item.FilePath) %>' target="_blank">
             get { 
@@ -494,7 +516,7 @@ namespace CPM.DAL
 
         #endregion
 
-        // Set some required fields to proceed
+        /* Set some required fields to proceed
         public FileDetail setProp(bool Async)
         { 
             if (!_Deleted)
@@ -565,6 +587,7 @@ namespace CPM.DAL
             parent.aItems.Single(p => p.ID == ClaimDetailID).aDFiles.AddRange(records);
             return parent;
         }
+        */
     }
 
     public class FileDetailMetadata

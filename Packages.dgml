@@ -1,0 +1,45 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<DirectedGraph GraphDirection="LeftToRight" xmlns="http://schemas.microsoft.com/vs/2009/dgml">
+  <Nodes>
+    <Node Id="CPM" Label="CPM" Category="Project" />
+    <Node Id="Glimpse 1.2.0" Label="Glimpse 1.2.0" Category="Package" />
+    <Node Id="Glimpse.AspNet 1.2.1" Label="Glimpse.AspNet 1.2.1" Category="Package" />
+    <Node Id="Glimpse.MiniProfiler 1.2.2" Label="Glimpse.MiniProfiler 1.2.2" Category="Package" />
+    <Node Id="Glimpse.Mvc3 1.2.1" Label="Glimpse.Mvc3 1.2.1" Category="Package" />
+    <Node Id="Microsoft.Web.Infrastructure 1.0.0.0" Label="Microsoft.Web.Infrastructure 1.0.0.0" Category="Package" />
+    <Node Id="MiniProfiler 2.1.0" Label="MiniProfiler 2.1.0" Category="Package" />
+    <Node Id="MiniProfiler.MVC3 2.0.2" Label="MiniProfiler.MVC3 2.0.2" Category="Package" />
+    <Node Id="WebActivator 1.4.4" Label="WebActivator 1.4.4" Category="Package" />
+  </Nodes>
+  <Links>
+    <Link Source="Glimpse.AspNet 1.2.1" Target="Glimpse 1.2.0" Category="Package Dependency" />
+    <Link Source="Glimpse.MiniProfiler 1.2.2" Target="Glimpse 1.2.0" Category="Package Dependency" />
+    <Link Source="Glimpse.MiniProfiler 1.2.2" Target="MiniProfiler 2.1.0" Category="Package Dependency" />
+    <Link Source="Glimpse.Mvc3 1.2.1" Target="Glimpse.AspNet 1.2.1" Category="Package Dependency" />
+    <Link Source="MiniProfiler.MVC3 2.0.2" Target="MiniProfiler 2.1.0" Category="Package Dependency" />
+    <Link Source="MiniProfiler.MVC3 2.0.2" Target="WebActivator 1.4.4" Category="Package Dependency" />
+    <Link Source="WebActivator 1.4.4" Target="Microsoft.Web.Infrastructure 1.0.0.0" Category="Package Dependency" />
+    <Link Source="CPM" Target="Glimpse 1.2.0" Category="Installed Package" />
+    <Link Source="CPM" Target="Glimpse.AspNet 1.2.1" Category="Installed Package" />
+    <Link Source="CPM" Target="Glimpse.MiniProfiler 1.2.2" Category="Installed Package" />
+    <Link Source="CPM" Target="Glimpse.Mvc3 1.2.1" Category="Installed Package" />
+    <Link Source="CPM" Target="Microsoft.Web.Infrastructure 1.0.0.0" Category="Installed Package" />
+    <Link Source="CPM" Target="MiniProfiler 2.1.0" Category="Installed Package" />
+    <Link Source="CPM" Target="MiniProfiler.MVC3 2.0.2" Category="Installed Package" />
+    <Link Source="CPM" Target="WebActivator 1.4.4" Category="Installed Package" />
+  </Links>
+  <Categories>
+    <Category Id="Project" />
+    <Category Id="Package" />
+  </Categories>
+  <Styles>
+    <Style TargetType="Node" GroupLabel="Project" ValueLabel="True">
+      <Condition Expression="HasCategory('Project')" />
+      <Setter Property="Background" Value="Blue" />
+    </Style>
+    <Style TargetType="Link" GroupLabel="Package Dependency" ValueLabel="True">
+      <Condition Expression="HasCategory('Package Dependency')" />
+      <Setter Property="Background" Value="Yellow" />
+    </Style>
+  </Styles>
+</DirectedGraph>

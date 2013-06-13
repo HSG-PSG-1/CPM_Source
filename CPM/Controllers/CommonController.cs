@@ -151,7 +151,8 @@ namespace CPM.Controllers
 
         #region Functions & JSON result returning Actions
         
-        [CacheControl(HttpCacheability.NoCache), HttpGet]
+        //[CacheControl(HttpCacheability.NoCache), HttpGet]
+        [OutputCache(Duration=3600, VaryByParam="id;term;extras")]
         public JsonResult Lookup(string id, string term, string extras)
         {
             #region Ref code kept for testing
@@ -261,7 +262,52 @@ namespace CPM.Controllers
         {
             return View();// Will return the default view
         }
-        
+
+        public ActionResult Navigate()
+        {
+
+            ViewData["Message"] = "";
+            return View();
+        }
+        [HttpPost]
+        public ActionResult Navigate(string searchText)
+        {
+            object result = new object();
+            try
+            {
+                NavigatorService.NavFeature NavTo = NavigatorService.NavFeature.Dashboard;
+                result = new NavigatorService(searchText).Navigate(ref NavTo);
+                switch (NavTo)
+                {
+                    case NavigatorService.NavFeature.Dashboard:
+                        vw_Claim_Dashboard resultD = (vw_Claim_Dashboard)result;
+                        int ClaimNo = -1;
+
+                        if (int.TryParse(resultD.ClaimNos, out ClaimNo))
+                            return RedirectToAction("Manage", "Claim", new { ClaimId = ClaimNo });
+                        else
+                        {
+                            base.filter = Filters.list.Dashboard;
+                            base.searchOpts = (vw_Claim_Dashboard)result;
+                            return RedirectToAction("List", "Dashboard");
+                        }                        
+                    case NavigatorService.NavFeature.ClaimEntry:
+                        return RedirectToAction("Manage", "Claim", new { ClaimId = (int)result });
+                    case NavigatorService.NavFeature.Usr:
+                        base.filter = Filters.list.User;
+                        base.searchOpts = (vw_Users_Role_Org)result;
+                        return RedirectToAction("List", "User");                        
+                    default: result = "No match found!";break;
+                }
+            }
+            catch (Exception ex)
+            {
+                result = ex.Message;   
+            }
+            ViewData["Message"] = "Still learning!<br/><br/>TECH INFO:" + result.ToString();
+            return View();
+        }
+
         #endregion
     }
 

@@ -33,15 +33,22 @@
     <link rel="shortcut icon" href="@Url.Content("~/Content/favicon.ico")" type="image/x-icon" />
     <link rel="icon" href="@Url.Content("~/Content/favicon.ico")" type="image/ico" />
     <link href="@Url.Content("~/Content/Site.css")" rel="stylesheet" type="text/css" />
+    @*<link rel="stylesheet" type="text/css" href="@Url.Content("~/Content/Menu/ddsmoothmenu.css")" />*@
+    @* CDN includes
     <link href="http://code.jquery.com/ui/1.10.2/themes/smoothness/jquery-ui.min.css" rel="stylesheet"type="text/css" />
-    <link rel="stylesheet" type="text/css" href="@Url.Content("~/Content/Menu/ddsmoothmenu.css")" />
-
-    @*SOME scripts are better persisted in head *@
+    /*SOME scripts are better persisted in head */
     <script src="http://code.jquery.com/jquery-1.9.1.min.js" type="text/javascript"></script>
     <script src="http://code.jquery.com/jquery-migrate-1.1.1.min.js" type="text/javascript"></script>
     
     <script src="http://code.jquery.com/ui/1.10.2/jquery-ui.min.js" type="text/javascript"></script>
     <script src="http://ajax.aspnetcdn.com/ajax/jquery.validate/1.11.0/jquery.validate.min.js" type="text/javascript"></script>
+     *@
+    @* Local includes *@
+    <link href="@Url.Content("~/Content/jQUI/smoothness/jquery-ui.min.css")" rel="stylesheet" type="text/css" />
+    <script src="@Url.Content("~/Content/jQUI/min/jquery-1.9.1.min.js")" type="text/javascript"></script>
+    <script src="@Url.Content("~/Content/jQUI/min/jquery-migrate-1.1.1.min.js")" type="text/javascript"></script>
+    <script src="@Url.Content("~/Content/jQUI/min/jquery-ui.1.10.2.min.js")" type="text/javascript"></script>
+    <script src="@Url.Content("~/Content/Scripts/jquery.validate.1.11.0.min.js")" type="text/javascript"></script>
         
         <style type="text/css">
 		    body {overflow:scroll;background-color:Transparent;height:100%}
@@ -58,6 +65,27 @@
 	            background-image: url('@Url.Content("~/Content/Images/asc.gif")');	            
             }
 	    </style>
+        @*<style type="text/css">
+        #menu1 .ui-menu {z-index: 1000; overflow: hidden;}
+        #menu1 .ui-menu .ui-menu { overflow: visible !important;}
+        #menu1 .ui-menu > li { float: left; display: block; width: auto !important;}
+        #menu1 .ui-menu > li { margin: 1px 1px !important; padding: 0 0 0 0 !important;}
+        #menu1 .ui-menu > li > a { float: left; display: block; clear: both; overflow: hidden;}
+        #menu1 .ui-menu .ui-menu-icon { margin-top: 0.1em !important;}
+        #menu1 .ui-menu .ui-menu .ui-menu li { float: left; display: block;}
+        </style>*@
+         <style type="text/css">
+            .ui-menu{
+               z-index: 1000;
+            }           
+
+            #menu1 li { display:inline-block; width: auto; }
+            #menu1 li.sub { display:block; width: auto;}
+
+            @*.ui-menu .ui-menu-icon{
+               display: none;
+            }*@
+            </style>
         <!--[if IE 7]>
 	    <style type="text/css">
 		    body {overflow:auto;}
@@ -68,6 +96,7 @@
     <!--[if IE 9]><style type="text/css">body {overflow:auto;}</style><![endif]-->    
     <!--[if IE 10]><style type="text/css">body {overflow:auto;}</style><![endif]-->    
     @RenderSection("HeadContent", required: false)
+    @*@MiniProfiler.RenderIncludes()*@
 </head>
 <body>
     <table cellpadding="3" width="100%" cellspacing="3" border="0" align="center">
@@ -92,7 +121,14 @@
                         <li><a href="#">Manage</a>
                             <ul>
                                 @if (_Session.RoleRights.ManageUser)
-                                {<li>@Html.ActionLink("Users", "List", "User")</li>} 
+                                {<li>@Html.ActionLink("Users", "List", "User")
+                                    @*<ul>
+                                        <li>@Html.ActionLink("Users", "List", "User")</li>
+                                        <li>@Html.ActionLink("Users KOGrid", "ListKOGrid", "User")</li>
+                                        <li>@Html.ActionLink("Users KO mobile", "ListKO", "User", new { source = "mobile" }, null)</li>
+                                    </ul>*@
+                                  </li>    
+                                } 
                                 @if (_Session.RoleRights.ManageRole)
                                 {<li>@Html.ActionLink("Roles", "Manage", "Role")</li>}
                                 @if (_Session.RoleRights.ManageMaster)
@@ -113,7 +149,7 @@
                         </li>
                         }                   
                         @if (_Session.RoleRights.ViewActivity)
-                        { <li>@Html.ActionLink("Activity", "Log", "Activity")</li>}
+                        { <li>@Html.ActionLink("Activity", "Log", "Activity")</li>}                                                                             
                         @*<li>@Html.ActionLink("Log Off", "LogOff", "Common") @</li>
                             <li><a href="#">Reports</a>
                             <ul>
@@ -151,19 +187,22 @@
                 <img src="@Url.Content("~/Content/Images/spacer.gif")" height="1px" width="800px" />
             </td>
         </tr>
-    </table>
-    <script type="text/javascript" src="@Url.Content("~/Content/Menu/ddsmoothmenu2.js")"></script>    
+    </table>    
+@RenderSection("FootContent", required: false)
+</body>
+    @*<script type="text/javascript" src="@Url.Content("~/Content/Menu/ddsmoothmenu2.js")"></script>    *@
     <script language="javascript" src="@Url.Content("~/Content/Scripts/common.js")" type="text/javascript"></script>
     <script language="javascript" src="@Url.Content("~/Content/Scripts/jquery.form.js")" type="text/javascript"></script>
     <script type="text/javascript" language="javascript" defer="defer">
         $().ready(function () {
-            ddsmoothmenu.init({
+        $("#menu1").menu({position:{at:"left bottom"}});
+           @* ddsmoothmenu.init({
                 mainmenuid: "smoothmenu", //menu DIV id
                 orientation: 'h', //Horizontal or vertical menu: Set to "h" or "v"
                 classname: 'ddsmoothmenu', //class added to menu's outer DIV
                 //customtheme: ["#1c5a80", "#18374a"],
                 contentsource: "markup" //"markup" or ["container_id", "path_to_menu_file"]
-            });
+            });*@
             $.validator.setDefaults({
                 //onfocusin: function(element) { $(element).valid(); },            
                 focusInvalid: false
@@ -175,6 +214,4 @@
             //$.validator.onkeyup = false; // http://forum.jquery.com/topic/jquery-validation-plug-in-setdefaults-not-working
         });
     </script>
-@RenderSection("FootContent", required: false)
-</body>
 </html>

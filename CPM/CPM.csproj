@@ -82,6 +82,7 @@
     </Compile>
     <Compile Include="Code\Helper\Attribute\JSONAttributes.cs" />
     <Compile Include="Code\Helper\ConfigSettings.cs" />
+    <Compile Include="Code\Helper\_SessionLookup.cs" />
     <Compile Include="Code\Helper\_SessionUser.cs" />
     <Compile Include="Code\Helper\QryString.cs" />
     <Compile Include="Code\Helper\Library\Crypto.cs" />
@@ -101,6 +102,7 @@
     <Compile Include="Code\Services\CommentService.cs" />
     <Compile Include="Code\Services\ClaimDetailService.cs" />
     <Compile Include="Code\Services\ActivityLogService.cs" />
+    <Compile Include="Code\Services\NavigatorService.cs" />
     <Compile Include="Code\Services\ReportingService.cs" />
     <Compile Include="Code\Services\SettingService.cs" />
     <Compile Include="Code\Services\SecurityService.cs" />
@@ -115,13 +117,14 @@
     <Compile Include="Code\Services\UserService.cs" />
     <Compile Include="Controllers\BaseController.cs" />
     <Compile Include="Controllers\CommonController.cs" />
-    <Compile Include="Controllers\ClaimController.cs" />
-    <Compile Include="Controllers\ClaimFileController.cs" />
     <Compile Include="Controllers\ActivityController.cs" />
     <Compile Include="Controllers\ClaimReportController.cs" />
-    <Compile Include="Controllers\ClaimCommentController.cs" />
-    <Compile Include="Controllers\ClaimDetailsController.cs" />
     <Compile Include="Controllers\ClaimPrintController.cs" />
+    <Compile Include="Controllers\ClaimCommentKOController.cs" />
+    <Compile Include="Controllers\ClaimDetailsController.cs" />
+    <Compile Include="Controllers\ClaimFileController.cs" />
+    <Compile Include="Controllers\ClaimController.cs" />
+    <Compile Include="Controllers\UserKOController.cs" />
     <Compile Include="Controllers\ReportController.cs" />
     <Compile Include="Controllers\SettingController.cs" />
     <Compile Include="Controllers\RoleController.cs" />
@@ -172,8 +175,10 @@
     <Content Include="Content\Images\search.gif" />
     <Content Include="Content\jQUI\min\jquery-1.9.1.min.js" />
     <Content Include="Content\jQUI\min\jquery-migrate-1.1.0.min.js" />
+    <Content Include="Content\jQUI\min\jquery-migrate-1.1.1.min.js" />
     <Content Include="Content\jQUI\min\jquery-ui-1.10.0.custom.js" />
     <Content Include="Content\jQUI\min\jquery-ui-1.10.0.custom.min.js" />
+    <Content Include="Content\jQUI\min\jquery-ui.1.10.2.min.js" />
     <Content Include="Content\jQUI\smoothness\images\animated-overlay.gif" />
     <Content Include="Content\jQUI\smoothness\images\ui-bg_flat_0_aaaaaa_40x100.png" />
     <Content Include="Content\jQUI\smoothness\images\ui-bg_flat_75_ffffff_40x100.png" />
@@ -219,6 +224,15 @@
     <Content Include="Content\jQUI\ui-lightness\jquery-ui-1.10.0.custom.min.css" />
     <Content Include="Content\Scripts\jquery.blockUI.js" />
     <Content Include="Content\Scripts\jquery.hint.js" />
+    <Content Include="Content\Scripts\jquery.validate.1.11.0.min.js" />
+    <Content Include="Content\Scripts\json2.js" />
+    <Content Include="Content\Scripts\KO\jquery.tmpl.js" />
+    <Content Include="Content\Scripts\KO\knockout-2.2.0.js" />
+    <Content Include="Content\Scripts\KO\knockout.mapping-latest.js" />
+    <Content Include="Content\Scripts\KO\KoExtra.js" />
+    <Content Include="Content\Scripts\KO\KoGrid.css" />
+    <Content Include="Content\Scripts\KO\KoGrid.debug.js" />
+    <Content Include="Content\Scripts\KO\perpetuum.knockout.js" />
     <Content Include="Global.asax" />
     <Content Include="Content\Scripts\common.js" />
     <Content Include="Web.config">
@@ -234,17 +248,6 @@
     </None>
     <Content Include="Views\Activity\EditorTemplates\ActivityLog.cshtml" />
     <Content Include="Views\Activity\Log.cshtml" />
-    <Content Include="Views\Claim\Archived.cshtml" />
-    <Content Include="Views\Claim\CommentsPg.cshtml" />
-    <Content Include="Views\Claim\EditorTemplates\Comments.cshtml" />
-    <Content Include="Views\Claim\EditorTemplates\Files.cshtml" />
-    <Content Include="Views\Claim\EditorTemplates\ItemDetail.cshtml" />
-    <Content Include="Views\Claim\EditorTemplates\ItemList.cshtml" />
-    <Content Include="Views\Claim\FilesDetail.cshtml" />
-    <Content Include="Views\Claim\FilesPg.cshtml" />
-    <Content Include="Views\Claim\Items.cshtml" />
-    <Content Include="Views\Claim\ItemsArchived.cshtml" />
-    <Content Include="Views\Claim\Manage.cshtml" />
     <Content Include="Views\Claim\PrintInternal.cshtml" />
     <Content Include="Views\Claim\PrintVendor.cshtml" />
     <Content Include="Views\Claim\Status.cshtml" />
@@ -292,8 +295,23 @@
     <Content Include="Views\Claim\GetFileD.cshtml" />
     <Content Include="Views\Claim\GetFile.cshtml" />
     <Content Include="Views\Claim\PrintCustomer.cshtml" />
-    <Content Include="Views\Claim\Copy of PrintInternal.cshtml" />
+    <Content Include="Views\Claim\Comments.cshtml" />
+    <Content Include="Views\User\ListKO.cshtml" />
+    <Content Include="Views\User\ListKOMobile.cshtml" />
     <Content Include="Views\Common\Navigate.cshtml" />
+    <Content Include="Views\User\ListKOGrid.cshtml" />
+    <Content Include="Views\User\EditorTemplates\UserListKO.cshtml" />
+    <Content Include="Views\Claim\KO\CommentsKOscript.cshtml" />
+    <Content Include="Views\Claim\KO\ItemsKOscript1.cshtml" />
+    <Content Include="Views\Claim\Files.cshtml" />
+    <Content Include="Views\Claim\KO\FilesKOscript.cshtml" />
+    <Content Include="Views\Claim\FilesDetail.cshtml" />
+    <Content Include="Views\Claim\KO\FileDetailsKOscript.cshtml" />
+    <Content Include="Views\Claim\Items.cshtml" />
+    <Content Include="Views\Claim\KO\ItemsKOscript.cshtml" />
+    <Content Include="Views\Claim\Manage.cshtml" />
+    <Content Include="Views\Claim\Archived.cshtml" />
+    <Content Include="Views\Claim\FilesDetailArchived.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Service Include="{3259AA49-8AA1-44D3-9025-A0B520596A8C}" />
@@ -338,6 +356,7 @@
     <Content Include="Views\Web.config" />
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="Code\Global\" />
     <Folder Include="Files\" />
   </ItemGroup>
   <ItemGroup>

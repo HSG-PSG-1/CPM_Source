@@ -89,6 +89,7 @@ namespace CPM.Helper
         
         public static string delImgOnly = @"<img {0} " + delImgPathTitle + " style='cursor: pointer' />";
         public static string delImg = "<img " + delImgPathTitle + " border='0' onclick='return confirmDelete(event);' />";
+        public static string delImgForObj(string obj) { return "<img " + delImgPathTitle + " border='0' onclick='return confirmDeleteM(event,\"Are you sure you want to delete this "+ obj + "?\");' />"; }
         public static string delPOSTImg = "<input type='image' " + delImgPathTitle + 
             " border='0' onclick='return confirmDelete(event);' />";
         public static string delImgLink = "<img " + delImgPathTitle + 
@@ -122,7 +123,7 @@ namespace CPM.Helper
             string hide = success ? (".toggle(500" + callback + ")") : "";
             return string.Format(
      "<taconite><replaceContent select=\"#{0}\">{1}</replaceContent>" +//<slideDown select=\"#{0}\" value=\"1000\" />
-     "<eval><![CDATA[ $(delTR).effect('highlight',{{}},1000){2};delTR = ''; ]]> </eval></taconite>", 
+     "<eval><![CDATA[ try{{$(delTR).effect('highlight',{{}},1000){2};delTR = '';}}catch(e){{;}} ]]> </eval></taconite>", 
      msgContainer?? "msg", msg , hide);
         }
 

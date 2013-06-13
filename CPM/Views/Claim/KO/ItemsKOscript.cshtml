@@ -1,0 +1,213 @@
+﻿@using CPM.Helper
+@using System.Collections
+@using System.Web.Script.Serialization
+@using System.Collections
+@using CPM.Services
+@using CPM.Helper
+
+    <script type="text/javascript" language="javascript" defer="defer">    
+    @*function toggleLabel(td) {return;
+        if (doTDHover) {
+            var control = $('input:first', td)[0];
+            var isText = (control != null);
+            if (!isText) control = $('select:first', td)[0];
+            var isDDL = (control != null);
+
+            if (isDDL || isText)
+                $(control).toggle(); // toggle the textbox
+
+            var ctrlVal = '';
+            if (isText) ctrlVal = $(control).val();
+            //SO: 1643227/get-selected-text-from-dropdownlist-using-jquery
+            if (!isText && isDDL) ctrlVal = $(control).children("option").filter(":selected").text();
+
+            $('span:first', td).html(ctrlVal).toggle(); // set textbox value in span and toggle
+            //$('span:first', td).html($('input:first', td).val());            
+        }
+    }*@
+    
+    var IsCDEditMode = false;
+    var NextNewItemID = -1;
+    var itemsModel = function () {
+        var self = this;
+        var _dummyObservable = ko.observable(); // use inside computed property
+
+        self.emptyItem = "";
+
+        self.showGrid = ko.observable(true);
+        self.itemToAdd = ko.observable();
+        self.IsCDEditMode = ko.observable();
+        self.allItems = ko.observableArray([]);
+        self.allFilesDetail = new Array();
+
+        self.invalidateToRefreshComputed = function () {
+            _dummyObservable.notifySubscribers(); //fake a change notification
+        };
+        @*self.itemToAdd.Defect = ko.computed(function () {            
+        return $("#ddlDefect option[value='" + self.itemToAdd.NatureOfDefect + "']").text();
+        });*@
+        self.CreditAmtTotal = ko.computed(function () {
+            // http://stackoverflow.com/questions/10940302/knockout-compute-sum
+            var total = parseFloat(0.00);
+            _dummyObservable(); //retrieve and ignore the value
+            for (var i = 0; i < self.allItems().length; i++) {
+                if (!self.allItems()[i]._Deleted())
+                    total += parseFloat(self.allItems()[i].CreditAmt1());
+            }
+            return total.toFixed(2);
+        });
+
+        self.InvoiceAmtTotal = ko.computed(function () {
+            // http: //stackoverflow.com/questions/9351939/using-ko-utils-arrayforeach-to-iterate-over-a-observablearray
+            var total = parseFloat(0.00);
+            _dummyObservable(); //retrieve and ignore the value
+            ko.utils.arrayForEach(self.allItems(), function (item) {
+                if (!item._Deleted())
+                    total += parseFloat(item.InvoiceAmt1());
+            });
+            return total.toFixed(2);
+        });
+
+        self.formatData = function () {
+            ko.utils.arrayForEach(self.allItems(), function (item) {
+                item.InvoiceAmt1(item.InvoiceAmt1().toFixed(2));
+                item.CreditAmt1(item.CreditAmt1().toFixed(2));
+            });
+        }
+
+        self.openAttachFilesDetail = function (item) { 
+            var url = "@Url.Action("FilesDetail", "Claim")" + "?ClaimDetailID=" + item.ID() + "&ClaimGUID=@ViewData["ClaimGUID"]";
+            var winFD = openWin(url,450,650);
+            //winFD.onunload = 
+        }
+
+        self.openAttachFilesDetailDirect = function (item) { 
+                    var url = "@Url.Action("FilesDetail", "Claim")" + "?ClaimDetailID=" + item.ID() + "&ClaimGUID=@ViewData["ClaimGUID"]";
+                    var winFD = openWin(url,450,650);
+                    
+                    self.itemToAdd(item);
+        }
+
+        self.showAddNew = function () {
+            if(!brandHasItems()){alert("Please select a Brand which has atleast one item"); return;}
+
+            self.itemToAdd(cloneObservable(self.emptyItem));//self.itemToAdd(ko.mapping.fromJS(self.emptyItem));
+
+            self.showGrid(false);   $("#itmEntryDailog").dialog("open");
+            doBrandsFillAndNumericTXT();
+            IsCDEditMode = false;
+        }
+
+        self.setEdited = function (item) {
+            item._Edited(!item._Added());
+            item.LastModifiedDate(Date111);
+            @*if(item.aDFilesJSON == null || item.aDFilesJSON() == null){item.aDFilesJSON = ko.observable("[]");}*@            
+            
+            self.itemToAdd(item); //ko.mapping.fromJS(ko.toJS(item), self.itemToAdd);
+
+            self.showGrid(false);   $("#itmEntryDailog").dialog("open");
+            doBrandsFillAndNumericTXT();            
+            IsCDEditMode = true;
+        }
+        self.setEditedFlag = function (item) {
+            item._Edited(!item._Added());
+            item.LastModifiedDate(Date111);
+        }
+        self.saveItem = function (item) {
+            if (item.ItemCode == null || item.ItemCode == "")
+            //if (self.itemToAdd.ItemCode == null || self.itemToAdd.ItemCode == "")
+                alert("Item is a required field");
+            else {
+                @*//self.itemToAdd().PostedOn = Date111;//ko.mapping.fromJS(new Date())*@
+                if (!IsCDEditMode) {
+                    item.ID = NextNewItemID;
+                    self.allItems.push(ko.mapping.fromJS(cloneObservable(item))); // self.allItems.push(item);
+                    NextNewItemID = NextNewItemID - 1;                    
+                }
+                else {                        
+                    @*var old = ko.utils.arrayFirst(self.allItems(), function (item) {return item.ID() == self.itemToAdd.ID(); });
+                    self.allItems.replace(old, self.itemToAdd); //self.locations.valueHasMutated();*@
+                    alert(item.TDRemaining());
+                }
+                
+                IsCDEditMode = false;
+                //HT: How to reset the add new obj
+                self.cancelItem(item);@*//ko.toJS(self.emptyItem) // ko.mapping.fromJS(ko.toJS(self.emptyItem), self.itemToAdd);*@
+                self.showGrid(true);    $("#itmEntryDailog" ).dialog("close");
+            }
+        };
+
+        self.removeSelected = function (item) {
+            if (item != null) // Prevent blanks and duplicates
+            {
+                //self.allItems.valueWillMutate();
+                item._Deleted(true);
+                if (item._Added()) {
+                    item._Added(false);
+                    self.allItems.remove(item);
+                }
+                @*var old = ko.utils.arrayFirst(self.allItems(), function (itm) { return itm.ID == item.ID; });
+                self.allItems.replace(old, item);
+                var index = self.allItems.indexOf(item);
+                self.allItems.remove(item);
+                self.allItems.splice(index, 0, item);*@
+            }
+        };
+
+        self.unRemoveSelected = function (item) {
+            if (item != null) // Prevent blanks and duplicates
+            {
+                item._Deleted(false);
+            }
+        };
+
+
+        self.cancelItem = function (item) {
+            IsCDEditMode = false;
+            @*//self.itemToAdd(null); //ko.toJS(self.emptyItem) // ko.mapping.fromJS(ko.toJS(self.emptyItem), self.itemToAdd);*@
+            self.itemToAdd(cloneObservable(self.emptyItem)); //self.itemToAdd(ko.mapping.fromJS(self.emptyItem));
+            self.showGrid(true);    $("#itmEntryDailog").dialog("close");
+        };
+
+        self.saveToServer = function () {
+            ko.utils.postJson(location.href, { items: ko.mapping.toJS(self.allItems) });
+            return false;
+        }
+    };
+
+var viewModelItems = new itemsModel();        
+ function createItemsKO()
+ {
+        $.getJSON('@Html.Raw(Url.Action("ItemsKOVM", "Claim", new { ClaimGUID = ViewData["ClaimGUID"] }))',
+         function (data) {
+             @* Because we need to show/hide file upload if (data.ItemToAdd.ID != -1) data.ItemToAdd.ID = NextNewItemID;*@
+
+             viewModelItems.emptyItem = data.ItemToAdd;
+             viewModelItems.itemToAdd(data.ItemToAdd);             
+             viewModelItems.allFilesDetail = new Array();
+             
+             viewModelItems.allItems = ko.mapping.fromJS(data.AllItems); 
+
+             viewModelItems.Defects = ko.mapping.fromJS(data.Defects);
+             viewModelItems.showGrid(data.showGrid); // viewModelItems.showGrid = ko.mapping.fromJS(data.showGrid);
+
+             viewModelItems.invalidateToRefreshComputed();
+             viewModelItems.formatData();
+             @*alert('Claim-Items');*@
+             ko.applyBindings(viewModelItems, document.getElementById("divItems"));
+
+             $("#itmEntryDailog").dialog({
+                 modal: true,
+                 autoOpen: false,
+                 height:420,
+                 width:639,
+                 close: function( event, ui ) {viewModelItems.showGrid(true);}
+             });
+         });
+ }    
+ @*
+ function addFilesDetail(dFiles){
+    if(viewModelItems.allFilesDetail != null && dFiles != null && dFiles.length > 0)
+        viewModelItems.allFilesDetail.push(dFiles);
+ }*@
+    </script>   

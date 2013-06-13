@@ -1,0 +1,109 @@
+﻿@using CPM.Services
+@using CPM.Helper
+@{  object routeValues = new { qData = Request["qData"] };
+    string reload = "return reloadList(this, this.href);";// Defaults.chkCollapse;    
+}
+<table width="100%" class="thinBorder" border="0">
+    <thead class="header">
+        <tr>
+            <th nowrap="nowrap" width="2%">
+            </th>
+            <th nowrap="nowrap">@Html.Raw(Html.SortableColumn("Org Type", "OrgType", reload, routeValues))
+            </th>
+            <th>@Html.Raw(Html.SortableColumn("Name", "UserName", reload, routeValues, true, true))
+            </th>
+            <th>@Html.Raw(Html.SortableColumn("Email", "Email", reload, routeValues))
+            </th>
+            <th>@Html.Raw(Html.SortableColumn("Role", "RoleName", reload, routeValues))
+            </th>
+        </tr>
+    </thead>
+    @*<tbody> - DON'T because we'll add multiple tbody for group by *@
+    <tbody data-bind="foreach: Users">
+        <tr>
+            <td nowrap="nowrap" data-bind="click: function(data,event){return doUserDelPost('UserId',data.ID);}">
+                @*<span data-bind='text:ID' style1="display:none"></span>*@ <a data-bind="attr : { href: '@Html.Raw(Url.Action("AddEdit"))'+'/'+ ID } ">@Html.Raw(Defaults.editImg)</a>
+                &nbsp;@Html.Raw(Defaults.delPOSTImgTACO("UserId", -999))
+                @*<div class="dDialog" onclick="doEditable(this);" data-bind1="click:$parent.setSelected">@Html.Raw(@Defaults.editImg)</div>
+                                &nbsp;
+                                <div class="dDialog" data-bind="click:$parent.removeSelected">@Html.Raw(@Defaults.delImg)</div>
+                                *@
+            </td>
+            <td data-bind="text:OrgType">
+            </td>
+            <td data-bind="text:UserName">
+            </td>
+            <td data-bind="text:Email">
+            </td>
+            <td data-bind="text:RoleName">
+            </td>
+        </tr>
+    </tbody>
+    <tfoot>
+        <tr>
+            <td colspan="8" align="center">
+                <table cellpadding="0" cellspacing="0" class="pager" data-bind="with:Users">
+                    <tr>
+                        <td nowrap="nowrap">
+                            &nbsp;Record count :
+                        </td>
+                        <td id="usrCount" data-bind="text:$data.length">
+                        </td>
+                        <td align="center" width1="98%" nowrap="nowrap">
+                            &nbsp;
+                        </td>
+                    </tr>
+                </table>
+                @*Count: <span data-bind="text:Users().length"></span>*@
+            </td>
+        </tr>
+    </tfoot>
+</table>
+<script language="javascript" type="text/javascript" defer="defer">
+ $('div.pager').children('a').click(function() { @Html.Raw(reload) });
+        function reloadList(a, url) {
+        $("#messages").hide();
+        //return reload(url, '', "#tdGrid");
+            $.getJSON(ListURL + "?" + a.href.split("?")[1], function (data)
+             {
+                //ko.mapping.fromJS(data, viewModel.Users);
+                viewModel.Users(data);
+
+             });
+             //swap sort order
+            var oldHREF = a.href;            var isASC = true;
+            a.href = oldHREF.replace("desc","asc");
+            isASC = (oldHREF == a.href);
+                if(isASC)
+                    a.href = oldHREF.replace("asc","desc");
+            
+            $(".header tr th").each(function(i){
+                $(this).html($(this).html().replace("▲",""));
+                $(this).html($(this).html().replace("▼",""));
+                //$(this).html($(this).html().replace("&#9650;","&#9660;"));
+                
+                if($(this).html().contains(a.href.replace("&","&amp;")))
+                   $(this).html($(this).html() + (isASC?"▲":"▼"));
+            });
+
+                    // ASC : "&nbsp;&#9650;"
+                    // DESC : "&nbsp;&#9660;"
+
+            return false;
+        } 
+        //var usrCountTD = $("table tfoot tr td #usrCount");
+
+        var delID=-1;var isDel = false;
+        function doUserDelPost(txtId, txtVal) {
+            if(!isDel){@*alert("doUserDelPost:" + txtVal);*@ return true;}
+            else isDel = false;
+            
+            var data = {}; data[txtId] = txtVal;
+            var url = '@Url.Action("UserKODelete", "User", new { ID = "" })';
+            $.post(url, data);
+            return false; // prevent any postback
+        }
+        function doDelPost(txtId, txtVal) {
+            isDel = true;
+        }
+</script>

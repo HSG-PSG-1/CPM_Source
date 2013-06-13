@@ -1,110 +1,330 @@
-﻿@model CPM.DAL.vw_Claim_Master_User_Loc
+﻿@model CPM.DAL.ClaimInternalPrint
+@using CPM.DAL
 @using CPM.Helper
-
 @{ ViewBag.Title = "Archived Claim"; Layout = Defaults.masterLayout;}
-@section HeadContent { 
+@{
+    vw_Claim_Master_User_Loc claim = Model.view;
+    List<Comment> comments = Model.comments;
+    List<FileHeader> filesH = Model.filesH;
+    List<ClaimDetail> items = Model.items;
+}
+@section HeadContent {
     <script type="text/javascript">
         //Make sure common.js is included for function renderAutoComplete(url, idBox, txtBox) {}
-        $().ready(function() {
+        $().ready(function () {
             $("#tabs").tabs({
                 /* cache: true, spinner: 'Loading...', ajaxOptions: { cache: false } //HT: cache: true - to prevent reload on each tab select!
                 http://jqueryui.com/upgrade-guide/1.9/#deprecated-ajaxoptions-and-cache-options-added-beforeload-event */
-            beforeLoad: function( event, ui ) {
-                ui.ajaxSettings.cache = false;
-                if ( ui.tab.data( "loaded" ) ) {  event.preventDefault();  return;  } 
-                ui.jqXHR.success(function() {   ui.tab.data( "loaded", true ); });
-               }
+                beforeLoad: function (event, ui) {
+                    ui.ajaxSettings.cache = false;
+                    if (ui.tab.data("loaded")) { event.preventDefault(); return; }
+                    ui.jqXHR.success(function () { ui.tab.data("loaded", true); });
+                }
             });
         });
-    </script>    
+    </script>
 }
-    @{ bool isArchived = Model.Archived; }
-    <table width="99%" align="center" border="0">
-        <tr>
-            <td align="right">
-                <table style="width: 99%;" border="0">
-                    <tr>
-                        <td nowrap="nowrap" align="right">
+@{ bool isArchived = claim.Archived; }
+<table width="99%" align="center" border="0">
+    <tr>
+        <td align="right">
+            <table style="width: 99%;" border="0">
+                <tr>
+                    <td nowrap="nowrap" align="right">
                         @*START: Archive*@
-                        @if (_Session.RoleRights.ArchiveClaim){
-                            using (Html.BeginForm("Archive", "Claim", new { id = Model.ID, ClaimGUID = Model.ClaimGUID, archive = !Model.Archived }, FormMethod.Post, new { @style = "display:inline", @onsubmit = "$('#btnUnarchive').prop('disabled', true);" }))
-           { <input type="submit" id="btnUnarchive" value="Unarchive" title="Unarchive this claim" class="button" onclick="if(confirmDeleteM(event, 'Are you sure you want to unarchive this claim?')){skipCommitChk=true;return true;} else return false;" />  }
-                         } 
-                        @* END: Archive*@
-                        @Html.Raw("&nbsp;")<input type="button" value="Print" class="button" onclick="javascript:openWin('@Url.Action("Print","Claim", new { ClaimID = Model.ID })',648,838);" />@Html.Raw("&nbsp;")
-                        </td>
-                    </tr>
-                </table>
-            </td>
-        </tr>
-        <tr>
-            <td>
-                <div id="tabs">
-                    <ul>
-                        <li><a href="#tabs-1"><span>Header</span></a></li>
-                        <li><a href='@Url.Action(isArchived ? "ItemsArchived" : "Items", new { ClaimGUID = Model.ClaimGUID.ToString() })'><span>Details</span></a></li>
-                        @if (!_Session.IsOnlyCustomer)
-                        { <li><a href='@Url.Action("CommentsPg", new { ClaimGUID = Model.ClaimGUID.ToString() })'><span>Comments</span></a></li>} 
-                        <li><a href='@Url.Action("FilesPg", new { ClaimGUID = Model.ClaimGUID.ToString() })'><span>Files</span></a></li>
-                    </ul>
-                    <div id="tabs-1">
-                        <table width="50%" cellpadding="2" cellspacing="2">
-                            <tr>
-                                <td nowrap="nowrap" width="1%" align="right">@Html.LabelFor(model => model.ClaimNo) : </td>
-                                <td nowrap="nowrap" width="40%" class="data">@Model.ClaimNo</td>
-                                <td nowrap="nowrap">&nbsp;&nbsp;</td>
-                                <td nowrap="nowrap" width="1%" align="right">@Html.LabelFor(model => model.StatusID) : </td>
-                                <td nowrap="nowrap" width="40%" class="data">@Model.Status&nbsp;&nbsp;&nbsp;</td>
-                                <td nowrap="nowrap" width="1%"><div class="dDialog uline" onclick="showDialog('#ddlg');">Status History</div>&nbsp;
-                                    <div id="ddlg" style="text-align: right"></div>
-                                    <script type="text/Javascript" language="javascript">
-                                        function showDialog(containerID) {
-                                            $(containerID).dialog({
-                                                modal: false,
-                                                open: function() {
-                                                    $(this).html(loading);
-                                                    $(this).load('@Url.Content("~/Claim/")@(Model.ID)/Status');
-                                                },
-                                                height: 360,
-                                                width: 650,
-                                                title: 'Status History'
-                                            });
-                                        }
-                                    </script>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td nowrap="nowrap" align="right">@Html.LabelFor(model => model.ClaimDate) :</td>
-                                <td nowrap="nowrap" class="data">
-                                &nbsp;@Model.ClaimDate.ToString(Defaults.dtFormat, Defaults.ci)</td>
-                                <td nowrap="nowrap">&nbsp;</td>
-                                <td nowrap="nowrap" align="right">@Html.LabelFor(model => model.BrandID) :</td>
-                                <td nowrap="nowrap" class="data">@Model.Brand</td>
-                                <td nowrap="nowrap">&nbsp;</td>
-                            </tr>
-                            <tr>
-                                <td nowrap="nowrap" align="right">@Html.LabelFor(model => model.CustID) : </td>
-                                <td nowrap="nowrap" class="data">@Model.CustOrg</td>
-                                <td nowrap="nowrap">&nbsp;</td>
-                                <td nowrap="nowrap" align="right">@Html.LabelFor(model => model.CustRefNo) : </td>
-                                <td nowrap="nowrap" class="data">@Model.CustRefNo</td>
-                                <td nowrap="nowrap">&nbsp;</td>
-                            </tr>
-                            <tr>
-                                <td nowrap="nowrap" align="right">@Html.LabelFor(model => model.ShipToLocationID) :</td>
-                                <td nowrap="nowrap" class="data">@Model.Location</td>
-                                <td nowrap="nowrap">&nbsp;</td>
-                                <td nowrap="nowrap" align="right">@Html.LabelFor(model => model.SalespersonID) :</td>
-                                <td nowrap="nowrap" class="data">@Model.SalespersonName</td>
-                                <td nowrap="nowrap">&nbsp;</td>
-                            </tr>
-                            <tr style="display: none">
-                                <td nowrap="nowrap" align="right">@Html.LabelFor(model => model.VendorID) :</td>
-                                <td nowrap="nowrap" colspan="5" class="data">@Model.VendorID</td>
-                            </tr>                            
-                        </table>
-                    </div>
+                        @if (_Session.RoleRights.ArchiveClaim)
+                        {
+                            using (Html.BeginForm("Archive", "Claim", new { ClaimID = claim.ID, ClaimGUID = claim.ClaimGUID, Archive = !claim.Archived, ClaimNo = claim.ClaimNo }, FormMethod.Post, new { @style = "display:inline", @onsubmit = "$('#btnUnarchive').prop('disabled', true);" }))
+                            { <input type="submit" id="btnUnarchive" value="Unarchive" title="Unarchive this claim"
+               class="button" onclick="if(confirmDeleteM(event, 'Are you sure you want to unarchive this claim?')){skipCommitChk=true;return true;} else return false;" />  }
+                        } 
+@* END: Archive*@
+                        @Html.Raw("&nbsp;")<input type="button" value="Print" class="button" onclick="javascript:openWin('@Url.Action("Print", "Claim", new { ClaimID = claim.ID })',648,838);" />@Html.Raw("&nbsp;")
+                    </td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <div id="tabs">
+                <ul>
+                    <li><a href="#tabs-1"><span>Header</span></a></li>
+                    <li><a href="#tabs-2"><span>Details</span></a></li>
+                    <li><a href="#tabs-3"><span>Comments</span></a></li>
+                    <li><a href="#tabs-4"><span>Files</span></a></li>                    
+                </ul>
+                <div id="tabs-1">
+                    <table width="50%" cellpadding="2" cellspacing="2">
+                        <tr>
+                            <td nowrap="nowrap" width="1%" align="right">@Html.LabelFor(model => claim.ClaimNo)
+                                :
+                            </td>
+                            <td nowrap="nowrap" width="40%" class="data">@claim.ClaimNo
+                            </td>
+                            <td nowrap="nowrap">
+                                &nbsp;&nbsp;
+                            </td>
+                            <td nowrap="nowrap" width="1%" align="right">@Html.LabelFor(model => claim.StatusID)
+                                :
+                            </td>
+                            <td nowrap="nowrap" width="40%" class="data">@claim.Status&nbsp;&nbsp;&nbsp;
+                            </td>
+                            <td nowrap="nowrap" width="1%">
+                                <div class="dDialog uline" onclick="showDialog('#ddlg');">
+                                    Status History</div>
+                                &nbsp;
+                                <div id="ddlg" style="text-align: right">
+                                </div>
+                                <script type="text/Javascript" language="javascript">
+                                    function showDialog(containerID) {
+                                        $(containerID).dialog({
+                                            modal: false,
+                                            open: function () {
+                                                $(this).html(loading);
+                                                $(this).load('@Url.Content("~/Claim/")@(claim.ID)/Status');
+                                            },
+                                            height: 360,
+                                            width: 650,
+                                            title: 'Status History'
+                                        });
+                                    }
+                                </script>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td nowrap="nowrap" align="right">@Html.LabelFor(model => claim.ClaimDate) :
+                            </td>
+                            <td nowrap="nowrap" class="data">
+                                @claim.ClaimDate.ToString(Defaults.dtFormat, Defaults.ci)
+                            </td>
+                            <td nowrap="nowrap">
+                                &nbsp;
+                            </td>
+                            <td nowrap="nowrap" align="right">@Html.LabelFor(model => claim.BrandID) :
+                            </td>
+                            <td nowrap="nowrap" class="data">@claim.Brand
+                            </td>
+                            <td nowrap="nowrap">
+                                &nbsp;
+                            </td>
+                        </tr>
+                        <tr>
+                            <td nowrap="nowrap" align="right">@Html.LabelFor(model => claim.CustID) :
+                            </td>
+                            <td nowrap="nowrap" class="data">@claim.CustOrg
+                            </td>
+                            <td nowrap="nowrap">
+                                &nbsp;
+                            </td>
+                            <td nowrap="nowrap" align="right">@Html.LabelFor(model => claim.CustRefNo) :
+                            </td>
+                            <td nowrap="nowrap" class="data">@claim.CustRefNo
+                            </td>
+                            <td nowrap="nowrap">
+                                &nbsp;
+                            </td>
+                        </tr>
+                        <tr>
+                            <td nowrap="nowrap" align="right">@Html.LabelFor(model => claim.ShipToLocationID) :
+                            </td>
+                            <td nowrap="nowrap" class="data">@claim.Location
+                            </td>
+                            <td nowrap="nowrap">
+                                &nbsp;
+                            </td>
+                            <td nowrap="nowrap" align="right">@Html.LabelFor(model => claim.SalespersonID) :
+                            </td>
+                            <td nowrap="nowrap" class="data">@claim.SalespersonName
+                            </td>
+                            <td nowrap="nowrap">
+                                &nbsp;
+                            </td>
+                        </tr>
+                        <tr style="display: none">
+                            <td nowrap="nowrap" align="right">@Html.LabelFor(model => claim.VendorID) :
+                            </td>
+                            <td nowrap="nowrap" colspan="5" class="data">@claim.VendorID
+                            </td>
+                        </tr>
+                    </table>
                 </div>
-            </td>
-        </tr>
-    </table>
+                <div id="tabs-2">
+                    <table class="thinBorder" width="100%">
+                        <thead class="header">
+                            <tr>
+                                <th width="1%">
+                                    #
+                                </th>
+                                <th width="1%">
+                                    Item
+                                </th>
+                                <th nowrap="nowrap">
+                                    Size / Ply / Description
+                                </th>
+                                <th nowrap="nowrap">
+                                    Serial No.
+                                </th>
+                                <th>
+                                    D.O.T. No.
+                                </th>
+                                <th nowrap="nowrap" class1="smaller">
+                                    32nds<br />
+                                    Remaining
+                                </th>
+                                <th nowrap="nowrap">
+                                    Nature Of Defect
+                                </th>
+                                <th nowrap="nowrap">
+                                    Original<br />
+                                    T.D.(32nds)
+                                </th>
+                                <th nowrap="nowrap">
+                                    Remaining<br />
+                                    Tread %
+                                </th>
+                                <th nowrap="nowrap">
+                                    Current<br />
+                                    Price
+                                </th>
+                                <th nowrap="nowrap">
+                                    Credit<br />
+                                    Amount
+                                </th>
+                                @if (!_Session.IsOnlyCustomer)
+                                { <th nowrap="nowrap" width="5%">
+                                    Invoice Amt
+                                    </th> }
+                                <th>
+                                    &nbsp;
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @{ int pos = 1;}
+                            @foreach (var item in items)
+                            {
+                                <tr>
+                                    <td>@(pos++)
+                                    </td>
+                                    <td nowrap="nowrap">@item.ItemCode
+                                    </td>
+                                    <td>
+                                        &nbsp;@item.Size/@item.Ply/@item.Description
+                                    </td>
+                                    <td nowrap="nowrap">@item.Serial
+                                    </td>
+                                    <td>@item.DOT
+                                    </td>
+                                    <td nowrap="nowrap">@item.TDRemaining.ToString("#0")
+                                    </td>
+                                    <td>@item.Defect
+                                    </td>
+                                    <td nowrap="nowrap">@item.TDOriginal1.ToString("#0")
+                                    </td>
+                                    <td nowrap="nowrap" align="right">@item.RemainingTread1.ToString("#0.00")%
+                                    </td>
+                                    <td nowrap="nowrap" align="right">
+                                        $@item.CurrentPrice.ToString("#0.00")
+                                    </td>
+                                    <td nowrap="nowrap" align="right">
+                                        $@item.CreditAmt1.ToString("#0.00")
+                                    </td>
+                                    @if (!_Session.IsOnlyCustomer)
+                                    { <td align="right">@item.InvoiceAmt1.ToString("#0.00")
+                                        </td> }
+                                    <td>
+                                    @{
+                                        string url = Url.Action("FilesDetailArchived", "Claim",
+                                        new { ClaimDetailID = item.ID, ClaimGUID = claim.ClaimGUID });
+                                     }
+                                        <div class="dDialog uline small" onclick="javascript:openWin('@Html.Raw(url)',400,600);">
+                                            FILES</div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                        <tfoot>
+                            @Html.Raw(Defaults.chkNoRecords(items.Count(), (!_Session.IsOnlyCustomer) ? 12 : 11))
+                            @if (items.Count() > 0)
+                            { 
+                                <tr>
+                                    <td colspan="10" align="right">
+                                        Total:
+                                    </td>
+                                    <td align="right">@items.Sum(c => c.CreditAmt1).ToString("#0.00")
+                                    </td>
+                                    @if (!_Session.IsOnlyCustomer)
+                                    { 
+                                        <td align="right">@items.Sum(c => c.InvoiceAmt1).ToString("#0.00")
+                                        </td>
+                                    }
+                                    <td>
+                                        &nbsp;
+                                    </td>
+                                </tr>
+                            }
+                        </tfoot>
+                    </table>
+                </div>
+                <div id="tabs-3">
+                <div style="text-align:right;width:99%">Assign To: @claim.AssignedToVal&nbsp;</div>
+                    <table class="thinBorder" width="99%">
+                <thead class="header">
+                    <tr>
+                        <th nowrap="nowrap" width="10%">Comment By</th>
+                        <th nowrap="nowrap" width="10%">Posted On</th>
+                        <th>Comment</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in comments){
+                        if (!item._Deleted){ //Avoid deleted records 
+                    <tr>
+                        <td>@item.CommentBy</td>
+                        <td>@item.PostedOn.ToString(Defaults.dtFormat, Defaults.ci)</td>
+                        <td>@item.Comment1</td>
+                    </tr>
+                     } }
+                </tbody>
+                <tfoot>
+                    @Html.Raw(Defaults.chkNoRecords(comments.Count(), 3))</tfoot>
+            </table>
+                </div>
+                <div id="tabs-4">
+                    <table class="thinBorder" width="100%" border="0">
+                    <thead class="header">
+                        <tr>
+                            <th>File</th>
+                            <th>Type</th>
+                            <th>Comment</th>
+                            <th nowrap="nowrap">Uploaded By</th>
+                            <th nowrap="nowrap">Uploaded Date</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in filesH){
+                            if (!item._Deleted){ //Avoid deleted records 
+                        <tr>
+                            <td>@item.FileName</td>
+                            <td>@item.FileTypeTitle</td>
+                            <td>@item.Comment</td>
+                            <td>@item.UploadedBy</td>
+                            <td>@item.UploadedOn.ToString(Defaults.dtFormat, Defaults.ci)</td>
+                            <td align="center">                                
+                                @{
+                                    string openWinStr = "openWin('" + Url.Action("GetFile", "Claim") + "?" + item.CodeStr + "',1,1);";
+                                 }
+                                <div class="dDialog" onclick = "@openWinStr">@Html.Raw(Defaults.clipImg)</div>
+                            </td>
+                        </tr> }}
+                    </tbody>
+                    <tfoot>
+                        @Html.Raw(Defaults.chkNoRecords(filesH.Count(), 6))</tfoot>
+                </table>
+                </div>
+            </div>
+        </td>
+    </tr>
+</table>
