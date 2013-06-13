@@ -6,7 +6,7 @@ using System.Web.Mvc;
 using CPM.DAL;
 using CPM.Services;
 using CPM.Helper;
-using StackExchange.Profiling;
+//using StackExchange.Profiling;
 
 namespace CPM.Controllers
 {
@@ -125,7 +125,7 @@ namespace CPM.Controllers
 
         public void populateData(bool fetchOtherData)
         {
-            using (MiniProfiler.Current.Step("Populate lookup Data"))
+            //using (MiniProfiler.Current.Step("Populate lookup Data"))
             {
                 vw_Claim_Dashboard searchOptions = (vw_Claim_Dashboard)(searchOpts);
                 if (_Session.IsOnlyCustomer) searchOptions.CustID = _SessionUsr.OrgID;//Set the cust filter

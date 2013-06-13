@@ -1,0 +1,58 @@
+﻿@{Layout = ""; /* Master page is NOT needed here */}
+@{ Response.CacheControl = "no-cache"; }
+@{ Response.AddHeader("Pragma", "no-cache"); }
+@{ Response.Expires = -1; }
+@model IEnumerable<CPM.DAL.FileDetail>
+@using System.Collections
+@using CPM.Helper
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>Detail Files (Archived)</title>
+    <link href="@Url.Content("~/Content/Site.css")" rel="stylesheet" type="text/css" />            
+    <script language="javascript" src="@Url.Content("~/Content/Scripts/common.js")" type="text/javascript"></script>
+</head>
+<body style="background-color: #ffffff; margin: 10px 10px 10px 10px; text-align: center">
+    <table align="center" width="100%">
+        <tr>
+            <td><span id="msg">&nbsp;</span></td>
+        </tr>        
+        <tr>
+            <td align="center">
+            @*Files Grid : START*@
+                <table class="thinBorder" width="100%">
+                    <thead class="header">
+                        <tr>
+                            <th>File</th>
+                            <th>Type</th>
+                            <th>Comment</th>
+                            <th nowrap="nowrap">Uploaded By</th>
+                            <th nowrap="nowrap">Uploaded Date</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model){                            
+                        <tr>                            
+                            <td>@item.FileName</td>
+                            <td>@item.FileTypeTitle</td>
+                            <td>@item.Comment</td>
+                            <td>@item.UploadedBy</td>
+                            <td>@item.UploadedOn.ToString(Defaults.dtFormat, Defaults.ci)</td>
+                            <td align="center">
+                                @{
+                                    string openWinStr = "openWin('" + Url.Action("GetFileD", "Claim") + "?" + item.CodeStr + "',1,1);";
+                                 }
+                                <div class="dDialog" onclick = "@openWinStr">@Html.Raw(Defaults.clipImg)</div>                                
+                            </td>                            
+                        </tr>                            
+                        }
+                    </tbody>
+                    <tfoot>@Html.Raw(Defaults.chkNoRecords(Model.Count(), 6))</tfoot>                            
+                </table>
+            @*Files Grid : END*@
+            </td>
+        </tr>
+    </table>         
+</body>
+</html>

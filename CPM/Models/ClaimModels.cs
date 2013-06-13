@@ -132,7 +132,7 @@ namespace CPM.DAL
 
         #endregion
 
-        // Set some required fields to proceed
+        /* Set some required fields to proceed
         public ClaimDetail setProp()
         {
             if (!_Deleted)
@@ -204,6 +204,7 @@ namespace CPM.DAL
             parent.aItems.AddRange(records);
             return parent;
         }
+        */
     }
 
     public class ClaimDetailMetadata
@@ -251,7 +252,7 @@ namespace CPM.DAL
         public string CommentBy { get; set; }
         #endregion
 
-        // Set some required fields to proceed
+        /* Set some required fields to proceed
         public Comment setProp()
         {
             if (!_Deleted)
@@ -320,7 +321,7 @@ namespace CPM.DAL
 
             return parent;
         }
-        
+        */
     }
 
     public class CommentMetadata
@@ -333,9 +334,6 @@ namespace CPM.DAL
 
         [DisplayName("Comment By")]
         public string CommentBy { get; set; }
-
-        //[NonSerialized]  -  Note: Not required now
-        //public Claim Claim { get; set; }
     }
     
     #endregion
@@ -379,7 +377,7 @@ namespace CPM.DAL
 
         #endregion
 
-        // Set some required fields to proceed
+        /* Set some required fields to proceed
         public FileHeader setProp(bool Async)
         {
             if (!_Deleted)
@@ -452,6 +450,7 @@ namespace CPM.DAL
             parent.aFiles.AddRange(records);
             return parent;
         }
+        */
     }
 
     public class FileHeaderMetadata
@@ -517,7 +516,7 @@ namespace CPM.DAL
 
         #endregion
 
-        // Set some required fields to proceed
+        /* Set some required fields to proceed
         public FileDetail setProp(bool Async)
         { 
             if (!_Deleted)
@@ -588,6 +587,7 @@ namespace CPM.DAL
             parent.aItems.Single(p => p.ID == ClaimDetailID).aDFiles.AddRange(records);
             return parent;
         }
+        */
     }
 
     public class FileDetailMetadata

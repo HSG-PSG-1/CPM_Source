@@ -95,7 +95,7 @@
         }
 
         self.openAttachFilesDetail = function (item) { 
-            var url = "@Url.Action("FilesDetailKO", "Claim")" + "?ClaimDetailID=" + item.ID + "&ClaimGUID=" + item.ClaimGUID;
+            var url = "@Url.Action("FilesDetail", "Claim")" + "?ClaimDetailID=" + item.ID + "&ClaimGUID=" + item.ClaimGUID;
             return openWin(url,450,650);
         }
 

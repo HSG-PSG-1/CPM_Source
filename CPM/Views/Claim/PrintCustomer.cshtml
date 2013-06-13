@@ -160,7 +160,7 @@
                             <td nowrap="nowrap" align="right">$@item.CreditAmt1.ToString("#0.00")</td>
                         </tr>
                             <tr>                            
-                            <td colspan="10" align="left"><i>&nbsp;Claim Status: @item.Note??""</i></td>
+                            <td colspan="10" align="left"><i>&nbsp;Claim Status: @Html.Raw(item.Note??"")</i></td>
                             </tr>
                         } 
                     </tbody>

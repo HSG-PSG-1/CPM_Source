@@ -47,25 +47,6 @@
       <HintPath>Lib\ELMAH\Elmah.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="Glimpse.AspNet">
-      <HintPath>..\packages\Glimpse.AspNet.1.2.1\lib\net40\Glimpse.AspNet.dll</HintPath>
-    </Reference>
-    <Reference Include="Glimpse.Core">
-      <HintPath>..\packages\Glimpse.1.2.0\lib\net40\Glimpse.Core.dll</HintPath>
-    </Reference>
-    <Reference Include="Glimpse.MiniProfiler">
-      <HintPath>..\packages\Glimpse.MiniProfiler.1.2.2\lib\net40\Glimpse.MiniProfiler.dll</HintPath>
-    </Reference>
-    <Reference Include="Glimpse.Mvc3">
-      <HintPath>..\packages\Glimpse.Mvc3.1.2.1\lib\net40\Glimpse.Mvc3.dll</HintPath>
-    </Reference>
-    <Reference Include="Microsoft.Web.Infrastructure, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <Private>True</Private>
-      <HintPath>..\packages\Microsoft.Web.Infrastructure.1.0.0.0\lib\net40\Microsoft.Web.Infrastructure.dll</HintPath>
-    </Reference>
-    <Reference Include="MiniProfiler">
-      <HintPath>..\packages\MiniProfiler.2.1.0\lib\net40\MiniProfiler.dll</HintPath>
-    </Reference>
     <Reference Include="MvcPager, Version=1.4.0.0, Culture=neutral, PublicKeyToken=f6872c5a09aed72c, processorArchitecture=MSIL" />
     <Reference Include="protobuf-net, Version=2.0.0.431, Culture=neutral, PublicKeyToken=257b51d87d2e4d67, processorArchitecture=MSIL" />
     <Reference Include="System" />
@@ -94,16 +75,11 @@
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Web.WebPages" />
     <Reference Include="System.Web.Helpers" />
-    <Reference Include="WebActivator">
-      <HintPath>..\packages\WebActivator.1.4.4\lib\net40\WebActivator.dll</HintPath>
-    </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="App_Start\MiniProfiler.cs" />
     <Compile Include="Code\CPM.cs">
       <DependentUpon>CPM.dbml</DependentUpon>
     </Compile>
-    <Compile Include="Code\Helper\Attribute\MiniProfiling.cs" />
     <Compile Include="Code\Helper\Attribute\JSONAttributes.cs" />
     <Compile Include="Code\Helper\ConfigSettings.cs" />
     <Compile Include="Code\Helper\_SessionLookup.cs" />
@@ -141,17 +117,13 @@
     <Compile Include="Code\Services\UserService.cs" />
     <Compile Include="Controllers\BaseController.cs" />
     <Compile Include="Controllers\CommonController.cs" />
-    <Compile Include="Controllers\ClaimController.cs" />
-    <Compile Include="Controllers\ClaimFileController.cs" />
     <Compile Include="Controllers\ActivityController.cs" />
     <Compile Include="Controllers\ClaimReportController.cs" />
-    <Compile Include="Controllers\ClaimCommentController.cs" />
-    <Compile Include="Controllers\ClaimDetailsController.cs" />
     <Compile Include="Controllers\ClaimPrintController.cs" />
     <Compile Include="Controllers\ClaimCommentKOController.cs" />
-    <Compile Include="Controllers\ClaimDetailsKOController.cs" />
-    <Compile Include="Controllers\ClaimFileKOController.cs" />
-    <Compile Include="Controllers\ClaimControllerKO.cs" />
+    <Compile Include="Controllers\ClaimDetailsController.cs" />
+    <Compile Include="Controllers\ClaimFileController.cs" />
+    <Compile Include="Controllers\ClaimController.cs" />
     <Compile Include="Controllers\UserKOController.cs" />
     <Compile Include="Controllers\ReportController.cs" />
     <Compile Include="Controllers\SettingController.cs" />
@@ -167,7 +139,6 @@
     <Compile Include="Controllers\UserReportController.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="GlimpseSecurityPolicy.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
@@ -277,17 +248,6 @@
     </None>
     <Content Include="Views\Activity\EditorTemplates\ActivityLog.cshtml" />
     <Content Include="Views\Activity\Log.cshtml" />
-    <Content Include="Views\Claim\Archived.cshtml" />
-    <Content Include="Views\Claim\CommentsPg.cshtml" />
-    <Content Include="Views\Claim\EditorTemplates\Comments.cshtml" />
-    <Content Include="Views\Claim\EditorTemplates\Files.cshtml" />
-    <Content Include="Views\Claim\EditorTemplates\ItemDetail.cshtml" />
-    <Content Include="Views\Claim\EditorTemplates\ItemList.cshtml" />
-    <Content Include="Views\Claim\FilesDetail.cshtml" />
-    <Content Include="Views\Claim\FilesPg.cshtml" />
-    <Content Include="Views\Claim\Items.cshtml" />
-    <Content Include="Views\Claim\ItemsArchived.cshtml" />
-    <Content Include="Views\Claim\Manage.cshtml" />
     <Content Include="Views\Claim\PrintInternal.cshtml" />
     <Content Include="Views\Claim\PrintVendor.cshtml" />
     <Content Include="Views\Claim\Status.cshtml" />
@@ -335,24 +295,23 @@
     <Content Include="Views\Claim\GetFileD.cshtml" />
     <Content Include="Views\Claim\GetFile.cshtml" />
     <Content Include="Views\Claim\PrintCustomer.cshtml" />
-    <Content Include="Views\Claim\CommentsKO.cshtml" />
+    <Content Include="Views\Claim\Comments.cshtml" />
     <Content Include="Views\User\ListKO.cshtml" />
     <Content Include="Views\User\ListKOMobile.cshtml" />
     <Content Include="Views\Common\Navigate.cshtml" />
-    <Content Include="packages.config" />
-    <Content Include="Views\Shared\_MINIPROFILER UPDATED Layout.cshtml" />
     <Content Include="Views\User\ListKOGrid.cshtml" />
     <Content Include="Views\User\EditorTemplates\UserListKO.cshtml" />
     <Content Include="Views\Claim\KO\CommentsKOscript.cshtml" />
     <Content Include="Views\Claim\KO\ItemsKOscript1.cshtml" />
-    <Content Include="Views\Claim\ItemsKO1.cshtml" />
-    <Content Include="Views\Claim\FilesKO.cshtml" />
+    <Content Include="Views\Claim\Files.cshtml" />
     <Content Include="Views\Claim\KO\FilesKOscript.cshtml" />
-    <Content Include="Views\Claim\FilesDetailKO.cshtml" />
+    <Content Include="Views\Claim\FilesDetail.cshtml" />
     <Content Include="Views\Claim\KO\FileDetailsKOscript.cshtml" />
-    <Content Include="Views\Claim\ItemsKO.cshtml" />
+    <Content Include="Views\Claim\Items.cshtml" />
     <Content Include="Views\Claim\KO\ItemsKOscript.cshtml" />
-    <Content Include="Views\Claim\ManageKO.cshtml" />
+    <Content Include="Views\Claim\Manage.cshtml" />
+    <Content Include="Views\Claim\Archived.cshtml" />
+    <Content Include="Views\Claim\FilesDetailArchived.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Service Include="{3259AA49-8AA1-44D3-9025-A0B520596A8C}" />

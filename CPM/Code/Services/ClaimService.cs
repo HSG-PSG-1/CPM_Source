@@ -293,7 +293,8 @@ namespace CPM.Services
         #endregion
 
         #region Add / Edit / Delete & Bulk
-
+        
+        /*
         public int AddEdit(vw_Claim_Master_User_Loc vwObj, int StatusIDold)
         {
             if (!IsAsync)// Do Async add/edit
@@ -317,7 +318,7 @@ namespace CPM.Services
 
                 _Session.Claims[vwObj.ClaimGUID] = claimObj;
                 #endregion
-                return AsyncBulkAddEditDel(claimObj/*_Session.Claims[vwObj.ClaimGUID]*/, StatusIDold);
+                return AsyncBulkAddEditDel(claimObj, StatusIDold);//_Session.Claims[vwObj.ClaimGUID]
             }
         }
                 
@@ -386,6 +387,7 @@ namespace CPM.Services
 
             return claimObj.ID;//Return updated claimobj
         }
+        */
 
         public int AsyncBulkAddEditDelKO(vw_Claim_Master_User_Loc vwObj, int StatusIDold, 
             IEnumerable<ClaimDetail> items, IEnumerable<Comment> comments, IEnumerable<FileHeader> files)

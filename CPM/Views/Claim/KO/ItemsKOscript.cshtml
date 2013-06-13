@@ -76,13 +76,13 @@
         }
 
         self.openAttachFilesDetail = function (item) { 
-            var url = "@Url.Action("FilesDetailKO", "Claim")" + "?ClaimDetailID=" + item.ID() + "&ClaimGUID=@ViewData["ClaimGUID"]";
+            var url = "@Url.Action("FilesDetail", "Claim")" + "?ClaimDetailID=" + item.ID() + "&ClaimGUID=@ViewData["ClaimGUID"]";
             var winFD = openWin(url,450,650);
             //winFD.onunload = 
         }
 
         self.openAttachFilesDetailDirect = function (item) { 
-                    var url = "@Url.Action("FilesDetailKO", "Claim")" + "?ClaimDetailID=" + item.ID() + "&ClaimGUID=@ViewData["ClaimGUID"]";
+                    var url = "@Url.Action("FilesDetail", "Claim")" + "?ClaimDetailID=" + item.ID() + "&ClaimGUID=@ViewData["ClaimGUID"]";
                     var winFD = openWin(url,450,650);
                     
                     self.itemToAdd(item);
@@ -127,6 +127,7 @@
                 else {                        
                     @*var old = ko.utils.arrayFirst(self.allItems(), function (item) {return item.ID() == self.itemToAdd.ID(); });
                     self.allItems.replace(old, self.itemToAdd); //self.locations.valueHasMutated();*@
+                    alert(item.TDRemaining());
                 }
                 
                 IsCDEditMode = false;

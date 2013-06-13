@@ -6,7 +6,7 @@ using System.Web.Mvc;
 using System.Web.Routing;
 using System.Reflection;
 using CPM.Helper;
-using StackExchange.Profiling;
+//using StackExchange.Profiling;
 namespace CPM
 {
     // Note: For instructions on enabling IIS6 or IIS7 classic mode, 
@@ -73,7 +73,7 @@ namespace CPM
             //ModelBinderProviders.Providers.RegisterBinderForType(typeof(IList<ProfileModel>), new CollectionModelBinder<ProfileModel>());
 
             #region for MiniProfiler
-            
+            /*
             GlobalFilters.Filters.Add(new ProfilingActionFilter());            
             RegisterGlobalFilters(GlobalFilters.Filters);
 
@@ -83,7 +83,7 @@ namespace CPM
             {
                 ViewEngines.Engines.Add(new ProfilingViewEngine(item));
             }
-
+            */
             #endregion
         }
 
@@ -197,7 +197,7 @@ namespace CPM
         protected void Application_EndRequest()
         {
            // MiniProfiler.Stop(); //stop as early as you can, even earlier with MvcMiniProfiler.
-            MiniProfiler.Stop(discardResults: true);
+            //MiniProfiler.Stop(discardResults: true);
         }
 
         #endregion
