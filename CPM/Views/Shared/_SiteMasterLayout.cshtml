@@ -1,5 +1,6 @@
 ﻿@using CPM.Helper
 @using CPM.Services
+@*using StackExchange.Profiling*@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
@@ -81,10 +82,7 @@
 
             #menu1 li { display:inline-block; width: auto; }
             #menu1 li.sub { display:block; width: auto;}
-
-            @*.ui-menu .ui-menu-icon{
-               display: none;
-            }*@
+            .ui-menu .ui-menu-icon{ display: none; }
             </style>
         <!--[if IE 7]>
 	    <style type="text/css">
@@ -96,7 +94,7 @@
     <!--[if IE 9]><style type="text/css">body {overflow:auto;}</style><![endif]-->    
     <!--[if IE 10]><style type="text/css">body {overflow:auto;}</style><![endif]-->    
     @RenderSection("HeadContent", required: false)
-    @*@MiniProfiler.RenderIncludes()*@
+    @*MiniProfiler.RenderIncludes()*@
 </head>
 <body>
     <table cellpadding="3" width="100%" cellspacing="3" border="0" align="center">
@@ -114,7 +112,7 @@
                 <div id="smoothmenu" class="ddsmoothmenu" style="text-align:left;" >
                     <ul id="menu1">
                         <li>
-                            @Html.ActionLink("Dashboard", "List", "Dashboard")
+                            @Html.ActionLink("Dashboard", "List", "Dashboard")                            
                         </li>
                         @if (_Session.RoleRights.ManageMaster || _Session.RoleRights.ManageUser || _Session.RoleRights.ManageRole)
                         { 
@@ -122,11 +120,11 @@
                             <ul>
                                 @if (_Session.RoleRights.ManageUser)
                                 {<li>@Html.ActionLink("Users", "List", "User")
-                                    @*<ul>
-                                        <li>@Html.ActionLink("Users", "List", "User")</li>
+                                    <ul>
+                                        <li>@Html.ActionLink("ListKO", "ListKO", "User")</li>
                                         <li>@Html.ActionLink("Users KOGrid", "ListKOGrid", "User")</li>
                                         <li>@Html.ActionLink("Users KO mobile", "ListKO", "User", new { source = "mobile" }, null)</li>
-                                    </ul>*@
+                                    </ul>
                                   </li>    
                                 } 
                                 @if (_Session.RoleRights.ManageRole)

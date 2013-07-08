@@ -55,6 +55,41 @@ namespace CPM.Services
                 #endregion
             }
         }
+
+        public List<vw_Claim_Dashboard> SearchKO(string orderBy, int? pgIndex, int pageSize, vw_Claim_Dashboard das, bool isExcelReport, bool applyLocFilter)
+        {
+            orderBy = string.IsNullOrEmpty(orderBy) ? sortOn : orderBy;
+
+            using (dbc)
+            {
+                IQueryable<vw_Claim_Dashboard> dasQ;
+                #region Special case for customer (apply accessible location filter)
+                if (!applyLocFilter)
+                    dasQ = (from vw_u in dbc.vw_Claim_Dashboards select vw_u);
+                else // only for customer
+                    dasQ = (from vw_u in dbc.vw_Claim_Dashboards
+                            join ul in dbc.UserLocations on new { LocID = vw_u.ShipToLocationID } equals new { LocID = ul.LocID }
+                            where ul.UserID == _SessionUsr.ID
+                            select vw_u);
+                #endregion
+
+                //Get filters - if any
+                dasQ = PrepareQuery(dasQ, das);
+                // Apply Sorting, Pagination and return PagedList
+
+                #region Sort and Return result
+                //Special case to replace Customproperty with original (for ShipToLoc)
+                // For better implementation: SO: 2241643/how-to-use-a-custom-property-in-a-linq-to-entities-query
+                orderBy = (orderBy ?? "").Replace("ShipToLocAndCode", "ShipToLoc");
+
+                if (isExcelReport)
+                    return dasQ.OrderBy(orderBy).ToList<vw_Claim_Dashboard>();
+                else /* Apply pagination and return - kept for future ref */
+                    return dasQ.OrderBy(orderBy).Skip(pgIndex.Value * pageSize).Take(pageSize).ToList<vw_Claim_Dashboard>(); 
+                
+                #endregion
+            }
+        }
         
         public static IQueryable<vw_Claim_Dashboard> PrepareQuery(IQueryable<vw_Claim_Dashboard> dasQ, vw_Claim_Dashboard das)
         {

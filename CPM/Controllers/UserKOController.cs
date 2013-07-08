@@ -21,6 +21,8 @@ namespace CPM.Controllers
             searchOpts = _Session.Search[Filters.list.User];
             //Populate ddl Viewdata
             populateData(true);
+            ViewData["gridPageSize"] = gridPageSize; // Required to adjust pagesize for grid
+
             // No need to return view - it'll fetched by ajax in partial rendering
             return View((source == "mobile") ? "ListKOMobile" : "ListKO");
         }
@@ -31,33 +33,47 @@ namespace CPM.Controllers
         }
         
         #region Will need GET (for AJAX) & Post
+        
         [CacheControl(HttpCacheability.NoCache)]//Don't mention GET or post as this is required for both!
-        public JsonResult UserListKO(int? index, string qData)
+        public JsonResult UserListKO(int? index, string qData, bool? fetchAll)
         {
             base.SetTempDataSort(ref index);// Set TempDate, Sort & index
             //Make sure searchOpts is assigned to set ViewState
+            vw_Users_Role_Org oldSearchOpts = (vw_Users_Role_Org)searchOpts;
+            searchOpts = new vw_Users_Role_Org();
             populateData(false);
 
-            return Json(new UserService().SearchKO(sortExpr, index, 1000/*gridPageSize*/, (vw_Users_Role_Org)searchOpts),
-                JsonRequestBehavior.AllowGet);            
+            index = (index > 0) ? index + 1 : index; // paging starts with 2
+
+            var result = new UserService().SearchKO(sortExpr, index, gridPageSize * 2, (vw_Users_Role_Org)searchOpts, fetchAll ?? false);
+
+            return Json(new { records = result, search = oldSearchOpts }, JsonRequestBehavior.AllowGet);
         }
-        #endregion
 
         [HttpPost]
         [SkipModelValidation]//HT: Use with CAUTION only meant for POSTBACK search Action        
         public JsonResult UserListKO(vw_Users_Role_Org searchObj, string doReset, string qData)
         {
             searchOpts = (doReset == "on") ? new vw_Users_Role_Org() : searchObj; // Set or Reset Search-options
-            populateData(true);// Populate ddl Viewdata
-            //AT PRESENT ONLY 'RESET' & 'SEARCH' come here so need to reset
-            //_Session.NewSort = _Session.OldSort = string.Empty;//Set sort variables
+            populateData(false);// Populate ddl Viewdata
 
-            TempData["SearchData"] = searchObj;// To be used by partial view
-            //return RedirectToAction("UserListKO");//Though ajaxified but DON'T return - return View();
-            return Json(new UserService().SearchKO(sortExpr, 0, 1000/*gridPageSize*/, (vw_Users_Role_Org)searchOpts),
-                JsonRequestBehavior.AllowGet);            
+            return Json(true);// WE just need to set it in the session
         }
 
+        [HttpPost]
+        [SkipModelValidation]
+        public ActionResult SetSearchOpts(vw_Claim_Dashboard searchObj)
+        {
+            if (searchObj != null)
+            {//Called only to set filter via ajax
+                searchOpts = searchObj;
+                return Json(true);
+            }
+            return Json(false);
+        }
+
+        #endregion
+        
         [HttpPost]
         public ActionResult UserKODelete(int? UserId)
         {

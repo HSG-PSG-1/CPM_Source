@@ -6,7 +6,7 @@ using System.Web.Mvc;
 using System.Web.Routing;
 using System.Reflection;
 using CPM.Helper;
-//using StackExchange.Profiling;
+using StackExchange.Profiling;
 namespace CPM
 {
     // Note: For instructions on enabling IIS6 or IIS7 classic mode, 
@@ -191,13 +191,13 @@ namespace CPM
         protected void Application_BeginRequest()
         {
             //if (Request.IsLocal)
-           // { MiniProfiler.Start(); } //or any number of other checks, up to you 
+            //{ MiniProfiler.Start(); } //or any number of other checks, up to you 
         }
 
         protected void Application_EndRequest()
         {
            // MiniProfiler.Stop(); //stop as early as you can, even earlier with MvcMiniProfiler.
-            //MiniProfiler.Stop(discardResults: true);
+           // MiniProfiler.Stop(discardResults: true);
         }
 
         #endregion

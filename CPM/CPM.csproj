@@ -47,6 +47,13 @@
       <HintPath>Lib\ELMAH\Elmah.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="Microsoft.Web.Infrastructure, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <Private>True</Private>
+      <HintPath>..\packages\Microsoft.Web.Infrastructure.1.0.0.0\lib\net40\Microsoft.Web.Infrastructure.dll</HintPath>
+    </Reference>
+    <Reference Include="MiniProfiler">
+      <HintPath>..\packages\MiniProfiler.2.0.2\lib\net40\MiniProfiler.dll</HintPath>
+    </Reference>
     <Reference Include="MvcPager, Version=1.4.0.0, Culture=neutral, PublicKeyToken=f6872c5a09aed72c, processorArchitecture=MSIL" />
     <Reference Include="protobuf-net, Version=2.0.0.431, Culture=neutral, PublicKeyToken=257b51d87d2e4d67, processorArchitecture=MSIL" />
     <Reference Include="System" />
@@ -75,8 +82,12 @@
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Web.WebPages" />
     <Reference Include="System.Web.Helpers" />
+    <Reference Include="WebActivator">
+      <HintPath>..\packages\WebActivator.1.4.4\lib\net40\WebActivator.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="App_Start\MiniProfiler.cs" />
     <Compile Include="Code\CPM.cs">
       <DependentUpon>CPM.dbml</DependentUpon>
     </Compile>
@@ -168,6 +179,8 @@
     <Content Include="Content\Images\page\page-next.gif" />
     <Content Include="Content\Images\page\page-prev-disabled.gif" />
     <Content Include="Content\Images\page\page-prev.gif" />
+    <Content Include="Content\Images\Print.jpg" />
+    <Content Include="Content\Images\Print.png" />
     <Content Include="Content\Images\refresh.gif" />
     <Content Include="Content\Images\nav_clear.png" />
     <Content Include="Content\Images\cancel.png" />
@@ -255,10 +268,8 @@
     <Content Include="Views\Common\NoAccess.cshtml" />
     <Content Include="Views\Dashboard\Comments.cshtml" />
     <Content Include="Views\Dashboard\EditorTemplates\ListCustomer.cshtml" />
-    <Content Include="Views\Dashboard\EditorTemplates\ListInternal.cshtml" />
     <Content Include="Views\Dashboard\Excel.cshtml" />
     <Content Include="Views\Dashboard\Files.cshtml" />
-    <Content Include="Views\Dashboard\List.cshtml" />
     <Content Include="Views\Master\EditorTemplates\MasterEdit.cshtml" />
     <Content Include="Views\Master\Manage.cshtml" />
     <Content Include="Views\Role\EditorTemplates\RoleEdit.cshtml" />
@@ -291,7 +302,6 @@
     <Content Include="Views\Report\Claim\BrandClaim.cshtml" />
     <Content Include="Views\Report\Claim\YearlyClaim.cshtml" />
     <Content Include="Views\Report\Claim\YearClaimItem.cshtml" />
-    <Content Include="Views\Dashboard\EditorTemplates\ListVendor.cshtml" />
     <Content Include="Views\Claim\GetFileD.cshtml" />
     <Content Include="Views\Claim\GetFile.cshtml" />
     <Content Include="Views\Claim\PrintCustomer.cshtml" />
@@ -312,6 +322,12 @@
     <Content Include="Views\Claim\Manage.cshtml" />
     <Content Include="Views\Claim\Archived.cshtml" />
     <Content Include="Views\Claim\FilesDetailArchived.cshtml" />
+    <Content Include="packages.config" />
+    <Content Include="Views\Shared\_MINIPROFILER UPDATED Layout.cshtml" />
+    <Content Include="Views\Dashboard\EditorTemplates\ListInternal.cshtml" />
+    <Content Include="Views\Dashboard\List.cshtml" />
+    <Content Include="Views\Dashboard\EditorTemplates\ListInternalKOscript.cshtml" />
+    <Content Include="Views\User\EditorTemplates\UserListKOscript.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Service Include="{3259AA49-8AA1-44D3-9025-A0B520596A8C}" />

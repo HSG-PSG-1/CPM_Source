@@ -1,33 +1,34 @@
 ﻿@using CPM.Services
 @using CPM.Helper
 @{  object routeValues = new { qData = Request["qData"] };
-    string reload = "return reloadList(this, this.href);";// Defaults.chkCollapse;    
+    string reload = "return false;";
 }
-<table width="100%" class="thinBorder" border="0">
+<div style="width:99%; text-align:center" data-bind="visible:filteredRecords().length < 1">No records found</div>
+<table width="100%" class="thinBorder" data-bind="visible:filteredRecords().length > 0">
     <thead class="header">
         <tr>
             <th nowrap="nowrap" width="2%">
             </th>
-            <th nowrap="nowrap">@Html.Raw(Html.SortableColumn("Org Type", "OrgType", reload, routeValues))
+            <th nowrap="nowrap" data-bind="click: function(data,event){$root.sortData(data, event,'OrgType')}">           
+            @Html.Raw(Html.SortableColumn("Org Type", "OrgType", reload, routeValues))
             </th>
-            <th>@Html.Raw(Html.SortableColumn("Name", "UserName", reload, routeValues, true, true))
+            <th data-bind="click: function(data,event){$root.sortData(data, event,'UserName')}">
+            @Html.Raw(Html.SortableColumn("Name", "UserName", reload, routeValues, true, true))
             </th>
-            <th>@Html.Raw(Html.SortableColumn("Email", "Email", reload, routeValues))
+            <th data-bind="click: function(data,event){$root.sortData(data, event,'Email')}">
+            @Html.Raw(Html.SortableColumn("Email", "Email", reload, routeValues))
             </th>
-            <th>@Html.Raw(Html.SortableColumn("Role", "RoleName", reload, routeValues))
+            <th data-bind="click: function(data,event){$root.sortData(data, event,'RoleName')}">
+                @Html.Raw(Html.SortableColumn("Role", "RoleName", reload, routeValues))
             </th>
         </tr>
     </thead>
     @*<tbody> - DON'T because we'll add multiple tbody for group by *@
-    <tbody data-bind="foreach: Users">
+    <tbody data-bind="foreach: pagedRows">
         <tr>
             <td nowrap="nowrap" data-bind="click: function(data,event){return doUserDelPost('UserId',data.ID);}">
-                @*<span data-bind='text:ID' style1="display:none"></span>*@ <a data-bind="attr : { href: '@Html.Raw(Url.Action("AddEdit"))'+'/'+ ID } ">@Html.Raw(Defaults.editImg)</a>
-                &nbsp;@Html.Raw(Defaults.delPOSTImgTACO("UserId", -999))
-                @*<div class="dDialog" onclick="doEditable(this);" data-bind1="click:$parent.setSelected">@Html.Raw(@Defaults.editImg)</div>
-                                &nbsp;
-                                <div class="dDialog" data-bind="click:$parent.removeSelected">@Html.Raw(@Defaults.delImg)</div>
-                                *@
+                <a data-bind="attr : { href: '@Html.Raw(Url.Action("AddEdit"))'+'/'+ ID } ">@Html.Raw(Defaults.editImg)</a>
+                &nbsp;@Html.Raw(Defaults.delPOSTImgTACO("UserId", -999))                
             </td>
             <td data-bind="text:OrgType">
             </td>
@@ -41,69 +42,32 @@
     </tbody>
     <tfoot>
         <tr>
-            <td colspan="8" align="center">
-                <table cellpadding="0" cellspacing="0" class="pager" data-bind="with:Users">
+            <td colspan="5" align="center">
+                <table cellpadding="0" cellspacing="0" class="pager noborder" style="width:100%" border="0">
                     <tr>
-                        <td nowrap="nowrap">
-                            &nbsp;Record count :
+                        @*<td nowrap="nowrap">
+                            &nbsp;Record count (<span data-bind="text:pageIndex()"></span>):
                         </td>
-                        <td id="usrCount" data-bind="text:$data.length">
+                        <td id="usrCount" data-bind="text:fields().length">
+                        </td>*@
+                        <td nowrap="nowrap" id="usrCount">
+                            &nbsp;Records : <span data-bind="text:filteredRecords().length"></span>, Page : <span data-bind="text:pageIndex()+1"></span>
                         </td>
-                        <td align="center" width1="98%" nowrap="nowrap">
-                            &nbsp;
+                        <td>
+                           
+                        </td>
+                        <td align="right" width="98%" nowrap="nowrap">
+                        <div class="dDialog uline" data-bind="click: previousPage, visible: pageIndex() > 0">« prev</div> &nbsp;&nbsp;
+                        <div class="dDialog uline" data-bind="click: nextPage, visible: pageIndex() < maxPageIndex()">next »</div> &nbsp;
+
+                        @*<div class="dDialog uline" data-bind="click: function(data,event){return page(data,0);}">« prev</div> &nbsp;&nbsp;
+                        <div class="dDialog uline" data-bind="click: function(data,event){return page(data,1);}">next »</div> &nbsp; *@
                         </td>
                     </tr>
                 </table>
-                @*Count: <span data-bind="text:Users().length"></span>*@
             </td>
         </tr>
     </tfoot>
 </table>
-<script language="javascript" type="text/javascript" defer="defer">
- $('div.pager').children('a').click(function() { @Html.Raw(reload) });
-        function reloadList(a, url) {
-        $("#messages").hide();
-        //return reload(url, '', "#tdGrid");
-            $.getJSON(ListURL + "?" + a.href.split("?")[1], function (data)
-             {
-                //ko.mapping.fromJS(data, viewModel.Users);
-                viewModel.Users(data);
-
-             });
-             //swap sort order
-            var oldHREF = a.href;            var isASC = true;
-            a.href = oldHREF.replace("desc","asc");
-            isASC = (oldHREF == a.href);
-                if(isASC)
-                    a.href = oldHREF.replace("asc","desc");
-            
-            $(".header tr th").each(function(i){
-                $(this).html($(this).html().replace("▲",""));
-                $(this).html($(this).html().replace("▼",""));
-                //$(this).html($(this).html().replace("&#9650;","&#9660;"));
-                
-                if($(this).html().contains(a.href.replace("&","&amp;")))
-                   $(this).html($(this).html() + (isASC?"▲":"▼"));
-            });
-
-                    // ASC : "&nbsp;&#9650;"
-                    // DESC : "&nbsp;&#9660;"
-
-            return false;
-        } 
-        //var usrCountTD = $("table tfoot tr td #usrCount");
-
-        var delID=-1;var isDel = false;
-        function doUserDelPost(txtId, txtVal) {
-            if(!isDel){@*alert("doUserDelPost:" + txtVal);*@ return true;}
-            else isDel = false;
-            
-            var data = {}; data[txtId] = txtVal;
-            var url = '@Url.Action("UserKODelete", "User", new { ID = "" })';
-            $.post(url, data);
-            return false; // prevent any postback
-        }
-        function doDelPost(txtId, txtVal) {
-            isDel = true;
-        }
-</script>
+@{ Html.RenderPartial("EditorTemplates/UserListKOscript", 
+       new ViewDataDictionary { { "gridPageSize", ViewData["gridPageSize"] } }); }
