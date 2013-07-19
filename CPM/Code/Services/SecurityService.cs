@@ -53,8 +53,7 @@ namespace CPM.Services
                         ID = data.r.ID,
                         Title = data.r.Title,
                         TitleOLD = data.r.Title,//DON'T forget
-                        SortOrder = data.r.SortOrder,
-                        SortOrderOLD = data.r.SortOrder,//DON'T forget
+                        SortOrder = data.r.SortOrder,                        
                         LastModifiedBy = data.r.LastModifiedBy,
                         LastModifiedDate = data.r.LastModifiedDate,
                         LastModifiedByVal = data.Name,
@@ -187,7 +186,7 @@ namespace CPM.Services
                         item.LastModifiedBy = _SessionUsr.ID;
                         item.LastModifiedDate = DateTime.Now;
 
-                        if (item.IsAdded)
+                        if (item.IsAdded && !item.IsDeleted) // Because we're NOT removing the deleted items
                             Add(item);
                         else if (item.IsDeleted && item.CanDelete)//double check the can-delete flag
                             Delete(item);//Make sure Ref check brfore Delete is done

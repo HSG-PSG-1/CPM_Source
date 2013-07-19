@@ -55,10 +55,11 @@
         <td align="center" data-bind="text:BrandName"></td>
         @if (!isCustomer)
         { <td align="center" data-bind="text:Salesperson"></td>} 
-        <td align="center">
+        <td align="center" nowrap="nowrap">
         <div data-bind="attr: {id : 'dialog' + $data.ID}"></div>
-        <div class="dDialog uline" data-bind="click: function(data,event){showDialog('Status',$data.ID,$data.Archived);statTDdiv = this;},
-        text:Status"></div>
+        <div class="noBorder dDialog uline" data-bind="click: function(data,event){showDialog('Status',$data.ID,$data.Archived);claimObj = this;},html:$data.Status, attr:{id:'statusDIV' + $data.ID}"></div>
+        @*<input data-bind="value:$data.Status, attr:{id : 'status' + $data.ID}" style="display:none"/>
+        <input data-bind="value:$data.StatusID, attr:{id : 'statusID' + $data.ID}" style="display:none"/>*@
         </td>
         @if (!isCustomer)
         { <td align="center">
@@ -106,5 +107,5 @@
         </tr>
     </tfoot>
 </table>
-@{ Html.RenderPartial("EditorTemplates/ListInternalKOscript", 
+@{ Html.RenderPartial("KO/ListInternalKOscript", 
        new ViewDataDictionary { { "gridPageSize", ViewData["gridPageSize"] } }); }

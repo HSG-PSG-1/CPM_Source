@@ -29,8 +29,9 @@ namespace CPM.Services
             return new RoleRights()
                 {
                     IsAdded = false,
-                    ID = Defaults.Integer,
-                    Title = "[Role]",//Required otherwise it'll be considered as ModelState error !
+                    ID = -1,
+                    Title = "[Role-1]",//Required otherwise it'll be considered as ModelState error !
+                    TitleOLD = "[Role-1]",
                     LastModifiedBy = userID,
                     LastModifiedByVal = usrName,
                     LastModifiedDate = DateTime.Now,

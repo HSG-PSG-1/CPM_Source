@@ -44,7 +44,7 @@ namespace CPM.Controllers
             base.SetTempDataSort(ref index);// Set TempDate, Sort & index
             //Make sure searchOpts is assigned to set ViewState
             vw_Claim_Dashboard oldSearchOpts = (vw_Claim_Dashboard)searchOpts;
-            searchOpts = new vw_Claim_Dashboard();
+            searchOpts = new vw_Claim_Dashboard() { Archived = oldSearchOpts.Archived };// CAUTION: otehrwise archived saved search will show null records
             populateData(false);
 
             index = (index > 0) ? index + 1 : index; // paging starts with 2
@@ -101,7 +101,7 @@ namespace CPM.Controllers
                              ShipToLocAndCode = vw_u.ShipToLocAndCode,
                          };
 
-            searchOpts1.Archived = oldSessionVal;//reset
+            //searchOpts1.Archived = oldSessionVal;//reset
 
             return Json(result, JsonRequestBehavior.AllowGet);
         }

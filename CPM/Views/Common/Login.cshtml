@@ -144,7 +144,7 @@
     var isInIFrame = (window.location != window.parent.location) ? true : false;
     
     @** HANDLE DIFF USE-CASE: When the Login page is reached by session timeout (from dialog, ajax or any other place) **@
-    
+    try{
     if (isInIFrame) {// ------- Make sure that the parent is refreshed
         window.onbeforeunload = null;
         // For iframe childs
@@ -165,6 +165,7 @@
         //alert("Session has expired! Please login.");
         window.location = "@Url.Content("~/Common/Login")";//"Login";
     }
+    }catch(e){;}//no need to notify
     
     function openSendPassword() {
         IsForgotPassword(true);//$("#IsForgotPassword").attr('checked', true);

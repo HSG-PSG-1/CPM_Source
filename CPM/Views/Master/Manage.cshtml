@@ -9,6 +9,12 @@
    if(_Session.MasterTbl.HasValue) {MasterTbl = (int)_Session.MasterTbl;}
    string title = MasterService.formatTitle(_Session.MasterTbl.ToString());
  }
+@section HeadContent {
+    <script src="@Url.Content("~/Content/Scripts/KO/knockout-2.2.0.js")" type="text/javascript"></script>
+    <script src="@Url.Content("~/Content/Scripts/KO/knockout.mapping-latest.js")" type="text/javascript"></script>
+    <script src="@Url.Content("~/Content/Scripts/KO/KoExtra.js")" type="text/javascript"></script>   
+}  
+
     @using (Html.BeginForm("Manage", "Master", FormMethod.Post, new { id = formID, style = "display:inline", @onsubmit = "$('#btnSubmit').prop('disabled', true);" }))
     {            
     <table width="100%" border="0">
@@ -31,56 +37,57 @@
             { <span>@Html.Raw(oprResult) </span> }        
         </td>
             <td align="right"  class="sqz">
-        <input type="button" value="Add New" onclick="addNewTR();" style="display:none" id="btnAddNew" />
-        <input type="button" value="Add New" onclick="showHideNew(true, null);$(this).toggle();$('#btnAddNew').toggle();" />
-        <input type="submit" id="btnSubmit" value="Save changes" onclick="document.getElementById('chkDone').checked = true;" />
-        <input type="button" onclick="window.location.replace('@_Session.MasterTbl.ToString()');" value="Reset" />
-        <input type="checkbox" id="chkDone" name="chkDone" style="display: none" />
+        <input type="button" value="Add New" data-bind="click:addNewRecord" id="btnAddNew" />        
+        <input type="button" id="btnSave" value="Save changes" data-bind="click:saveToServer"/>
+        <input type="button" onclick="window.location.replace('@_Session.MasterTbl.ToString()');" value="Reset" />        
             </td>
         </tr>
         <tr>
-            <td colspan="3">            
-                <table id="sortable" class="thinBorder tablesorter" width="100%" title="Drag the table rows to reorder the entries.">
-                    <thead class="header">
-                        <tr>
-                            <th></th>
-                            <th>Title</th>
-                            @* For future <% //HT: Special case for Master Defect
-                            if (_Session.MasterTbl.HasValue && _Session.MasterTbl.Value == MasterService.Table.Defect){ %>
-                            <th>
-                                Category
-                            </th>
-                            <%}//HT: Special case for Master Defect %>*@
-                            <th nowrap="nowrap" style="display:none">Sort Order</th>
-                            <th nowrap="nowrap">Last Modified By</th>
-                            <th nowrap="nowrap">Last Modified Date</th>
-                        </tr>
-                    </thead>
-                    <tbody>             
-                    @if (Model != null){
-                        for (int i = 0; i < Model.Count(); i++){ 
-                           @Html.EditorFor(x => x.ToList<Master>()[i], "MasterEdit")                    
-                     }} 
-                    </tbody>
-                </table>
+            <td colspan="3">
+                @{ Html.RenderPartial("KO/MasterGrid"); }
             </td>
         </tr>
+        <tr>
+            <td colspan="3" align="right"><i class="small">NOTE: Drag a row to change the sort order</i></td>
+        </tr>
     </table>
+        <span></span>
     @*  For Debug: <textarea id="tx1" name="tx1" cols="50" rows="10"></textarea><textarea id="tx2" name="tx2" cols="50" rows="10"></textarea>*@
-     }     
-    <script src="@Url.Content("~/Content/Scripts/jquery.tablesorter.min.js")" type="text/javascript"></script>
-    <script src="@Url.Content("~/Content/Scripts/bulkOprGrid.js")" type="text/javascript"></script>
+     }  
     <script type="text/javascript" defer="defer">setFocus("ddlMaster");</script>
 	<script type="text/javascript">
 	    function changeMaster(ddl, val) { window.location.replace(ddl.options[ddl.selectedIndex].text); }
 	    //.disableSelection();	WON'T allow to edit inputs or else follow: http://stackoverflow.com/questions/4027158
 	    $(document).ready(function () {
-	        $("#sortable").tablesorter({ textExtraction: sorterTextExtraction });
+	       // $("#sortable").tablesorter({ textExtraction: sorterTextExtraction });
 	        $("#@formID").validate({ @Defaults.validatorJQsetting });
         });
         function confirmDeleteCustom(evt){
             var GoAhead = window.confirm("Are you sure you want to delete this @title?");
             return stopEvent(evt, GoAhead);            
         }
+        // Return a helper with preserved width of cells 
+        //Ref: http: //www.foliotek.com/devblog/make-table-rows-sortable-using-jquery-ui-sortable/
+        var fixHelper = function(e, ui) {// or try this: SO: 1307705/jquery-ui-sortable-with-table-and-tr-width
+            ui.children().each(function() {$(this).width($(this).width());});
+            return ui;
+        };
+        // OR for future: http://stackoverflow.com/questions/6938301/better-javascript-library
+        // IE6 issue : http://stackoverflow.com/questions/859007/jquery-ui-sortable-problem-on-ie6
+        $("#sortable tbody").sortable({
+            helper: fixHelper,
+            cursor: 'move',
 
+            update: function(e, ui) {
+                $el = $(ui.item);
+                $el.effect('highlight', {}, 2000);
+
+                //Use for debug: alert($('#sortable tbody tr').length);
+
+                $('#sortable tbody tr').each(
+                        function(currentIndex) {
+                            $(this).find('td:nth-child(3)').find('input:first').val(this.rowIndex).trigger("change"); //td:first
+                        });
+            }
+        });
 	</script>

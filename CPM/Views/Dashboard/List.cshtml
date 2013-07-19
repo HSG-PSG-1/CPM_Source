@@ -23,7 +23,7 @@
     <table width="100%">
     <tr>
     <td><b class="smallHeading">Dashboard</b></td>
-    <td class="sqz" align="right">Quick search: <input type="text" class="textBox" data-bind = "value:quickSearch" title="all filters except Date and won't apply for Excel export" /> </td>
+    <td class="sqz" align="right">@*Quick search: <input type="text" class="textBox" data-bind = "value:quickSearch" title="all filters except Date and won't apply for Excel export" /> *@</td>
     <td class="sqz" align="right">@Html.ActionLink("New Claim", "Manage", "Claim", new { ClaimId = 0}, null)&nbsp;</td>
     </tr>
         <tr>
@@ -109,8 +109,8 @@
         <tr>
             <td colspan="3">  
             <div id="tdGrid">
-                @*@Html.RenderPartial("./EditorTemplates/ListCustomer", Model); *@
-                        @{ Html.RenderPartial("EditorTemplates/" + 
+                @*@Html.RenderPartial("./KO/ListCustomer", Model); *@
+                        @{ Html.RenderPartial("KO/" + 
                                (_Session.IsOnlyCustomer ? "ListCustomer" : "ListInternal"), 
                                new ViewDataDictionary { { "gridPageSize" , ViewData["gridPageSize"] } }); }
              </div>
@@ -203,7 +203,7 @@
                          
             return false; // prevent any postback
         }
-        var statTDdiv = "";//will be set whn the cell is clicked
+        var claimObj = "";//will be set whn the cell is clicked
    function updateStatusHistory(){
         //clone and insert the tr after the table
         $(lastTR).clone(true).insertAfter(lastTR);        
@@ -219,8 +219,17 @@
         //persist updated status in textbox
         $(oldStatID).val($(newStatID).val());
         $(oldStat).val($(newStatID).children("option:selected").text());
-        //update in Grid (NOTE: make sure 'statTDdiv' is set when td is clicked
-        $(statTDdiv).html($(oldStat).val()); $(statTDdiv).effect('highlight', {}, 2000); //highlight
+        //update in Grid (NOTE: make sure 'claimObj' is set when td is clicked
+        //$(claimObj).html($(oldStat).val()); $(claimObj).effect('highlight', {}, 2000); //highlight
+        @*$("#status" + claimObj.ID).val($(oldStat).val()).trigger("change");
+        $("#statusID" + claimObj.ID).val($(newStatID).val()).trigger("change");*@
+        $("#statusDIV" + claimObj.ID).text($(oldStat).val()).trigger("change").effect('highlight', {}, 2000);
+        claimObj.Status = $(oldStat).val(); claimObj.StatusID = $(newStatID).val();
+        // won't update because its not an observable
+        
+        @*var old = ko.utils.arrayFirst(vm_D.fields(), function (item) {return item.ID == claimObj.ID; });
+                    vm_D.fields.replace(old, claimObj); 
+                    //vm_D.fields().valueHasMutated();*@
    }    
 </script>
 <script language="javascript" type="text/javascript" defer="defer">
@@ -234,11 +243,13 @@
     //var vm_D = new claimListModel();
     var vm_D = new viewModel();
     function createKO() {
+        showDlg(true);
         $.getJSON(ListURL, function (data) {
+            showDlg(false);
             //vm_D.Claims = ko.observableArray(data); // Initial items
             vm_D.fields(data.records);
             vm_D.search = ko.mapping.fromJS(data.search); // Otherwise the search button will be needed
-            vm_D.quickSearch("");
+            @*vm_D.quickSearch("");*@
             vm_D.invokeSearch(2);
             ko.applyBindings(vm_D);
             //pagedGrid.DisplayFields(data);
@@ -257,7 +268,7 @@
             data: $("#frm").serialize(),
             url: ListURL
             ,async : false // SO: 14645011 (for FF to ensure the postback is not
-            @*,success: function (data) {alert(data);
+            @*,success: function (data) {
                 if (data != null) {
                     alert(data);
                     /*//vm_D.fields.removeAll();
@@ -296,7 +307,7 @@
         if (hadArchived == true)
             getArchivedData($("#Archived"));
 
-        vm_D.quickSearch(null);
+        @*vm_D.quickSearch(null);*@
     }      
 
     function getArchivedData(chk)

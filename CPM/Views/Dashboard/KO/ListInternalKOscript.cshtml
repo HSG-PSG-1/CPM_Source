@@ -18,7 +18,9 @@ function gotoClaim(ClaimId)
 function updatePagedRows(vm)
 {// Starts with : index=0
     ListURL = ListURL.replace("index=" + (vm.pageIndex()-1), "index=" + vm.pageIndex());
+    showDlg(true);
     $.getJSON(ListURL, function (data) {
+            showDlg(false);
             //viewModel.Claims = ko.observableArray(data); // Initial items
             //ko.applyBindings(viewModel);
             if(data != null)
@@ -47,7 +49,7 @@ var viewModel = function(){
         self.sortOrderNxtAsc = ko.observable(true);
         self.search = ko.observable();
         self.invokeSearch = ko.observable(2);
-        self.quickSearch =  ko.observable("");
+        @*self.quickSearch =  ko.observable("");*@
         
         self.previousPage = function() {
             self.pageIndex(self.pageIndex() - 1);
@@ -61,8 +63,6 @@ var viewModel = function(){
             //    updatePagedRows(self);
             self.cachedPagesTill(self.cachedPagesTill() - 1);
         };
-
-        
 
         self.filteredRecords = ko.computed(function() {
             var s = self.invokeSearch();self.invokeSearch(0);
@@ -81,7 +81,7 @@ var viewModel = function(){
             var ClaimDateFrom = (s.ClaimDateFrom != null && s.ClaimDateFrom() != "")?s.ClaimDateFrom():null;
             var ClaimDateTo = (s.ClaimDateTo != null && s.ClaimDateTo() != "")?s.ClaimDateTo():null;
 
-            var quickSearch = (self.quickSearch != null && self.quickSearch() != null && self.quickSearch() != "")?self.quickSearch().toLowerCase():null;
+            @*var quickSearch = (self.quickSearch != null && self.quickSearch() != null && self.quickSearch() != "")?self.quickSearch().toLowerCase():null;*@
                         
             self.pageIndex(0);
                         
@@ -98,8 +98,9 @@ var viewModel = function(){
                     (Salesperson == null || rec.Salesperson.toLowerCase().indexOf(Salesperson) > -1) &&                    
                     (ClaimDateFrom == null || new Date(rec.ClaimDateOnly) >= new Date(ClaimDateFrom)) &&
                     (ClaimDateTo == null || new Date(rec.ClaimDateOnly) <= new Date(ClaimDateTo)) &&
-                    (rec.Archived == Archived) && @* START : Special case quick search filter *@
-                    (quickSearch == null ||
+                    (rec.Archived == Archived) 
+                    @* START : Special case quick search filter 
+                    && (quickSearch == null ||
                         (
                             rec.Status.toLowerCase().indexOf(quickSearch) > -1 ||
                             rec.AssignToName.toLowerCase().indexOf(quickSearch) > -1 ||
@@ -109,7 +110,7 @@ var viewModel = function(){
                             rec.Salesperson.toLowerCase().indexOf(quickSearch) > -1
                         )
                     )
-                    @* END : Special case quick search filter *@
+                     END : Special case quick search filter *@
                 );
             });
             @*

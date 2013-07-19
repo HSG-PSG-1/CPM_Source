@@ -143,6 +143,8 @@ namespace CPM.Services
 
                 //Special case handling for IE with KO - null becomes "null"
                 if (item.Note == "null") item.Note = "";
+                if (item.Serial == "null") item.Serial = "";
+                if (item.DOT == "null") item.DOT = "";
 
                 if (item._Deleted)
                 {

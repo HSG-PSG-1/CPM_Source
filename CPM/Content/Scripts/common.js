@@ -332,7 +332,7 @@ function reviseLastGrpCount(prevID) {
     }
 }
 
-//Define a function variable which can be usedand also re-initialized in pages
+//Define a function variable which can be used and also re-initialized in pages
 var sorterTextExtraction = function(node) {
 var val = $(node).children('input:first-child'); // textbox
 val = val.length < 1 ? $(node).children('select:first-child') : val; // dropdown
@@ -390,4 +390,13 @@ function chartPieSelectHandler(chartObj,dataTbl,keyPos) {
 }
 function DisableSubmitButtons(disable) {
     $('input[type = "submit"]').prop('disabled', disable);
+}
+
+function showDlg(show) {
+    if (show && $("#divdlg")){
+        $("#divdlg").dialog({ title: "", modal: true, height: 110, width: 50});
+        $("#divdlg").parent().find(".ui-dialog-titlebar").hide();  // Hide title : http://forum.jquery.com/topic/ui-dialog-remove-title-bar
+    }
+    else if($("#divdlg"))
+        $("#divdlg").dialog("destroy");        
 }

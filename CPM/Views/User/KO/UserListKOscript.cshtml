@@ -13,7 +13,9 @@ function gotoUser(ClaimId)
 function updatePagedRows(vm)
 {// Starts with : index=0
     ListURL = ListURL.replace("index=" + (vm.pageIndex()-1), "index=" + vm.pageIndex());
+    showDlg(true);
     $.getJSON(ListURL, function (data) {
+            showDlg(false);
             //viewModel.Claims = ko.observableArray(data); // Initial items
             //ko.applyBindings(viewModel);
             if(data != null)
@@ -34,8 +36,7 @@ var viewModel = function(){
         self.sortField = ko.observable("ClaimNo");
         self.sortOrderNxtAsc = ko.observable(true);
         self.search = ko.observable();
-        self.invokeSearch = ko.observable(2);
-        self.quickSearch =  ko.observable("");
+        self.invokeSearch = ko.observable(2);        
         
         self.removeSelected = function (user) {
             if (user != null) // Prevent blanks and duplicates
@@ -65,9 +66,6 @@ var viewModel = function(){
             var Email = (s.Email != null && s.Email() != null && s.Email() != "")?s.Email().toLowerCase():null;
             var RoleID = (s.RoleID != null && s.RoleID() != null && s.RoleID() != "")?s.RoleID():0;
             
-            //var BrandName = (s.BrandName != null && s.BrandName() != null && s.BrandName() != "")?s.BrandName().toLowerCase():null;            
-            var quickSearch = (self.quickSearch != null && self.quickSearch() != null && self.quickSearch() != "")?self.quickSearch().toLowerCase():null;
-                        
             self.pageIndex(0);
                         
             return ko.utils.arrayFilter(self.fields(), function(rec) {                                
@@ -75,17 +73,7 @@ var viewModel = function(){
                     (OrgType == null || rec.OrgType.toLowerCase().indexOf(OrgType) > -1) &&
                     (UserName == null || rec.UserName.toLowerCase().indexOf(UserName) > -1) &&                    
                     (Email == null || rec.Email.toLowerCase().indexOf(Email) > -1) &&                    
-                    (RoleID < 1 || rec.RoleID == RoleID) &&
-
-                    (quickSearch == null ||
-                        (
-                            rec.Email.toLowerCase().indexOf(quickSearch) > -1 ||
-                            rec.RoleName.toLowerCase().indexOf(quickSearch) > -1 ||                            
-                            rec.UserName.toLowerCase().indexOf(quickSearch) > -1 ||
-                            rec.OrgType.toLowerCase().indexOf(quickSearch) > -1
-                        )
-                    )
-                    @* END : Special case quick search filter *@
+                    (RoleID < 1 || rec.RoleID == RoleID)
                 );
             });                        
         });
