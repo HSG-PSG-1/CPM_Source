@@ -12,10 +12,10 @@ namespace CPM.Services
     public class DashboardService : _ServiceBase
     {
         #region Variables
-        
+
         public readonly vw_Claim_Dashboard emptyView = new vw_Claim_Dashboard() { ID = Defaults.Integer };
         public const string sortOn = "ClaimNo DESC", sortOn1 = "ClaimNo DESC";
-        
+
         #endregion
 
         public List<vw_Claim_Dashboard> Search(string orderBy, int? pgIndex, int pageSize, vw_Claim_Dashboard das, bool isExcelReport, bool applyLocFilter)
@@ -29,10 +29,10 @@ namespace CPM.Services
                 if (!applyLocFilter)
                     dasQ = (from vw_u in dbc.vw_Claim_Dashboards select vw_u);
                 else // only for customer
-                    dasQ = (from vw_u in dbc.vw_Claim_Dashboards 
+                    dasQ = (from vw_u in dbc.vw_Claim_Dashboards
                             join ul in dbc.UserLocations on new { LocID = vw_u.ShipToLocationID } equals new { LocID = ul.LocID }
                             where ul.UserID == _SessionUsr.ID
-                            select vw_u );
+                            select vw_u);
                 #endregion
 
                 //Get filters - if any
@@ -55,7 +55,42 @@ namespace CPM.Services
                 #endregion
             }
         }
-        
+
+        public List<vw_Claim_Dashboard> SearchKO(string orderBy, int? pgIndex, int pageSize, vw_Claim_Dashboard das, bool isExcelReport, bool applyLocFilter)
+        {
+            orderBy = string.IsNullOrEmpty(orderBy) ? sortOn : orderBy;
+
+            using (dbc)
+            {
+                IQueryable<vw_Claim_Dashboard> dasQ;
+                #region Special case for customer (apply accessible location filter)
+                if (!applyLocFilter)
+                    dasQ = (from vw_u in dbc.vw_Claim_Dashboards select vw_u);
+                else // only for customer
+                    dasQ = (from vw_u in dbc.vw_Claim_Dashboards
+                            join ul in dbc.UserLocations on new { LocID = vw_u.ShipToLocationID } equals new { LocID = ul.LocID }
+                            where ul.UserID == _SessionUsr.ID
+                            select vw_u);
+                #endregion
+
+                //Get filters - if any
+                dasQ = PrepareQuery(dasQ, das);
+                // Apply Sorting, Pagination and return PagedList
+
+                #region Sort and Return result
+                //Special case to replace Customproperty with original (for ShipToLoc)
+                // For better implementation: SO: 2241643/how-to-use-a-custom-property-in-a-linq-to-entities-query
+                orderBy = (orderBy ?? "").Replace("ShipToLocAndCode", "ShipToLoc");
+
+                if (isExcelReport)
+                    return dasQ.OrderBy(orderBy).ToList<vw_Claim_Dashboard>();
+                else /* Apply pagination and return - kept for future ref */
+                    return dasQ.OrderBy(orderBy).Skip(pgIndex.Value * pageSize).Take(pageSize).ToList<vw_Claim_Dashboard>();
+
+                #endregion
+            }
+        }
+
         public static IQueryable<vw_Claim_Dashboard> PrepareQuery(IQueryable<vw_Claim_Dashboard> dasQ, vw_Claim_Dashboard das)
         {
             #region Append WHERE clause if applicable
@@ -67,7 +102,7 @@ namespace CPM.Services
                 int SingleClaimNo = -1;
 
                 if (int.TryParse(das.ClaimNos, out SingleClaimNo))
-                    dasQ = dasQ.Where(o => SqlMethods.Like(o.ClaimNo.ToString(),"%" + SingleClaimNo.ToString() + "%"));                
+                    dasQ = dasQ.Where(o => SqlMethods.Like(o.ClaimNo.ToString(), "%" + SingleClaimNo.ToString() + "%"));
                 else
                     dasQ = dasQ.Where(o => Defaults.stringToIntList(das.ClaimNos).Contains(o.ClaimNo));
             }
@@ -105,9 +140,24 @@ namespace CPM.Services
             if (das.ClaimDateTo.HasValue)
                 dasQ = dasQ.Where(o => o.ClaimDate.Date <= das.ClaimDateTo_SQL.Value.Date);
 
-            #endregion            
+            #endregion
 
             return dasQ;
+        }
+
+        public List<vw_ClaimWithItemDetail> ClaimWithDetails()
+        {
+            using (dbc)
+            {
+                IQueryable<vw_ClaimWithItemDetail> dasQ = (from vw_u in dbc.vw_ClaimWithItemDetails select vw_u);
+                
+                //Get filters - if any
+                //dasQ = PrepareQuery(dasQ, das);
+                // Apply Sorting, Pagination and return PagedList
+
+                //sorting already applied by the view
+                return dasQ.ToList<vw_ClaimWithItemDetail>();                
+            }
         }
     }
 }

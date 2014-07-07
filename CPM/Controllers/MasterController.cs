@@ -39,78 +39,59 @@ namespace CPM.Controllers
 
             if (string.IsNullOrEmpty(masterTbl))
             // This is required so that url redirection works properly when dropdown is changed
-            {Response.Redirect(defaultMaster, true); return View();}
+            { Response.Redirect(defaultMaster, true); return View(); }
             else
                 _Session.MasterTbl = _Enums.ParseEnum<MasterService.Table>(masterTbl);
 
             ViewData["oprSuccess"] = base.operationSuccess;//For successful operation
 
             ModelState.Clear();//Start FRESH
-            return View(new MasterService(_Session.MasterTbl).FetchAllCached());
+            return View();
+        }
+
+        [CacheControl(HttpCacheability.NoCache), HttpGet]
+        public ActionResult ManageKOVM(string masterTbl)
+        {
+            if (string.IsNullOrEmpty(masterTbl))
+            // This is required so that url redirection works properly when dropdown is changed
+            { Response.Redirect(defaultMaster, true); return View(); }
+            else
+                _Session.MasterTbl = _Enums.ParseEnum<MasterService.Table>(masterTbl);
+
+            return Json(new MasterService(_Session.MasterTbl).FetchAllCached(),
+                JsonRequestBehavior.AllowGet);
         }
 
         [HttpPost]
         [IsAuthorize(IsAuthorizeAttribute.Rights.ManageMaster)]
         //Old kept for ref - [OutputCache(NoStore = true, Duration = 0, VaryByParam = "*")]//To avoid js sort issues
-        public ActionResult Manage(string masterTbl, List<Master> changes)
+        public ActionResult Manage(string masterTbl, IEnumerable<Master> records)//[FromJson] 
         {
             MasterService srv = new MasterService(_Session.MasterTbl);
-            
-            #region Issue due to which we can't sort Model as done in js!
-            //NOT possible to change value of Model during postback - 
-            // URL --- http://www.gxclarke.org/2010/05/consumption-of-data-in-mvc2-views.html
-            //ISSUE: http://stackoverflow.com/questions/5007330/mvc-jquery-reorder-list-not-ordered-on-postback
-            //var changesReordered = new List<Master>(changes.Count);
-            //if (changes != null && changes.Count > 0)//Apply sorting as it was applied by js
-            //    changesReordered = (from c in changes select c).OrderBy(x => Convert.ToInt32(x.SortOrder)).ToList();
-            #endregion
-            
-            bool CanCommit = ModelState.IsValid; string err = "";
-            
-            #region Can commit
-            if (CanCommit)
+            bool CanCommit = true; string err = "";
+            //Make sure If there's any DELETE - it is NOT being referred
+            CanCommit = !isDeletedBeingReferred(records, false, ref err);
+            //Check duplicates among New records only
+            if (CanCommit && records != null && records.ToList<Master>().Exists(r => r.IsAdded))
+                CanCommit = !hasDuplicateInNewEntries(records, ref err);
+
+            #region All OK so go ahead
+            if (CanCommit)//Commit
             {
-                //Make sure If there's any DELETE - it is NOT being referred
-                CanCommit = !(isDeletedBeingReferred(changes, false,ref err));
-                //Check duplicates among New records only
-                if (CanCommit && changes != null && changes.Exists(r => r.IsAdded))
-                    CanCommit = !hasDuplicateInNewEntries(changes, ref err);
-                
-                #region All OK so go ahead
-                if (CanCommit)//Commit
-                {
-                    srv.BulkAddEditDel(changes);//Performs Add, Edit & Delete by chacking each item
-                    base.operationSuccess = true;// Set operation sucess
-                    //Log Activity
-                    new ActivityLogService(ActivityLogService.Activity.MasterManage).Add(new CPM.DAL.ActivityHistory());
-                }
-                #endregion
+                srv.BulkAddEditDel(records.ToList<Master>());//Performs Add, Edit & Delete by chacking each item
+                base.operationSuccess = true;// Set operation sucess
+                //Log Activity
+                new ActivityLogService(ActivityLogService.Activity.MasterManage).Add(new CPM.DAL.ActivityHistory());
             }
+            else // worst case or hack
+                return Json(err, JsonRequestBehavior.AllowGet);
+
             #endregion
 
-            #region Can't commit
-            if (!CanCommit)
-            {
-                ModelState.AddModelError(string.Empty, err);
-                ViewData["oprSuccess"] = false;//Don't use base.oprSuccess because it doesn't redirect!
-                ViewData["err"] = err;
-
-                // doAddEditPopulate(); -- if needed in futrue
-                return View(changes);
-            }
-            #endregion
-
-            #region NOTE regarding ModelState
-            //HT:IMP:Caution: Clear ModelState so that old data is FLUSHED //http://stackoverflow.com/questions/2547111/unexpected-html-editorfor-behavior-in-asp-net-mvc-2
-            //ModelState.Clear();//Caching & History issues (http://forums.asp.net/p/1527149/3687407.aspx)
-            //return View(new MasterService(_Session.MasterTbl).FetchAll());
-            //OR better Redirect !
-            #endregion
-
-            Response.Redirect(masterTbl, true); return View();
+            return Json(string.Empty, JsonRequestBehavior.AllowGet);
         }
 
-        #endregion
+        #endregion        
 
         #region Common functions
 
@@ -119,8 +100,9 @@ namespace CPM.Controllers
         /// </summary>
         /// <param name="items">Master object list</param>
         /// <returns>True if atleast one of the item(s) being deleted is referred, else false</returns>
-        public static bool isDeletedBeingReferred(List<Master> items, bool isSecurity, ref string err)
+        public static bool isDeletedBeingReferred(IEnumerable<Master> items, bool isSecurity, ref string err)
         {
+            if (items == null || items.Count() < 1) return false;
             items = items.Where(m => m.IsDeleted && !m.IsAdded).ToList();//reformat the list with only required items
             bool refFound = false;
             foreach (Master item in items)
@@ -147,10 +129,11 @@ namespace CPM.Controllers
         /// <param name="changes">list of master</param>
         /// <param name="err">error message</param>
         /// <returns>true if atleast one of the new entries are duplicate</returns>
-        public static bool hasDuplicateInNewEntries(List<Master> changes, ref string err)
+        public static bool hasDuplicateInNewEntries(IEnumerable<Master> changes, ref string err)
         {
+            //IMP: For consistency make sure that the Delete Ref check is done before this (as we ignore deleted records)
             List<Master> inserts = changes.Where(r => r.IsAdded && !r.IsDeleted).ToList();// new inserts & not deleted
-            List<Master> validEntries = changes.Where(r => r.ID != 0 || !r.IsDeleted).ToList();// fetch valid entries
+            List<Master> validEntries = changes.Where(r => !r.IsDeleted).ToList();// fetch valid entries - r.ID > 0 &&
             bool hasDuplicate = false;
             // check case-in-sensitive title duplication among all the records
             foreach (Master m in inserts)

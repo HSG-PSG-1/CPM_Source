@@ -1,0 +1,73 @@
+﻿@using CPM.Services
+@using CPM.Helper
+@{  object routeValues = new { qData = Request["qData"] };
+    string reload = "return false;";
+}
+<div style="width:99%; text-align:center" data-bind="visible:filteredRecords().length < 1">No records found</div>
+<table width="100%" class="thinBorder" data-bind="visible:filteredRecords().length > 0">
+    <thead class="header">
+        <tr>
+            <th nowrap="nowrap" width="2%">
+            </th>
+            <th nowrap="nowrap" data-bind="click: function(data,event){$root.sortData(data, event,'OrgType')}">           
+            @Html.Raw(Html.SortableColumn("Org Type", "OrgType", reload, routeValues))
+            </th>
+            <th data-bind="click: function(data,event){$root.sortData(data, event,'UserName')}">
+            @Html.Raw(Html.SortableColumn("Name", "UserName", reload, routeValues, true, true))
+            </th>
+            <th data-bind="click: function(data,event){$root.sortData(data, event,'Email')}">
+            @Html.Raw(Html.SortableColumn("Email", "Email", reload, routeValues))
+            </th>
+            <th data-bind="click: function(data,event){$root.sortData(data, event,'RoleName')}">
+                @Html.Raw(Html.SortableColumn("Role", "RoleName", reload, routeValues))
+            </th>
+        </tr>
+    </thead>
+    @*<tbody> - DON'T because we'll add multiple tbody for group by *@
+    <tbody data-bind="foreach: pagedRows">
+        <tr>
+            <td nowrap="nowrap" data-bind="click: function(data,event){return doUserDelPost('UserId',data.ID);}">
+                <a data-bind="attr : { href: '@Html.Raw(Url.Action("AddEdit"))'+'/'+ ID } ">@Html.Raw(Defaults.editImg)</a>
+                &nbsp;@Html.Raw(Defaults.delPOSTImgTACO("UserId", -999))                
+            </td>
+            <td data-bind="text:OrgType">
+            </td>
+            <td data-bind="text:UserName">
+            </td>
+            <td data-bind="text:Email">
+            </td>
+            <td data-bind="text:RoleName">
+            </td>
+        </tr>
+    </tbody>
+    <tfoot>
+        <tr>
+            <td colspan="5" align="center">
+                <table cellpadding="0" cellspacing="0" class="pager noborder" style="width:100%" border="0">
+                    <tr>
+                        @*<td nowrap="nowrap">
+                            &nbsp;Record count (<span data-bind="text:pageIndex()"></span>):
+                        </td>
+                        <td id="usrCount" data-bind="text:fields().length">
+                        </td>*@
+                        <td nowrap="nowrap" id="usrCount">
+                            &nbsp;Records : <span data-bind="text:filteredRecords().length"></span>, Page : <span data-bind="text:pageIndex()+1"></span>
+                        </td>
+                        <td>
+                           
+                        </td>
+                        <td align="right" width="98%" nowrap="nowrap">
+                        <div class="dDialog uline" data-bind="click: previousPage, visible: pageIndex() > 0">« prev</div> &nbsp;&nbsp;
+                        <div class="dDialog uline" data-bind="click: nextPage, visible: pageIndex() < maxPageIndex()">next »</div> &nbsp;
+
+                        @*<div class="dDialog uline" data-bind="click: function(data,event){return page(data,0);}">« prev</div> &nbsp;&nbsp;
+                        <div class="dDialog uline" data-bind="click: function(data,event){return page(data,1);}">next »</div> &nbsp; *@
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </tfoot>
+</table>
+@{ Html.RenderPartial("KO/UserListKOscript", 
+       new ViewDataDictionary { { "gridPageSize", ViewData["gridPageSize"] } }); }

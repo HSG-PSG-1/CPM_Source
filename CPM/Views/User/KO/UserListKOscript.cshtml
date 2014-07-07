@@ -1,0 +1,143 @@
+﻿@using CPM.Services
+@using CPM.Helper
+<script language="javascript" type="text/javascript" defer="defer">
+var loading = '<div style="text-align:center;display:block;"><img src=" @Url.Content("~/Content/Images/loading.gif")" title="" alt="Loading" /></div>';
+       
+function gotoUser(ClaimId)
+{
+    window.location.href = 
+    "@HttpUtility.UrlDecode(Url.Action("Manage?", "Claim", new { ClaimId = -99 }))".replace('-99',ClaimId);
+}
+
+@* KO based pagination *@
+function updatePagedRows(vm)
+{// Starts with : index=0
+    ListURL = ListURL.replace("index=" + (vm.pageIndex()-1), "index=" + vm.pageIndex());
+    showDlg(true);
+    $.getJSON(ListURL, function (data) {
+            showDlg(false);
+            //viewModel.Claims = ko.observableArray(data); // Initial items
+            //ko.applyBindings(viewModel);
+            if(data != null)
+            ko.utils.arrayForEach(data, function (item) {
+                vm_U.fields.push(item);
+            });
+            else
+                vm_U.pageIndex(0);//reset            
+        });
+}
+
+var viewModel = function(){        
+        var self = this;
+        self.fields =  ko.observableArray();//jsondata
+        self.pageSize = ko.observable(@ViewData["gridPageSize"]);
+        self.pageIndex = ko.observable(0);
+        self.cachedPagesTill = ko.observable(0);
+        self.sortField = ko.observable("ClaimNo");
+        self.sortOrderNxtAsc = ko.observable(true);
+        self.search = ko.observable();
+        self.invokeSearch = ko.observable(2);        
+        
+        self.removeSelected = function (user) {
+            if (user != null) // Prevent blanks and duplicates
+                self.fields.remove(user);
+        };
+
+        self.previousPage = function() {
+            self.pageIndex(self.pageIndex() - 1);
+            if(self.cachedPagesTill() < 1)
+                self.cachedPagesTill(0);
+            self.cachedPagesTill(self.cachedPagesTill() + 1);
+        };
+        self.nextPage = function() {            
+            self.pageIndex(self.pageIndex() + 1);            
+            //if(self.cachedPagesTill() < 1)
+            //    updatePagedRows(self);
+            self.cachedPagesTill(self.cachedPagesTill() - 1);
+        };        
+
+        self.filteredRecords = ko.computed(function() {
+            var s = self.invokeSearch();self.invokeSearch(0);
+            
+            var s = self.search;
+
+            var OrgType = (s.OrgType != null && s.OrgType() != null && s.OrgType() != "")?s.OrgType().toLowerCase():null;
+            var UserName = (s.UserName != null && s.UserName() != null && s.UserName() != "")?s.UserName().toLowerCase():null;
+            var Email = (s.Email != null && s.Email() != null && s.Email() != "")?s.Email().toLowerCase():null;
+            var RoleID = (s.RoleID != null && s.RoleID() != null && s.RoleID() != "")?s.RoleID():0;
+            
+            self.pageIndex(0);
+                        
+            return ko.utils.arrayFilter(self.fields(), function(rec) {                                
+                return (
+                    (OrgType == null || rec.OrgType.toLowerCase().indexOf(OrgType) > -1) &&
+                    (UserName == null || rec.UserName.toLowerCase().indexOf(UserName) > -1) &&                    
+                    (Email == null || rec.Email.toLowerCase().indexOf(Email) > -1) &&                    
+                    (RoleID < 1 || rec.RoleID == RoleID)
+                );
+            });                        
+        });
+
+        self.maxPageIndex = ko.computed(function() {//dependentObservable
+            var s = self.invokeSearch();self.invokeSearch(0);
+            return Math.ceil(self.filteredRecords().length / self.pageSize()) - 1;
+        });
+
+        self.pagedRows = ko.computed(function() {//dependentObservable
+                var size = self.pageSize();
+                var start = self.pageIndex() * size;
+                return self.filteredRecords().slice(start, start + size);
+        });
+
+        self.sortData = function(data, event, sort)
+        {
+            if((self.sortField() == sort))
+                self.sortOrderNxtAsc(!self.sortOrderNxtAsc());
+            else
+                {self.sortField(sort); self.sortOrderNxtAsc(false);}
+            
+            var sortOrder = self.sortOrderNxtAsc()? -1 : 1; // Asc : Desc
+
+            @*"click: function(data,event){fields.sort(function (l, r) { return l.Status > r.Status ? 1 : -1 })}"*@
+            switch (sort)
+            {
+            case "OrgType":
+                 self.fields.sort(function (l, r) { return l.OrgType > r.OrgType ? 1*sortOrder : -1*sortOrder });                
+                 break;
+            case "RoleName": // Need to convert into string while comparison
+                self.fields.sort(function (l, r) { return l.RoleName + "" > r.RoleName + "" ? 1*sortOrder : -1*sortOrder });                
+                break;
+            case "UserName":
+                self.fields.sort(function (l, r) { return l.UserName > r.UserName ? 1*sortOrder : -1*sortOrder });                
+                break;
+            case "Email":
+                  self.fields.sort(function (l, r) { return l.Email > r.Email ? 1*sortOrder : -1*sortOrder });                  
+                  break;            
+            }  
+            
+            $(".header tr th").each(function(i){
+                $(this).html($(this).html().replace("▲",""));
+                $(this).html($(this).html().replace("▼",""));
+                @*$(this).html($(this).html().replace("&#9650;","&#9660;"));*@
+        
+                if($(this).html().indexOf(vm_U.sortField()) > -1)
+                    $(this).html($(this).html() + " " + (vm_U.sortOrderNxtAsc()?"▼": "▲"));
+            });
+
+            self.pageIndex(0);  self.cachedPagesTill(0);
+        }
+    };
+    var delID=-1;var isDel = false;
+        function doUserDelPost(txtId, txtVal) {
+            if(!isDel){@*alert("doUserDelPost:" + txtVal);*@ return true;}
+            else isDel = false;
+            
+            var data = {}; data[txtId] = txtVal;
+            var url = '@Url.Action("UserKODelete", "User", new { ID = "" })';
+            $.post(url, data);
+            return false; // prevent any postback
+        }
+        function doDelPost(txtId, txtVal) {
+            isDel = true;
+        }
+</script>

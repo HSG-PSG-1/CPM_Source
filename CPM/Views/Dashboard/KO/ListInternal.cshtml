@@ -1,0 +1,111 @@
+﻿@using Webdiyer.WebControls.Mvc
+@using CPM.Services
+@using CPM.Helper
+@{  object routeValues = new { qData = Request["qData"] };
+    string reload = "return false;";
+    bool isCustomer = _Session.IsOnlyCustomer;       }
+<div style="width:99%; text-align:center" data-bind="visible:filteredRecords().length < 1">No records found</div>
+<table width="100%" class="thinBorder" data-bind="visible:filteredRecords().length > 0">
+    <thead class="header">
+    @*NOTE: DO NOT change column order without updating the Group logic variables below*@
+        <tr>
+            <th nowrap="nowrap" data-bind="click: function(data,event){$root.sortData(data, event,'ClaimNo')}">           
+            @Html.Raw(HttpUtility.HtmlDecode(Html.SortableColumn("Claim #", "ClaimNo", reload, routeValues, true, false))) </th>
+            <th nowrap="nowrap" data-bind="click: function(data,event){$root.sortData(data, event,'ClaimDateOnly')}">
+            @Html.Raw(Html.SortableColumn("Claim Date", "ClaimDateOnly", reload, routeValues))            
+            </th>
+            <th nowrap="nowrap" data-bind="click: function(data,event){$root.sortData(data, event,'CustRefNo')}">
+            @Html.Raw(HttpUtility.HtmlDecode(Html.SortableColumn("Customer<br/>Ref #", "CustRefNo", reload, routeValues)))
+            @* For future: reload(this.href,'','#main');*@</th>
+            @if (!isCustomer){ 
+            <th nowrap="nowrap"data-bind="click: function(data,event){$root.sortData(data, event,'CustOrg')}">
+            @Html.Raw(Html.SortableColumn("Customer", "CustOrg", reload, routeValues))</th>
+            } 
+            <th nowrap="nowrap" data-bind="click: function(data,event){$root.sortData(data, event,'ShipToLocAndCode')}">
+            @Html.Raw(HttpUtility.HtmlDecode(Html.SortableColumn("Location", "ShipToLocAndCode", reload, routeValues)))</th>
+            <th nowrap="nowrap" data-bind="click: function(data,event){$root.sortData(data, event,'BrandName')}">
+            @Html.Raw(Html.SortableColumn("Brand", "BrandName", reload, routeValues))</th>
+
+            @if (!isCustomer){
+                 <th nowrap="nowrap" data-bind="click: function(data,event){$root.sortData(data, event,'Salesperson')}">
+                @Html.Raw(Html.SortableColumn("Salesperson", "Salesperson", reload, routeValues))</th>
+            } 
+            <th nowrap="nowrap" data-bind="click: function(data,event){$root.sortData(data, event,'Status')}">
+            @Html.Raw(Html.SortableColumn("Status", "Status", reload, routeValues))</th>
+            @if (!isCustomer){ 
+                <th nowrap="nowrap"data-bind="click: function(data,event){$root.sortData(data, event,'CommentsExist')}">
+                @Html.Raw(Html.SortableColumn("Comment", "CommentsExist", reload, routeValues))</th>
+            } 
+            <th nowrap="nowrap"data-bind="click: function(data,event){$root.sortData(data, event,'FilesHExist')}">
+            @Html.Raw(Html.SortableColumn("File", "FilesHExist", reload, routeValues))</th>            
+        </tr>
+    </thead>
+    @*<tbody> - DON'T because we'll add multiple tbody for group by *@
+    <tbody data-bind="foreach: pagedRows">@* Claims *@
+    <tr>
+        <td align="center">            
+                <u><div title="Click to view this claim" style="height: 99%; cursor: pointer;" data-bind="text:$data.ClaimNo, 
+                click:function(data,event){ gotoClaim($data.ID);return false;}"></div></u>            
+        </td>
+        <td align="center" data-bind="text:ClaimDateTxt"></td>
+        <td align="center" data-bind="text:CustRefNo"></td>
+        @if (!isCustomer)
+        { <td align="center" data-bind="text:CustOrg"></td>} 
+        <td align="center" data-bind="text:ShipToLocAndCode"></td>
+        <td align="center" data-bind="text:BrandName"></td>
+        @if (!isCustomer)
+        { <td align="center" data-bind="text:Salesperson"></td>} 
+        <td align="center" nowrap="nowrap">
+        <div data-bind="attr: {id : 'dialog' + $data.ID}"></div>
+        <div class="noBorder dDialog uline" data-bind="click: function(data,event){showDialog('Status',$data.ID,$data.Archived);claimObj = this;},html:$data.Status, attr:{id:'statusDIV' + $data.ID}"></div>
+        @*<input data-bind="value:$data.Status, attr:{id : 'status' + $data.ID}" style="display:none"/>
+        <input data-bind="value:$data.StatusID, attr:{id : 'statusID' + $data.ID}" style="display:none"/>*@
+        </td>
+        @if (!isCustomer)
+        { <td align="center">
+        <!-- ko if: CommentsExist -->         
+            <input type="image" src="@Url.Content("~/Content/Images/comments.gif")" alt="View Comments" title="View Comments"
+                data-bind="visible: CommentsExist,click: function(data,event){showDialog('Comments',$data.ID,$data.Archived);return false;}" />
+        <!-- /ko -->
+        </td>} 
+        <td align="center">
+        <input type="image" src="@Url.Content("~/Content/Images/files.gif")" alt="View Files" title="View Files"
+                data-bind="visible: FilesHExist,click: function(data,event){showDialog('Files',$data.ID,$data.Archived);return false;}"/>
+        </td>
+        @*<td align="center">
+            <input type="image" src="@Url.Content("~/Content/Images/Print.png")" alt="Print Claim" title="Print Claim"
+            data-bind="click: function(data,event){openPrintDialog($data.ID);return false;}" />
+        </td>*@
+    </tr>
+      </tbody>
+    <tfoot>
+        <tr>
+            <td colspan="10" align="center">
+                <table cellpadding="0" cellspacing="0" class="pager noborder" style="width:100%" border="0">
+                    <tr>
+                        @*<td nowrap="nowrap">
+                            &nbsp;Record count (<span data-bind="text:pageIndex()"></span>):
+                        </td>
+                        <td id="usrCount" data-bind="text:fields().length">
+                        </td>*@
+                        <td nowrap="nowrap" id="usrCount">
+                            &nbsp;Records : <span data-bind="text:filteredRecords().length"></span>, Page : <span data-bind="text:pageIndex()+1"></span>
+                        </td>
+                        <td>
+                           
+                        </td>
+                        <td align="right" width="98%" nowrap="nowrap">
+                        <div class="dDialog uline" data-bind="click: previousPage, visible: pageIndex() > 0">« prev</div> &nbsp;&nbsp;
+                        <div class="dDialog uline" data-bind="click: nextPage, visible: pageIndex() < maxPageIndex()">next »</div> &nbsp;
+
+                        @*<div class="dDialog uline" data-bind="click: function(data,event){return page(data,0);}">« prev</div> &nbsp;&nbsp;
+                        <div class="dDialog uline" data-bind="click: function(data,event){return page(data,1);}">next »</div> &nbsp; *@
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </tfoot>
+</table>
+@{ Html.RenderPartial("KO/ListInternalKOscript", 
+       new ViewDataDictionary { { "gridPageSize", ViewData["gridPageSize"] } }); }

@@ -30,7 +30,7 @@ tbody tr td{background-color:#ffffff;}
         <td align="center">@item.ClaimDate.ToString(Defaults.dtFormat, Defaults.ci)</td>
         <td align="center">@item.CustRefNo</td>
         <td align="center">@item.BrandName</td>
-        <td align="center">@item.ShipToLoc</td>        
+        <td align="center">@item.ShipToLocAndCode</td>        
         @if (!_Session.IsOnlyCustomer)
         {
         <td align="center">@item.CustOrg</td>        

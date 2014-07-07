@@ -62,7 +62,6 @@ namespace CPM.Services
                                                      Title = m.Title,
                                                      TitleOLD = m.Title,
                                                      SortOrder = m.SortOrder,
-                                                     SortOrderOLD = m.SortOrder,
                                                      LastModifiedBy = m.LastModifiedBy,
                                                      LastModifiedByVal = m.LastModifiedByVal,
                                                      LastModifiedDate = m.LastModifiedDate
@@ -76,8 +75,8 @@ namespace CPM.Services
                 result.Add(new Master()
                 {
                     IsAdded = false,
-                    ID = Defaults.Integer,
-                    Title = "[Title]",//Required otherwise it'll be considered as ModelState error !
+                    ID = -1,
+                    Title = "[Title-1]",//Required otherwise it'll be considered as ModelState error !
                     SortOrder = result.Count+1,//To make sure the js sort doesn't mess up like 0
                     LastModifiedBy = Defaults.Integer,//Make sure this is set to 0
                     LastModifiedByVal = _SessionUsr.UserName,
@@ -203,7 +202,7 @@ select new {
         public void BulkAddEditDel(List<Master> items)
         {
             // Cleanup newly added & deleted records
-            items.RemoveAll(i => i.ID == Defaults.Integer && i.IsDeleted);
+            items.RemoveAll(i => (i.IsAdded || i.ID < Defaults.Integer) && i.IsDeleted); // Remove newly inserted records
             using (dbc)
             {
                 dbc.Connection.Open();
@@ -221,7 +220,7 @@ select new {
                         item.LastModifiedBy = _SessionUsr.ID;
                         item.LastModifiedDate = DateTime.Now;
 
-                        if (item.IsAdded)
+                        if (item.IsAdded && !item.IsDeleted) // Because we're NOT removing the deleted items
                             Add(item);
                         else if (item.IsDeleted && item.CanDelete)//double check the can-delete flag
                             Delete(item);//Make sure Ref check brfore Delete is done
@@ -243,6 +242,8 @@ select new {
                     if (dbc.Transaction != null) 
                         dbc.Transaction.Dispose();
                     dbc.Transaction = null;
+                    //Invalidate cache entry
+                    _SessionLookup.MasterData.Remove(masterType);
                 }
                 #endregion
             }

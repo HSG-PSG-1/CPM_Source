@@ -126,8 +126,7 @@
                 }
                 else {                        
                     @*var old = ko.utils.arrayFirst(self.allItems(), function (item) {return item.ID() == self.itemToAdd.ID(); });
-                    self.allItems.replace(old, self.itemToAdd); //self.locations.valueHasMutated();*@
-                    alert(item.TDRemaining());
+                    self.allItems.replace(old, self.itemToAdd); //self.locations.valueHasMutated();*@                    
                 }
                 
                 IsCDEditMode = false;
@@ -186,7 +185,9 @@ var viewModelItems = new itemsModel();
              viewModelItems.itemToAdd(data.ItemToAdd);             
              viewModelItems.allFilesDetail = new Array();
              
-             viewModelItems.allItems = ko.mapping.fromJS(data.AllItems); 
+             viewModelItems.allItems = ko.mapping.fromJS(data.AllItems);
+             
+             try{viewModelItems.allItems.sort(function (l, r) { return l.ID() < r.ID() ? -1 : 1 }); }catch(ex){;}
 
              viewModelItems.Defects = ko.mapping.fromJS(data.Defects);
              viewModelItems.showGrid(data.showGrid); // viewModelItems.showGrid = ko.mapping.fromJS(data.showGrid);

@@ -4,7 +4,10 @@
 @using CPM.Helper
 @using System.Collections
 @{ ViewBag.Title = "Dashboard"; Layout = Defaults.masterLayout;}
-@section HeadContent { <script type="text/javascript" language="javascript"></script> }
+@section HeadContent { 
+    <script src="@Url.Content("~/Content/Scripts/KO/knockout-2.2.0.js")" type="text/javascript"></script>
+    <script src="@Url.Content("~/Content/Scripts/KO/knockout.mapping-latest.js")" type="text/javascript"></script>    
+ }
 
 @{ CPM.DAL.vw_Claim_Dashboard dSearch = ((CPM.DAL.vw_Claim_Dashboard)(ViewData["SearchData"]));
        object routeValues = new { qData = Request["qData"] };
@@ -16,16 +19,17 @@
        string brandLookup = !_Session.IsOnlyVendor ?LookupService.Source.Brand.ToString():
        LookupService.Source.BrandVendor.ToString() + "&extras=" + _SessionUsr.OrgID.ToString();
    }
-       <form action="@Url.Content("~/Dashboard/Excel")" method="post" id="frmExcel" style="display:none"><input type="submit" value="Export to Excel" class="button" id="btnExcel" /></form>       
+    <form action="@Url.Content("~/Dashboard/Excel")" method="post" id="frmExcel" style="display:none" ><input type="submit" value="Export to Excel" class="button" id="btnExcel" onclick="return excelPostback(event);" /></form>       
     <table width="100%">
     <tr>
     <td><b class="smallHeading">Dashboard</b></td>
+    <td class="sqz" align="right">@*Quick search: <input type="text" class="textBox" data-bind = "value:quickSearch" title="all filters except Date and won't apply for Excel export" /> *@</td>
     <td class="sqz" align="right">@Html.ActionLink("New Claim", "Manage", "Claim", new { ClaimId = 0}, null)&nbsp;</td>
     </tr>
         <tr>
-            <td colspan="2">
+            <td colspan="3">
             <!-- START: Search Panel -->
-                <form action="@Url.Content("~/Dashboard/List")" method="post" id="frm" style="display:inline">                
+                <form action="@Url.Content("~/Dashboard/List")" method="post" id="frm" style="display:inline" onsubmit="return doAJAXSubmit(this);"> 
                 <fieldset>
                     <legend onclick="showHideDiv('tblSearch')" style="cursor:pointer">
                     &nbsp;<img id="tblSearchImg" src="@Url.Content("~/Content/Images/aroB.gif")" alt="Show/Hide panel" />
@@ -35,58 +39,61 @@
                         <td nowrap="nowrap" width="5%">Claim #</td>
                         <td>
                             @*<%= Html.TextBox("ClaimNo1", dSearch.ClaimNo1)%>*@
-                            @Html.TextBox("ClaimNos", dSearch.ClaimNos, new{title="Enter single or comma separated multiple values"})
+                            @Html.TextBox("ClaimNos", dSearch.ClaimNos, new{title1="Enter single or comma separated multiple values",
+                                                                            data_bind = "value:search.ClaimNos"
+                       })
                         </td>
                         <td nowrap="nowrap" width="5%">Status</td>
                         <td>
-                            @Html.DropDownList("StatusID", new SelectList((IEnumerable)ViewData["Status"], "id", "value", dSearch.StatusID), " ", new { @class = "dropDown" })
+                            @Html.DropDownList("StatusID", new SelectList((IEnumerable)ViewData["Status"], "id", "value", dSearch.StatusID), " ", new { @class = "dropDown", data_bind = "value:search.StatusID" })
                         </td>
                         @if (!isCustomer) { 
                         <td nowrap="nowrap" width="5%">Assigned To</td>
                         <td valign="bottom" nowrap="nowrap">
-                            @Html.TextBox("AssignToName", dSearch.AssignToName,new {@style="width:200px"})&nbsp;@Html.Raw(string.Format(Defaults.lookupImgBtn, "AssignToName"))@Html.Hidden("AssignedTo", dSearch.AssignedTo)
+                            @Html.TextBox("AssignToName", dSearch.AssignToName, new { @style = "width:200px", data_bind = "value:search.AssignToName" })&nbsp;@Html.Raw(string.Format(Defaults.lookupImgBtn, "AssignToName"))@Html.Hidden("AssignedTo", dSearch.AssignedTo)
                         </td> 
                         } else { <td colspan="2"></td>   } 
                     </tr>
                     <tr>
                         <td nowrap="nowrap">Customer Ref #</td>
                         <td>
-                            @Html.TextBox("CustRefNo", dSearch.CustRefNo, txtAttr)
+                            @Html.TextBox("CustRefNo", dSearch.CustRefNo, new { @class = "hdrTxt textBox",
+                                data_bind = "value:search.CustRefNo" }) @* txtAttr)*@
                         </td>
                         <td nowrap="nowrap">Brand</td>
                         <td valign="top" nowrap="nowrap">
-                        @Html.TextBox("BrandName", dSearch.BrandName)&nbsp;@Html.Raw(string.Format(Defaults.lookupImgBtn, "BrandName"))@Html.Hidden("BrandID", dSearch.BrandID)
+                        @Html.TextBox("BrandName", dSearch.BrandName, new { data_bind = "value:search.BrandName" })&nbsp;@Html.Raw(string.Format(Defaults.lookupImgBtn, "BrandName"))@Html.Hidden("BrandID", dSearch.BrandID)
                         </td>
                         @if (!isCustomer) { 
                         <td nowrap="nowrap">Customer</td>
                         <td valign="middle" nowrap="nowrap">
-                        @Html.TextBox("CustOrg", dSearch.CustOrg,new {@style="width:200px"})&nbsp;@Html.Raw(string.Format(Defaults.lookupImgBtn, "CustOrg"))@Html.Hidden("CustID", dSearch.CustID)
+                        @Html.TextBox("CustOrg", dSearch.CustOrg,new {@style="width:200px", data_bind = "value:search.CustOrg"})&nbsp;@Html.Raw(string.Format(Defaults.lookupImgBtn, "CustOrg"))@Html.Hidden("CustID", dSearch.CustID)
                         </td>
                         } else { <td colspan="2"></td>   }
                     </tr>
                     <tr>
                         <td nowrap="nowrap">Claim Date From</td>
                         <td>
-                            @Html.TextBox("ClaimDateFrom1", dSearch.ClaimDateFrom.HasValue ? dSearch.ClaimDateFrom.Value.ToString(Defaults.dtFormat, Defaults.ci) : "")
+                            @Html.TextBox("ClaimDateFrom1", dSearch.ClaimDateFrom.HasValue ? dSearch.ClaimDateFrom.Value.ToString(Defaults.dtFormat, Defaults.ci) : "", new { data_bind = "value:search.ClaimDateFrom" })
                             @Html.Hidden("ClaimDateFrom", dSearch.ClaimDateFrom.HasValue ? dSearch.ClaimDateFrom.Value.ToString(Defaults.dtFormat, Defaults.ci) : "")
                         </td>
                         <td nowrap="nowrap">Claim Date To</td>
                         <td>
-                            @Html.TextBox("ClaimDateTo1", dSearch.ClaimDateTo.HasValue ? dSearch.ClaimDateTo.Value.ToString(Defaults.dtFormat, Defaults.ci) : "")
+                            @Html.TextBox("ClaimDateTo1", dSearch.ClaimDateTo.HasValue ? dSearch.ClaimDateTo.Value.ToString(Defaults.dtFormat, Defaults.ci) : "", new { data_bind = "value:search.ClaimDateTo" })
                             @Html.Hidden("ClaimDateTo", dSearch.ClaimDateTo.HasValue ? dSearch.ClaimDateTo.Value.ToString(Defaults.dtFormat, Defaults.ci) : "")
                         </td>
                         @if (!isCustomer && !isSales) { 
                         <td nowrap="nowrap">Salesperson</td>
                         <td valign="top" nowrap="nowrap">
-                            @Html.TextBox("Salesperson", dSearch.Salesperson,new {@style="width:200px"})&nbsp;@Html.Raw(string.Format(Defaults.lookupImgBtn, "Salesperson"))@Html.Hidden("SalespersonID", dSearch.SalespersonID)
+                            @Html.TextBox("Salesperson", dSearch.Salesperson,new {@style="width:200px", data_bind = "value:search.Salesperson" })&nbsp;@Html.Raw(string.Format(Defaults.lookupImgBtn, "Salesperson"))@Html.Hidden("SalespersonID", dSearch.SalespersonID)
                         </td>
                         } else { <td colspan="2"></td>   } 
                     </tr>
                     <tr>
                         <td colspan="6" align="right">
-                        Search Archived Claims @Html.CheckBox("Archived", dSearch.Archived)&nbsp;&nbsp;
-                        <input type="submit" value="Search" class="button" />
-                <input type="submit" value="Reset" class="button" onclick="clearForm(document.getElementById('frm')); document.getElementById('doReset').checked = true;resetDatepicker('#ClaimDateFrom1, #ClaimDateTo1');" />                
+                        Search Archived Claims @Html.CheckBox("Archived", dSearch.Archived, new { data_bind = "checked: search.Archived", @onclick = "$('#btnsearch').focus();", @onchange = "getArchivedData(this);" })&nbsp;&nbsp;
+                        <input type="submit" value="Search" class="button" id="btnsearch" />
+                <input type="submit" value="Reset" class="button" onclick="resetForm(this);" />
                 <input type="checkbox" name="doReset" id="doReset" style="display: none;" />                
                 @if (true || Model.Count > 0) {//Kept for ref 
                 <input type="button" value="Export to Excel" class="button" onclick="document.getElementById('btnExcel').click();return false;" />  
@@ -98,12 +105,14 @@
                 </form>
             <!-- END: Search Panel -->
             </td>
-        </tr>        
+        </tr>                
         <tr>
-            <td colspan="2">  
+            <td colspan="3">  
             <div id="tdGrid">
-                @*@Html.RenderPartial("./EditorTemplates/ListCustomer", Model); *@
-                        @{ Html.RenderAction("ClaimList", "Dashboard"); }
+                @*@Html.RenderPartial("./KO/ListCustomer", Model); *@
+                        @{ Html.RenderPartial("KO/" + 
+                               (_Session.IsOnlyCustomer ? "ListCustomer" : "ListInternal"), 
+                               new ViewDataDictionary { { "gridPageSize" , ViewData["gridPageSize"] } }); }
              </div>
             </td>
         </tr>
@@ -123,7 +132,7 @@
     doCollapse(); //If url has collapse
         
         //AJAXify form
-        doAjaxForm('#frm', '#tdGrid', '#doReset');
+        //doAjaxForm('#frm', '#tdGrid', '#doReset');
 
         callAutoComplete("@Html.Raw(brandLookup)", "#BrandName", "#BrandID");
         //callAutoComplete("ShipLoc", "#ShipToLoc", "#ShipToLocationID");
@@ -149,6 +158,8 @@
 						$.datepicker._defaults.dateFormat,
 						selectedDate, instance.settings);
                 dates.not(this).datepicker("option", option, date);
+
+                $(this).trigger("change"); // Specially for KO
             }
         });
             // Set format to be used by alt date field
@@ -157,6 +168,8 @@
 
             $("#ClaimDateTo1").datepicker("option", "altField", '#ClaimDateTo');
             $("#ClaimDateTo1").datepicker("option", "altFormat", 'dd-M-yy');
+
+            //$("#frm").submit(); // Render the list after page load
     });
     
     //Required to show/hide search-panel
@@ -190,7 +203,7 @@
                          
             return false; // prevent any postback
         }
-        var statTDdiv = "";//will be set whn the cell is clicked
+        var claimObj = "";//will be set whn the cell is clicked
    function updateStatusHistory(){
         //clone and insert the tr after the table
         $(lastTR).clone(true).insertAfter(lastTR);        
@@ -206,10 +219,124 @@
         //persist updated status in textbox
         $(oldStatID).val($(newStatID).val());
         $(oldStat).val($(newStatID).children("option:selected").text());
-        //update in Grid (NOTE: make sure 'statTDdiv' is set when td is clicked
-        $(statTDdiv).html($(oldStat).val()); $(statTDdiv).effect('highlight', {}, 2000); //highlight
+        //update in Grid (NOTE: make sure 'claimObj' is set when td is clicked
+        //$(claimObj).html($(oldStat).val()); $(claimObj).effect('highlight', {}, 2000); //highlight
+        @*$("#status" + claimObj.ID).val($(oldStat).val()).trigger("change");
+        $("#statusID" + claimObj.ID).val($(newStatID).val()).trigger("change");*@
+        $("#statusDIV" + claimObj.ID).text($(oldStat).val()).trigger("change").effect('highlight', {}, 2000);
+        claimObj.Status = $(oldStat).val(); claimObj.StatusID = $(newStatID).val();
+        // won't update because its not an observable
+        
+        @*var old = ko.utils.arrayFirst(vm_D.fields(), function (item) {return item.ID == claimObj.ID; });
+                    vm_D.fields.replace(old, claimObj); 
+                    //vm_D.fields().valueHasMutated();*@
    }    
 </script>
+<script language="javascript" type="text/javascript" defer="defer">
+    var ListURL = '@Html.Raw(@Url.Action("ClaimListKO", "Dashboard", new { index = 0, fetchAll = true }))';
+    function doAJAXSubmit(frm) {
+
+        vm_D.invokeSearch(1);
+        return false;        
+    }
+    
+    //var vm_D = new claimListModel();
+    var vm_D = new viewModel();
+    function createKO() {
+        showDlg(true);
+        $.getJSON(ListURL, function (data) {
+            showDlg(false);
+            //vm_D.Claims = ko.observableArray(data); // Initial items
+            vm_D.fields(data.records);
+            vm_D.search = ko.mapping.fromJS(data.search); // Otherwise the search button will be needed
+            @*vm_D.quickSearch("");*@
+            vm_D.invokeSearch(2);
+            ko.applyBindings(vm_D);
+            //pagedGrid.DisplayFields(data);
+        });
+    }
+    var skipCommitChk = false;
+    $(document).ready(function () {
+        createKO();
+        @*//bind event to check claim commit*@
+        window.onbeforeunload = function(e){            
+           if(skipCommitChk){skipCommitChk = false; return;}
+            $.ajax({
+            type: "POST",
+            //contentType: "application/json; charset=utf-8",
+            //dataType: "json",
+            data: $("#frm").serialize(),
+            url: ListURL
+            ,async : false // SO: 14645011 (for FF to ensure the postback is not
+            @*,success: function (data) {
+                if (data != null) {
+                    alert(data);
+                    /*//vm_D.fields.removeAll();
+                    vm_D.pageIndex(0);  self.cachedPagesTill(0);
+                    vm_D.fields(data.records);
+                    vm_D.search(data.search);
+                    document.getElementById('doReset').checked = false;*/             
+                }
+            }*@
+        });  
+         
+        };
+    });
+
+    function resetForm(btn) 
+    {
+        clearForm(document.getElementById('frm'));
+        document.getElementById('doReset').checked = true;
+        resetDatepicker('#ClaimDateFrom1, #ClaimDateTo1');
+
+        //trigger changeClaimStatusPost for KO binding notification
+        vm_D.search.ClaimNos(null);
+        vm_D.search.StatusID(0);
+        vm_D.search.AssignToName(null);
+        vm_D.search.CustRefNo(null);
+        vm_D.search.BrandName(null);
+        vm_D.search.CustOrg(null);
+        vm_D.search.Salesperson(null);
+
+        vm_D.search.ClaimDateFrom(null);
+        vm_D.search.ClaimDateTo(null);
+        
+        var hadArchived = vm_D.search.Archived();
+        vm_D.search.Archived(false);
+
+        if (hadArchived == true)
+            getArchivedData($("#Archived"));
+
+        @*vm_D.quickSearch(null);*@
+    }      
+
+    function getArchivedData(chk)
+    {
+        var archived = $(chk).is(':checked');
+        var ArchivedURL = '@Html.Raw(@Url.Action("ClaimListArchivedKO", "Dashboard", new { archived = -99 }))'.replace('-99',archived);
+
+        $.getJSON(ArchivedURL, function (data) {
+            vm_D.fields(data);
+            vm_D.invokeSearch(3);            
+        });
+    }
+
+    function excelPostback(e)
+    {
+        skipCommitChk = true;
+        $.ajax({
+            type: "POST",
+            //contentType: "application/json; charset=utf-8",
+            //dataType: "json",
+            data: $("#frm").serialize(),
+            url: '@Html.Raw(@Url.Action("SetSearchOpts", "Dashboard"))',
+            success: function (data) {
+                $("#frmExcel").submit();
+            }
+        });
+        return false; // to cause form postback
+    }
+    </script>
 @*HT: Set min width required by Dashboard*@
 <img src="@Url.Content("~/Content/Images/spacer.gif")" height="1px" width="900px" />
 <script src="@Url.Content("~/Content/Scripts/jquery.taconite.js")" type="text/javascript" ></script>

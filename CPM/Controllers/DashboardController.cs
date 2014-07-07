@@ -12,7 +12,7 @@ namespace CPM.Controllers
 {
     //[CompressFilter] - DON'T
     [IsAuthorize(IsAuthorizeAttribute.Rights.NONE)]//Special case for some dirty session-abandoned pages and hacks
-    public class DashboardController : BaseController
+    public partial class DashboardController : BaseController
     {
         string view = _Session.IsOnlyCustomer ? "ListCustomer" : "ListInternal";
 
@@ -27,48 +27,111 @@ namespace CPM.Controllers
             //_Session.NewSort = DashboardService.sortOn1; _Session.OldSort = string.Empty;//Initialize (only once)
             //base.SetSearchOpts(index.Value);
             //Special case: Set the filter back if it existed so that if the user "re-visits" the page he gets the previous filter (unless reset or logged off)
-            searchOpts = _Session.Search[Filters.list.Dashboard];
+            searchOpts = _Session.Search[Filters.list.Dashboard];//new vw_Claim_Dashboard();
 
             populateData(true);
-            
+            ViewData["gridPageSize"] = gridPageSize; // Required to adjust pagesize for grid
+
             // No need to return view - it'll fetched by ajax in partial rendering
             return View();
         }
 
         #region Will need GET (for AJAX) & Post
+        
         [CacheControl(HttpCacheability.NoCache)]//Don't mention GET or post as this is required for both!
-        public PartialViewResult ClaimList(int? index, string qData)
+        public JsonResult ClaimListKO(int? index, string qData, bool? fetchAll)
         {
             base.SetTempDataSort(ref index);// Set TempDate, Sort & index
             //Make sure searchOpts is assigned to set ViewState
+            vw_Claim_Dashboard oldSearchOpts = (vw_Claim_Dashboard)searchOpts;
+            searchOpts = new vw_Claim_Dashboard() { Archived = oldSearchOpts.Archived };// CAUTION: otehrwise archived saved search will show null records
             populateData(false);
-            
-            //var profiler = MiniProfiler.Current; // it's ok if this is null
 
-            List<vw_Claim_Dashboard> result = new List<vw_Claim_Dashboard>();
-            //using (profiler.Step("Fetch Dashboard Data"))
-            {
-                result = new DashboardService().Search(sortExpr, index, gridPageSize, (vw_Claim_Dashboard)searchOpts, false, _Session.IsOnlyCustomer);
-            }
-                return PartialView("~/Views/Dashboard/EditorTemplates/" +
-                    (_Session.IsOnlyCustomer ? "ListCustomer.cshtml" : "ListInternal.cshtml"), result);
-            
+            index = (index > 0) ? index + 1 : index; // paging starts with 2
+
+            var result = from vw_u in new DashboardService().SearchKO(
+                sortExpr, index, gridPageSize * 2, (vw_Claim_Dashboard)searchOpts, fetchAll ?? false, _Session.IsOnlyCustomer)
+                         select new
+                         {
+                             ID = vw_u.ID,
+                             ClaimNo = vw_u.ClaimNo,
+                             StatusID = vw_u.StatusID,
+                             AssignToName = vw_u.AssignToName,
+                             CustRefNo = vw_u.CustRefNo,
+                             BrandName = vw_u.BrandName,
+                             CustOrg = vw_u.CustOrg,
+                             Salesperson = vw_u.Salesperson,
+                             ClaimDateOnly = vw_u.ClaimDateOnly,
+                             Archived = vw_u.Archived,
+                             Status = vw_u.Status,
+                             CommentsExist = vw_u.CommentsExist,
+                             FilesHExist = vw_u.FilesHExist,
+                             ClaimDateTxt = vw_u.ClaimDateTxt,//ClaimDate.ToString(Defaults.dtFormat, Defaults.ci),
+                             ShipToLocAndCode = vw_u.ShipToLocAndCode,
+                         };
+
+            return Json(new { records = result, search = oldSearchOpts }, JsonRequestBehavior.AllowGet);
         }
-        #endregion
+
+        [CacheControl(HttpCacheability.NoCache)]//Don't mention GET or post as this is required for both!
+        public JsonResult ClaimListArchivedKO(bool? archived)
+        {
+            vw_Claim_Dashboard searchOpts1 = (vw_Claim_Dashboard)searchOpts;
+            bool oldSessionVal = searchOpts1.Archived;
+            searchOpts1.Archived = archived.HasValue ? archived.Value : false;
+
+            var result = from vw_u in new DashboardService().SearchKO(
+                sortExpr, 0, gridPageSize * 2, searchOpts1, true, _Session.IsOnlyCustomer)
+                         select new
+                         {
+                             ID = vw_u.ID,
+                             ClaimNo = vw_u.ClaimNo,
+                             StatusID = vw_u.StatusID,
+                             AssignToName = vw_u.AssignToName,
+                             CustRefNo = vw_u.CustRefNo,
+                             BrandName = vw_u.BrandName,
+                             CustOrg = vw_u.CustOrg,
+                             Salesperson = vw_u.Salesperson,
+                             ClaimDateOnly = vw_u.ClaimDateOnly,
+                             Archived = vw_u.Archived,
+                             Status = vw_u.Status,
+                             CommentsExist = vw_u.CommentsExist,
+                             FilesHExist = vw_u.FilesHExist,
+                             ClaimDateTxt = vw_u.ClaimDateTxt,//ClaimDate.ToString(Defaults.dtFormat, Defaults.ci),
+                             ShipToLocAndCode = vw_u.ShipToLocAndCode,
+                         };
+
+            //searchOpts1.Archived = oldSessionVal;//reset
+
+            return Json(result, JsonRequestBehavior.AllowGet);
+        }
 
         [HttpPost]
         [SkipModelValidation]//HT: Use with CAUTION only meant for POSTBACK search Action
-        public ActionResult List(vw_Claim_Dashboard searchObj, string doReset, string qData)
+        public ActionResult ClaimListKO(vw_Claim_Dashboard searchObj, string doReset, string qData, bool? fetchAll)
         {
             searchOpts = (doReset == "on") ? new vw_Claim_Dashboard() : searchObj; // Set or Reset Search-options
-            populateData(true);// Populate ddl Viewdata
-            //AT PRESENT ONLY 'RESET' & 'SEARCH' come here so need to reset
-            //_Session.NewSort = _Session.OldSort = string.Empty;//Set sort variables
-            
-            TempData["SearchData"] = searchObj;// To be used by partial view
-            return RedirectToAction("ClaimList"); //Though ajaxified but DON'T return - return View();
+            populateData(false);// Populate ddl Viewdata
+
+            return Json(true);// WE just need to set it in the session
         }
 
+        [HttpPost]
+        [SkipModelValidation]
+        public ActionResult SetSearchOpts(vw_Claim_Dashboard searchObj)
+        {
+            if (searchObj != null)
+            {//Called only to set filter via ajax
+                searchOpts = searchObj;
+                return Json(true);
+            }
+            return Json(false);
+        }
+
+        #endregion
+
+        [HttpPost]
+        [SkipModelValidation]
         public ActionResult Excel()
         {
             //HttpContext context = ControllerContext.HttpContext.CurrentHandler;
@@ -84,8 +147,12 @@ namespace CPM.Controllers
             //this.Response.End();
 
             populateData(false);
+            var result = new DashboardService().Search(sortExpr, 1, gridPageSize, (vw_Claim_Dashboard)searchOpts, true, _Session.IsOnlyCustomer);
 
-            return View(new DashboardService().Search(sortExpr, 1, gridPageSize, (vw_Claim_Dashboard)searchOpts, true, _Session.IsOnlyCustomer));
+            searchOpts = new vw_Claim_Dashboard();
+            populateData(false);
+
+            return View("Excel", result);
         }
 
         public ActionResult ExcelPDF()
@@ -95,6 +162,30 @@ namespace CPM.Controllers
             
             string GUID = _SessionUsr.ID.ToString();
             return new ReportManagement.StandardPdfRenderer().BinaryPdfData(this, "Dashboard" + GUID, "Excel", printView);
+        }
+
+        public ActionResult ClaimWithDetails(string code)
+        {
+            if (code != "ChrisH")
+            {
+                ViewData["Message"] = "You do not have access to Claim with details report.";
+                return RedirectToAction("NoAccess", "Common");
+            }
+
+            //HttpContext context = ControllerContext.HttpContext.CurrentHandler;
+            //Essense of : http://stephenwalther.com/blog/archive/2008/06/16/asp-net-mvc-tip-2-create-a-custom-action-result-that-returns-microsoft-excel-documents.aspx
+            this.Response.Clear();
+            this.Response.AddHeader("content-disposition", "attachment;filename=" + "ClaimWithDetails.xls");
+            this.Response.Charset = "";
+            this.Response.Cache.SetCacheability(HttpCacheability.NoCache);
+            this.Response.ContentType = "application/vnd.ms-excel";
+
+            //DON'T do the following
+            //this.Response.Write(content);
+            //this.Response.End();
+
+            var result = new DashboardService().ClaimWithDetails();
+            return View("ClaimWithDetails", result);
         }
         #endregion
 

@@ -18,61 +18,109 @@ namespace CPM.Controllers
 
         #region List Grid
 
-        public ActionResult List(int? index, string qData, bool? success)
+        public ActionResult List(int? index, string qData, bool? success, string source)
         {
             index = index ?? 0;
-            //_Session.NewSort = UserService.sortOn1;//Initialize (only once)
             ViewData["oprSuccess"] = base.operationSuccess;//oprSuccess will be reset after this
             //base.SetSearchOpts(index.Value);
-            //Special case: Set the filter back if it existed so that if the user "re-visits" the page he gets the previous filter (unless reset or logged off)
             searchOpts = _Session.Search[Filters.list.User];
-
             //Populate ddl Viewdata
             populateData(true);
+            ViewData["gridPageSize"] = gridPageSize; // Required to adjust pagesize for grid
+
             // No need to return view - it'll fetched by ajax in partial rendering
+            return View();
+            //return View((source == "mobile") ? "ListKOMobile" : "List");
+        }
+
+        public ActionResult ListKOGrid(int? index, string qData, bool? success, string source)
+        {
             return View();
         }
 
-        public ActionResult ListPDF(int? index, string qData, bool? success)
-        {
-            index = index ?? 0;
-            //_Session.NewSort = UserService.sortOn1;//Initialize (only once)
-            ViewData["oprSuccess"] = base.operationSuccess;//oprSuccess will be reset after this
-            base.SetSearchOpts(index.Value);
-            //Populate ddl Viewdata
-            populateData(true);
-            // No need to return view - it'll fetched by ajax in partial rendering
-            string GUID = _SessionUsr.ID.ToString();
-            return new ReportManagement.StandardPdfRenderer().BinaryPdfData(this, "UserList" + GUID, @"EditorTemplates\UserList",
-                new UserService().Search(sortExpr, index, gridPageSize, (vw_Users_Role_Org)searchOpts));
-        }
-
         #region Will need GET (for AJAX) & Post
+
         [CacheControl(HttpCacheability.NoCache)]//Don't mention GET or post as this is required for both!
-        public PartialViewResult UserList(int? index, string qData)
+        public JsonResult UserList(int? index, string qData, bool? fetchAll)
         {
             base.SetTempDataSort(ref index);// Set TempDate, Sort & index
             //Make sure searchOpts is assigned to set ViewState
+            vw_Users_Role_Org oldSearchOpts = (vw_Users_Role_Org)searchOpts;
+            searchOpts = new vw_Users_Role_Org();
             populateData(false);
 
-            return PartialView("~/Views/User/EditorTemplates/UserList.cshtml", 
-                new UserService().Search(sortExpr, index, gridPageSize, (vw_Users_Role_Org)searchOpts));
+            index = (index > 0) ? index + 1 : index; // paging starts with 2
+
+            var result = from vw_u in new UserService().SearchKO(sortExpr, index, gridPageSize * 2, (vw_Users_Role_Org)searchOpts, fetchAll ?? false)
+                         select new
+                         {
+                             ID = vw_u.ID,
+                             Email = vw_u.Email,
+                             OrgID = vw_u.OrgID,
+                             OrgName = vw_u.OrgName,
+                             OrgType = vw_u.OrgType,
+                             OrgTypeId = vw_u.OrgTypeId,
+                             RoleID = vw_u.RoleID,
+                             RoleName = vw_u.RoleName,
+                             SalespersonCode = vw_u.SalespersonCode,
+                             UserName = vw_u.UserName
+                         };
+
+            //var result = new UserService().SearchKO(sortExpr, index, gridPageSize * 2, (vw_Users_Role_Org)searchOpts, fetchAll ?? false);
+
+            return Json(new { records = result, search = oldSearchOpts }, JsonRequestBehavior.AllowGet);
         }
-        #endregion
 
         [HttpPost]
         [SkipModelValidation]//HT: Use with CAUTION only meant for POSTBACK search Action        
-        public ActionResult List(vw_Users_Role_Org searchObj, string doReset, string qData)
+        public JsonResult UserList(vw_Users_Role_Org searchObj, string doReset, string qData)
         {
             searchOpts = (doReset == "on") ? new vw_Users_Role_Org() : searchObj; // Set or Reset Search-options
-            populateData(true);// Populate ddl Viewdata
-            //AT PRESENT ONLY 'RESET' & 'SEARCH' come here so need to reset
-            //_Session.NewSort = _Session.OldSort = string.Empty;//Set sort variables
+            populateData(false);// Populate ddl Viewdata
 
-            TempData["SearchData"] = searchObj;// To be used by partial view
-            return RedirectToAction("UserList");//Though ajaxified but DON'T return - return View();
+            return Json(true);// WE just need to set it in the session
         }
-        
+
+        [HttpPost]
+        [SkipModelValidation]
+        public ActionResult SetSearchOpts(vw_Claim_Dashboard searchObj)
+        {
+            if (searchObj != null)
+            {//Called only to set filter via ajax
+                searchOpts = searchObj;
+                return Json(true);
+            }
+            return Json(false);
+        }
+
+        #endregion
+
+        [HttpPost]
+        public ActionResult UserKODelete(int? UserId)
+        {
+            Users uObj = new Users() { ID = UserId.Value };
+            bool proceed = false; string err = "";
+            proceed = !(new UserService().IsReferred(uObj));//If user being deleted is referred abort            
+            if (!proceed)
+                err = CPM.Models.Master.delRefChkMsg;
+            else
+            {
+                proceed = !(uObj.ID == _SessionUsr.ID); // Self delete
+                if (!proceed) err = "Cannot delete your own record!";
+            }
+
+            if (proceed) // NOT deleted because testing
+            {//Delete & Log Activity
+                //new UserService().Delete(uObj);
+                //new ActivityLogService(ActivityLogService.Activity.UserDelete).Add();
+            }
+            //base.operationSuccess = proceed; HT: DON'T
+            return this.Content(Defaults.getTaconite(proceed,
+                Defaults.getOprResult(proceed, err) + (proceed ? "(NOT DELETED just testing)" : ""), null, true), "text/xml");
+
+            //return this.Content(Defaults.getTaconite(true, Defaults.getOprResult(true, ""), "cmtOprMsg"), "text/xml");            
+        }
+
         #endregion
 
         #region Customer Location GET (for AJAX)

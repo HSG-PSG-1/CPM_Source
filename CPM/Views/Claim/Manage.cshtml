@@ -256,12 +256,13 @@
             else { $('#tabs').tabs('option', 'active',0); }
 
             if (proceed) {
+                showDlg(true);
                 ko.utils.postJson(location.href, 
                 { 
                     isAddMode: @isNewClaim.ToString().ToLower(),
                     claimObj: claimObj,
                     items: ko.mapping.toJS(viewModelItems.allItems()),
-                    comments: ko.mapping.toJS(viewModelComments.allComments()),  
+                    @if (!IsOnlyCustomer){<text>comments: ko.mapping.toJS(viewModelComments.allComments()),</text>}
                     files: ko.mapping.toJS(viewModelFH.allFiles()),
                     printClaimAfterSave: printClaimAfterSave  
                 });

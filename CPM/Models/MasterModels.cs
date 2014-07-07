@@ -17,7 +17,7 @@ namespace CPM.Models
     [DuplicateMatchAndRequiredForMASTERAttribute("Title", "TitleOLD")]    
     [MetadataType(typeof(MastersMetadata))]
     [Table] //HT: Required to bind extra properties while Dynamic LINQ: http://geekswithblogs.net/michelotti/archive/2008/04/20/121437.aspx
-    public partial class Master //: DAL.MasterClaimStatus
+    public partial class Master
     {
         [Column(Name="ID")]
         public int ID { get; set; }
@@ -28,19 +28,8 @@ namespace CPM.Models
         [StringLength(50, ErrorMessage = Defaults.MaxLengthMsg)]
         [Column(Name = "Title")]
         public string TitleOLD { get; set; }
-        public bool TitleChanged
-        {
-            get
-            {
-                //if (IsDeleted || IsAdded) return false;//Skip check during Add & Del
-                return ((Title ?? "").ToUpper() != (TitleOLD ?? "").ToUpper());
-            }
-        }
         [Column(Name = "SortOrder")]
         public int SortOrder { get; set; }
-        [Column(Name = "SortOrder")]
-        public int SortOrderOLD { get; set; }
-        public bool SortOrderChanged { get { return (SortOrder != SortOrderOLD); } }
         [Column(Name = "CanDelete")]
         public bool CanDelete { get; set; }
         [Column(Name = "LastModifiedBy")]
@@ -53,19 +42,10 @@ namespace CPM.Models
         //HT: Special column only for MasterDefect
         [Column(Name = "Category")]
         public string Category { get; set; }
-        [Column(Name = "Category")]
-        public string CategoryOLD { get; set; }
-        public bool CategoryChanged
-        {
-            get
-            {
-                return ((Category ?? "").ToUpper() != (CategoryOLD ?? "").ToUpper());
-            }
-        }
 
-        public bool IsUpdated { get { return !IsAdded && !IsDeleted && (ID>0) &&
-            (TitleChanged || SortOrderChanged); }
-        }
+        public bool IsUpdated { get; set; }
+        /*get { return !IsAdded && !IsDeleted && (ID>0) &&
+            (TitleChanged || SortOrderChanged); }*/
         public bool IsAdded { get; set; }
         public bool IsDeleted { get; set; }
 

@@ -30,7 +30,8 @@ namespace CPM.Services
             
             //using (dbc) HT: Coz we're using the data
             {
-                usr = dbc.vw_Users_Role_Orgs.SingleOrDefault(u => u.Email.ToUpper() == email && u.Password == password);
+                usr = dbc.vw_Users_Role_Orgs.FirstOrDefault(u => u.Email.ToUpper() == email && u.Password == password);
+                // CAUTION: SingleOrDefault is causing error !
                     /*(from u in dbc.vw_Users_Role_Orgs
                        where u.Email.ToUpper() == email && u.Password == password
                        select u).SingleOrDefault();*/
@@ -72,7 +73,7 @@ namespace CPM.Services
             }
         }
 
-        public List<vw_Users_Role_Org> SearchKO(string orderBy, int? pgIndex, int pageSize, vw_Users_Role_Org usr)
+        public List<vw_Users_Role_Org> SearchKO(string orderBy, int? pgIndex, int pageSize, vw_Users_Role_Org usr, bool fetchAll)
         {
             orderBy = string.IsNullOrEmpty(orderBy) ? sortOn : orderBy;
 
@@ -84,7 +85,10 @@ namespace CPM.Services
                 // Apply Sorting
                 userQuery = userQuery.OrderBy(orderBy);
                 // Apply pagination and return
-                return userQuery.Skip(pgIndex.Value).Take(pageSize).ToList<vw_Users_Role_Org>();
+                if (fetchAll)
+                    return userQuery.ToList<vw_Users_Role_Org>();
+                else
+                    return userQuery.Skip(pgIndex.Value).Take(pageSize).ToList<vw_Users_Role_Org>();
             }
         }
 
