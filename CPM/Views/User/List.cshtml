@@ -89,7 +89,7 @@ var mailToCellTemplate =
 hmnt</a>*@
 </script>
 <script language="javascript" type="text/javascript" defer="defer">    setFocus("UserName");
-    var ListURL = '@Url.Action("UserList", "User", new { index = 0, fetchAll = true }))';
+    var ListURL = '@Html.Raw(Url.Action("UserList", "User", new { index = 0, fetchAll = true })))';
     function doAJAXSubmit(frm) {
         vm_U.invokeSearch(1);
         return false;

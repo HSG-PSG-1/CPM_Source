@@ -30,7 +30,8 @@ namespace CPM.Services
             
             //using (dbc) HT: Coz we're using the data
             {
-                usr = dbc.vw_Users_Role_Orgs.SingleOrDefault(u => u.Email.ToUpper() == email && u.Password == password);
+                usr = dbc.vw_Users_Role_Orgs.FirstOrDefault(u => u.Email.ToUpper() == email && u.Password == password);
+                // CAUTION: SingleOrDefault is causing error !
                     /*(from u in dbc.vw_Users_Role_Orgs
                        where u.Email.ToUpper() == email && u.Password == password
                        select u).SingleOrDefault();*/
