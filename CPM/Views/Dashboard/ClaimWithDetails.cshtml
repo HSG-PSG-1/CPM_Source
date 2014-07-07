@@ -1,0 +1,28 @@
+﻿@model IEnumerable<CPM.DAL.vw_ClaimWithItemDetail>
+@using System.Collections
+@using CPM.Helper
+@{Layout = ""; /* Master page is NOT needed here */}
+<style>
+table {font-size: 12px;font-family: Calibri, Verdana, Helvetica, Sans-Serif;border: solid 1px #BFB88E;border-collapse: collapse;}
+td,th{text-align: center;background-color:#EEECE1;}
+tbody tr td{background-color:#ffffff;}
+</style>
+<table border="1">
+    <thead>
+    <tr>
+        <th>Claim #</th>
+        <th>Customer Ref</th>
+        <th>Claim Date<br />MM/dd/yyyy</th>
+        <th>Customer<br />Org Code</th>
+        <th>Customer Org Name</th>
+        <th>Brand</th>        
+        <th>ItemNo</th>        
+        <th>Defect</th>
+        <th>Description</th>        
+    </tr>
+    </thead>
+    <tbody>
+    @foreach (var item in Model){ 
+<tr><td>@item.ClaimNo</td><td>@item.CustRefNo</td><td>@item.ClaimDate.ToString(Defaults.dtFormat, Defaults.ci)</td><td>@item.CustOrgCode</td><td>@item.CustOrgName</td><td>@item.Brand</td><td>@item.ItemNo</td><td>@item.Defect</td><td>@item.Description</td></tr>}
+    </tbody>
+</table>

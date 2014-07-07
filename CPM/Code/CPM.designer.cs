@@ -443,6 +443,14 @@ namespace CPM.DAL
 				return this.GetTable<vw_Claim_Dashboard>();
 			}
 		}
+		
+		public System.Data.Linq.Table<vw_ClaimWithItemDetail> vw_ClaimWithItemDetails
+		{
+			get
+			{
+				return this.GetTable<vw_ClaimWithItemDetail>();
+			}
+		}
 	}
 	
 	[global::System.Data.Linq.Mapping.TableAttribute(Name="dbo.ClaimDetail")]
@@ -10836,6 +10844,177 @@ namespace CPM.DAL
 				if ((this._AssignToName != value))
 				{
 					this._AssignToName = value;
+				}
+			}
+		}
+	}
+	
+	[global::System.Data.Linq.Mapping.TableAttribute(Name="dbo.vw_ClaimWithItemDetails")]
+	public partial class vw_ClaimWithItemDetail
+	{
+		
+		private int _ClaimNo;
+		
+		private string _CustRefNo;
+		
+		private System.DateTime _ClaimDate;
+		
+		private string _CustOrgCode;
+		
+		private string _CustOrgName;
+		
+		private string _Brand;
+		
+		private string _ItemNo;
+		
+		private string _Defect;
+		
+		private string _Description;
+		
+		public vw_ClaimWithItemDetail()
+		{
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_ClaimNo", DbType="Int NOT NULL")]
+		public int ClaimNo
+		{
+			get
+			{
+				return this._ClaimNo;
+			}
+			set
+			{
+				if ((this._ClaimNo != value))
+				{
+					this._ClaimNo = value;
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_CustRefNo", DbType="NVarChar(30)")]
+		public string CustRefNo
+		{
+			get
+			{
+				return this._CustRefNo;
+			}
+			set
+			{
+				if ((this._CustRefNo != value))
+				{
+					this._CustRefNo = value;
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_ClaimDate", DbType="DateTime NOT NULL")]
+		public System.DateTime ClaimDate
+		{
+			get
+			{
+				return this._ClaimDate;
+			}
+			set
+			{
+				if ((this._ClaimDate != value))
+				{
+					this._ClaimDate = value;
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_CustOrgCode", DbType="NVarChar(20) NOT NULL", CanBeNull=false)]
+		public string CustOrgCode
+		{
+			get
+			{
+				return this._CustOrgCode;
+			}
+			set
+			{
+				if ((this._CustOrgCode != value))
+				{
+					this._CustOrgCode = value;
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_CustOrgName", DbType="NVarChar(80) NOT NULL", CanBeNull=false)]
+		public string CustOrgName
+		{
+			get
+			{
+				return this._CustOrgName;
+			}
+			set
+			{
+				if ((this._CustOrgName != value))
+				{
+					this._CustOrgName = value;
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_Brand", DbType="NVarChar(50) NOT NULL", CanBeNull=false)]
+		public string Brand
+		{
+			get
+			{
+				return this._Brand;
+			}
+			set
+			{
+				if ((this._Brand != value))
+				{
+					this._Brand = value;
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_ItemNo", DbType="NVarChar(50) NOT NULL", CanBeNull=false)]
+		public string ItemNo
+		{
+			get
+			{
+				return this._ItemNo;
+			}
+			set
+			{
+				if ((this._ItemNo != value))
+				{
+					this._ItemNo = value;
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_Defect", DbType="NVarChar(50) NOT NULL", CanBeNull=false)]
+		public string Defect
+		{
+			get
+			{
+				return this._Defect;
+			}
+			set
+			{
+				if ((this._Defect != value))
+				{
+					this._Defect = value;
+				}
+			}
+		}
+		
+		[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_Description", DbType="NVarChar(250)")]
+		public string Description
+		{
+			get
+			{
+				return this._Description;
+			}
+			set
+			{
+				if ((this._Description != value))
+				{
+					this._Description = value;
 				}
 			}
 		}

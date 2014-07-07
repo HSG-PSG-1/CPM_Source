@@ -557,4 +557,17 @@
       <Column Name="AssignToName" Type="System.String" DbType="NVarChar(50)" CanBeNull="true" />
     </Type>
   </Table>
+  <Table Name="dbo.vw_ClaimWithItemDetails" Member="vw_ClaimWithItemDetails">
+    <Type Name="vw_ClaimWithItemDetail">
+      <Column Name="ClaimNo" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="CustRefNo" Type="System.String" DbType="NVarChar(30)" CanBeNull="true" />
+      <Column Name="ClaimDate" Type="System.DateTime" DbType="DateTime NOT NULL" CanBeNull="false" />
+      <Column Name="CustOrgCode" Type="System.String" DbType="NVarChar(20) NOT NULL" CanBeNull="false" />
+      <Column Name="CustOrgName" Type="System.String" DbType="NVarChar(80) NOT NULL" CanBeNull="false" />
+      <Column Name="Brand" Type="System.String" DbType="NVarChar(50) NOT NULL" CanBeNull="false" />
+      <Column Name="ItemNo" Type="System.String" DbType="NVarChar(50) NOT NULL" CanBeNull="false" />
+      <Column Name="Defect" Type="System.String" DbType="NVarChar(50) NOT NULL" CanBeNull="false" />
+      <Column Name="Description" Type="System.String" DbType="NVarChar(250)" CanBeNull="true" />
+    </Type>
+  </Table>
 </Database>

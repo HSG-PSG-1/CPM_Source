@@ -248,6 +248,7 @@
     <Content Include="Content\Site.css" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="App_Browsers\BrowserFile.browser" />
     <None Include="Code\CPM.dbml">
       <Generator>MSLinqToSQLGenerator</Generator>
       <LastGenOutput>CPM.designer.cs</LastGenOutput>
@@ -307,6 +308,7 @@
     <Content Include="Views\Role\Manage.cshtml" />
     <Content Include="Views\Role\KO\RoleGridKOscript.cshtml" />
     <Content Include="Views\Role\KO\RoleGrid.cshtml" />
+    <Content Include="Views\Dashboard\ClaimWithDetails.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Service Include="{3259AA49-8AA1-44D3-9025-A0B520596A8C}" />

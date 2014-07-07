@@ -163,6 +163,30 @@ namespace CPM.Controllers
             string GUID = _SessionUsr.ID.ToString();
             return new ReportManagement.StandardPdfRenderer().BinaryPdfData(this, "Dashboard" + GUID, "Excel", printView);
         }
+
+        public ActionResult ClaimWithDetails(string code)
+        {
+            if (code != "ChrisH")
+            {
+                ViewData["Message"] = "You do not have access to Claim with details report.";
+                return RedirectToAction("NoAccess", "Common");
+            }
+
+            //HttpContext context = ControllerContext.HttpContext.CurrentHandler;
+            //Essense of : http://stephenwalther.com/blog/archive/2008/06/16/asp-net-mvc-tip-2-create-a-custom-action-result-that-returns-microsoft-excel-documents.aspx
+            this.Response.Clear();
+            this.Response.AddHeader("content-disposition", "attachment;filename=" + "ClaimWithDetails.xls");
+            this.Response.Charset = "";
+            this.Response.Cache.SetCacheability(HttpCacheability.NoCache);
+            this.Response.ContentType = "application/vnd.ms-excel";
+
+            //DON'T do the following
+            //this.Response.Write(content);
+            //this.Response.End();
+
+            var result = new DashboardService().ClaimWithDetails();
+            return View("ClaimWithDetails", result);
+        }
         #endregion
 
         #region Dialog Actions
