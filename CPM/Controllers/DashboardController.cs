@@ -164,13 +164,14 @@ namespace CPM.Controllers
             return new ReportManagement.StandardPdfRenderer().BinaryPdfData(this, "Dashboard" + GUID, "Excel", printView);
         }
 
-        public ActionResult ClaimWithDetails(string code)
+        [OutputCacheAttribute(VaryByParam = "*", Duration = 0, NoStore = true)] // disable caching SO : 12948156
+        public ActionResult ClaimWithDetails()
         {
-            if (code != "ChrisH")
+            /*if (_Session.IsInternal && _SessionUsr.RoleID == (int)SecurityService.Roles.Admin)
             {
                 ViewData["Message"] = "You do not have access to Claim with details report.";
                 return RedirectToAction("NoAccess", "Common");
-            }
+            }*/
 
             //HttpContext context = ControllerContext.HttpContext.CurrentHandler;
             //Essense of : http://stephenwalther.com/blog/archive/2008/06/16/asp-net-mvc-tip-2-create-a-custom-action-result-that-returns-microsoft-excel-documents.aspx

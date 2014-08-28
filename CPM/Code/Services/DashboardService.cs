@@ -149,13 +149,12 @@ namespace CPM.Services
         {
             using (dbc)
             {
-                IQueryable<vw_ClaimWithItemDetail> dasQ = (from vw_u in dbc.vw_ClaimWithItemDetails select vw_u);
+                IQueryable<vw_ClaimWithItemDetail> dasQ =
+                    (from vw_u in dbc.vw_ClaimWithItemDetails orderby vw_u.ClaimID, vw_u.CDID select vw_u);
                 
                 //Get filters - if any
                 //dasQ = PrepareQuery(dasQ, das);
-                // Apply Sorting, Pagination and return PagedList
-
-                //sorting already applied by the view
+                
                 return dasQ.ToList<vw_ClaimWithItemDetail>();                
             }
         }
