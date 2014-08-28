@@ -111,14 +111,15 @@ namespace CPM.Controllers
 
             if (proceed) // NOT deleted because testing
             {//Delete & Log Activity
-                //new UserService().Delete(uObj);
-                //new ActivityLogService(ActivityLogService.Activity.UserDelete).Add();
+                new UserService().Delete(uObj);
+                new ActivityLogService(ActivityLogService.Activity.UserDelete).Add();
             }
             //base.operationSuccess = proceed; HT: DON'T
-            return this.Content(Defaults.getTaconite(proceed,
-                Defaults.getOprResult(proceed, err) + (proceed ? "(NOT DELETED just testing)" : ""), null, true), "text/xml");
+            return this.Content(Defaults.getTaconiteResult(proceed,
+                Defaults.getOprResult(proceed, err), null, "removeUser()"), "text/xml");
 
-            //return this.Content(Defaults.getTaconite(true, Defaults.getOprResult(true, ""), "cmtOprMsg"), "text/xml");            
+            /*return this.Content(Defaults.getTaconite(proceed,
+                Defaults.getOprResult(proceed, err), null, true), "text/xml");*/
         }
 
         #endregion
@@ -194,7 +195,7 @@ namespace CPM.Controllers
                 new ActivityLogService(ActivityLogService.Activity.UserDelete).Add();
             }
             //base.operationSuccess = proceed; HT: DON'T
-            return this.Content(Defaults.getTaconite(proceed,
+            return this.Content(Defaults.getTaconiteRemoveTR(proceed,
                 Defaults.getOprResult(proceed, err), null, true), "text/xml");
         }
 

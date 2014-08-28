@@ -51,7 +51,7 @@
         }
 @{ bool isNewClaim = (Model.CVM.ID <= Defaults.Integer);//StatusIDold
    string cancelorDelete = isNewClaim ? "Cancel" : "Delete";
-   bool? oprSuccess = ((bool?)ViewData["oprSuccess"]);
+   //bool? oprSuccess = ((bool?)ViewData["oprSuccess"]); - Handled in master page ! 
    string archiveVal = Model.CVM.Archived ? "Unarchive" : "Archive";
    string ClaimNo = isNewClaim ? "(new)" : Model.CVM.ClaimNo.ToString();
    bool readonlySP = IsOnlyCustomer && (Model.CVM.SalespersonName ?? "").Trim().Length > 0;
@@ -63,11 +63,7 @@
     <tr>
         <td align="right">
             <table style="width: 90%;" border="0">
-                <tr>
-                    @if (oprSuccess.HasValue)
-                    {
-                        <td style="width: 99%;" align="center">@Html.Raw(Defaults.getOprResult(oprSuccess.Value, CPM.Services.ClaimService.delRefChkMsg))
-                        </td>}
+                <tr>                    
                     <td nowrap="nowrap" align="right" id="tdButtons">
                         @* HT: CAUTION - Make sure first tab is selected to trigger validation *@
                         <input type="submit" value="Accept" class="button" onclick="skipCommitChk=true; document.getElementById('btnCommit').click();return false;" />&nbsp;
@@ -134,7 +130,7 @@
                                               Status History</div>@Html.Raw("&nbsp;")
                                           <div id="ddlg" style="text-align: right">
                                           </div> @*Show Status dialog*@
-                                          <script type="text/Javascript" language="javascript">
+                                          <script type="text/javascript">
                                               function showDialog(containerID) {
                                                   $(containerID).dialog({
                                                       modal: false,
@@ -243,7 +239,7 @@
 <script src="@Url.Content("~/Content/Scripts/KO/knockout-2.2.0.js")" type="text/javascript"></script>
 <script src="@Url.Content("~/Content/Scripts/KO/knockout.mapping-latest.js")" type="text/javascript"></script>
 <script src="@Url.Content("~/Content/Scripts/KO/KoExtra.js")" type="text/javascript"></script>
-<script language="javascript" type="text/javascript"> 
+<script type="text/javascript">
     var claimViewModel = function () {
         var self = this;
         self.CVM = ko.observable();
@@ -380,7 +376,7 @@
             try{ // Re-initiate Items for the selected Brand
             if($("#ItemCode")[0]!= null)
                 fillItemsForBrand(ddl.value, true);
-            } catch(err){alert(err);}
+            } catch(err){alert(err.message);}
         }
         var printClaimAfterSave = false;
         function checkAndPrint(btn, evt){
@@ -410,10 +406,8 @@
             //alert(viewModelItems.allFilesDetail.length);alert(viewModelItems.itemToAdd.aDFilesJSON.length);
         }
 </script>
-@*<script language="javascript" src="@Url.Content("~/Content/Scripts/jquery.numeric.js")" type="text/javascript"></script>
-<script  language="javascript" src="@Url.Content("~/Content/Scripts/jquery.taconite.js")" type="text/javascript" ></script>
+@* Remove after final debug / testing
+<script src="@Url.Content("~/Content/Scripts/jquery.numeric.js")" type="text/javascript"></script>
+<script  src="@Url.Content("~/Content/Scripts/jquery.taconite.js")" type="text/javascript" ></script>
 <script src="@Url.Content("~/Content/Scripts/jquery.blockUI.js")" type="text/javascript"></script>
-<!--[if lt IE 8]>
-<script src="@Url.Content("~/Content/Scripts/json2.js")" type="text/javascript" ></script>
-<![endif]-->
 *@

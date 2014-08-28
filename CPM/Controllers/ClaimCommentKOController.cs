@@ -94,18 +94,20 @@ namespace CPM.Controllers
         //int AssignedToOLD,
         {            
             bool sendMail = (ClaimID > Defaults.Integer && AssignedTo != _SessionUsr.ID);// No need to send mail if its current user
+            string msg = sendMail ? "Email queued for new comment" : "Self notification : No email queued";
             try
             {
                 #region Check and send email
                 if (sendMail)
                 {// No need to send mail if its current user
                     string UserEmail = new UserService().GetUserEmailByID(AssignedTo);
-                    MailManager.AssignToMail(ClaimNo.ToString(), CommentObj.Comment1, ClaimID, UserEmail, (_SessionUsr.UserName), true);
+                    sendMail = MailManager.AssignToMail(ClaimNo.ToString(), CommentObj.Comment1, ClaimID, UserEmail, (_SessionUsr.UserName), true);
                 }
                 #endregion
             }
-            catch (Exception ex) { sendMail = false; }
-            return Json(sendMail, JsonRequestBehavior.AllowGet); ;// RedirectToAction("Comments");//new CommentKOModel()
+            catch (Exception ex) { sendMail = false; msg = ex.Message; }
+            HttpContext.Response.Clear(); // to avoid debug email content from rendering !
+            return Json(new { sendMail, msg }, JsonRequestBehavior.AllowGet);
         }        
     }
 }

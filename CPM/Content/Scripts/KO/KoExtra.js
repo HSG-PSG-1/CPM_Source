@@ -15,7 +15,7 @@ ko.bindingHandlers.date = {
         var value = new Date(); // today by default         
         //alert(value.toString());        
         if (jsonDate != null && jsonDate != Date111) {
-        try { value = new Date(parseInt(jsonDate.substr(6))); } catch (e) { alert(e); } //value = new Date();
+        try { value = new Date(parseInt(jsonDate.substr(6))); } catch (e) { alert(e.message); } //value = new Date();
         }
         */
         var ret = ParseJSONdate(jsonDate); //value.getMonth() + 1 + "/" + value.getDate() + "/" + value.getFullYear();
@@ -33,7 +33,7 @@ ko.bindingHandlers.date = {
         var value = new Date(); // today by default         
         //alert(value.toString());        
         if (jsonDate != null && jsonDate != Date111) {
-            try { value = new Date(parseInt(jsonDate.substr(6))); } catch (e) { alert(e); } //value = new Date();
+            try { value = new Date(parseInt(jsonDate.substr(6))); } catch (e) { alert(e.message); } //value = new Date();
         }
         */
         var ret = ParseJSONdate(jsonDate); //value.getMonth() + 1 + "/" + value.getDate() + "/" + value.getFullYear();
@@ -51,7 +51,7 @@ function ParseJSONdate(jsonDate) {
     var value = new Date(); // today by default         
     //alert(value.toString());        
     if (jsonDate != null && jsonDate != Date111) {
-        try { value = new Date(parseInt(jsonDate.substr(6))); } catch (e) { alert(e); }
+        try { value = new Date(parseInt(jsonDate.substr(6))); } catch (e) { alert(e.message); }
     }
     return value.getMonth() + 1 + "/" + value.getDate() + "/" + value.getFullYear();
 }
@@ -98,12 +98,12 @@ function editable(ctrl, show)
 
 function doEditable(editDiv)
 {
-    try{$(editDiv).closest('tr').find("td input[class='noBorder']").focus().trigger("click");}catch(e){alert(e);}
+    try { $(editDiv).closest('tr').find("td input[class='noBorder']").focus().trigger("click"); } catch (e) { alert(e.message); }
     //editDiv.parentElement.parentElement.children[4].click();
 }
 
 function doEditableTA(td) {
-    try { $(td).closest('tr').find("td textarea[class='noBorder']").focus().trigger("click"); } catch (e) { alert(e); }
+    try { $(td).closest('tr').find("td textarea[class='noBorder']").focus().trigger("click"); } catch (e) { alert(e.message); }
     //editDiv.parentElement.parentElement.children[4].click();
 }
 
@@ -116,7 +116,7 @@ function doRequiredChk(ctrl)
 {
     var val = $(ctrl).val();
     if (val == null || val.length < 1) {
-        alert("This field is required")
+        showNOTY("This field is required", false);
         $(ctrl).focus();
         return false;
     }

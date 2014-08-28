@@ -12,7 +12,7 @@ body
     color: #505050; /*#f5f5f5; */
 }
 /* ====================================================== */
-.dropDown {FONT-FAMILY: Verdana, Arial, Helvetica;FONT-SIZE: 13px; COLOR: #646464;BORDER: #A3A3A3 1px solid;}
+.dropDown {FONT-FAMILY: Verdana, Arial, Helvetica;FONT-SIZE: 13px; COLOR: #646464;BORDER: #A3A3A3 1px solid;  width: 204px;}
 .textBox {BORDER: #A3A3A3 1px solid; FONT-SIZE: 12px; COLOR: #000000; FONT-FAMILY: Verdana, Arial, Helvetica}
 /* .fieldSet{ BORDER-RIGHT: #C5C5C5 1px solid; BORDER-TOP: #C5C5C5 1px solid; BORDER-LEFT: #C5C5C5 1px solid; BORDER-BOTTOM: #C5C5C5 1px solid;} */
 .button {FONT-SIZE: 12px;font-family:Verdana}
@@ -73,12 +73,12 @@ tbody.off { display:none; }
 /* ====================================================== */
 input[type="text"] 
 {
-    BORDER: #A3A3A3 1px solid; FONT-SIZE: 12px; COLOR: #000000; FONT-FAMILY: Verdana, Arial, Helvetica
+    BORDER: #A3A3A3 1px solid; FONT-SIZE: 12px; COLOR: #000000; FONT-FAMILY: Verdana, Arial, Helvetica; width: 200px;
     /*border: 1px solid #CCC;*/
 }
 input[type="password"] 
 {
-    BORDER: #A3A3A3 1px solid; FONT-SIZE: 12px; COLOR: #000000; FONT-FAMILY: Verdana, Arial, Helvetica
+    BORDER: #A3A3A3 1px solid; FONT-SIZE: 12px; COLOR: #000000; FONT-FAMILY: Verdana, Arial, Helvetica; width: 200px;
     /*border: 1px solid #CCC;*/
 }
 input[type="submit"] {FONT-SIZE: 12px;font-family:Verdana}

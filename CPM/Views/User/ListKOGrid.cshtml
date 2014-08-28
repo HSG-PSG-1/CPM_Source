@@ -55,7 +55,7 @@ var mailToCellTemplate =
 <a data-bind="attr: { 'href': 'mailto:' + $data.getProperty($parent)}, html: $data.getProperty($parent)">
 hmnt</a>*@
 </script>
-<script language="javascript" type="text/javascript" defer="defer">    setFocus("UserName");
+<script type="text/javascript">
     var ListURL = '@Url.Action("UserList", "User")';
 @*//    function doAJAXSubmit(frm) {
 //        $.ajax({
@@ -86,6 +86,8 @@ hmnt</a>*@
 
     var viewModel = new userListModel();
     function createKO() {
+        setFocus("UserName");
+
         $.getJSON(ListURL, function (data) {
             viewModel.Users = ko.observableArray(data.records); //ko.mapping.fromJS(data.AllComments); // Initial items                      
             viewModel.gridOptions = { data: viewModel.Users, showGroupPanel: true, jqueryUIDraggable: true, /* jqueryUITheme: true,*/
@@ -100,7 +102,7 @@ hmnt</a>*@
             };
 
             viewModel.MailTo = function () {
-                alert('data');
+                showNOTY('Mail', true);
             }
             ko.applyBindings(viewModel);
         });
@@ -109,7 +111,7 @@ hmnt</a>*@
         createKO();
     });
     var MailTo = function (data) {
-        alert("Send mail to : " + data);
+        showNOTY("Send mail to : " + data, true);
         //Try this while using external KO template: https://groups.google.com/forum/#!msg/knockoutjs/1WDUJNd-VQ0/SBVuJttE91UJ
     }
 </script>

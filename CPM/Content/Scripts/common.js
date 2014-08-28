@@ -343,13 +343,30 @@ return (val.attr('checked') != null)? val.attr('checked'): val.val(); //checkbox
 }
 
 var doFurtherProcessing = function(success) { };
-function showOprResult(spanId, success) {   
+function showOprResult(spanId, success) {
     // Highlight, fadeOut and finally REMOVE!
-    $(spanId).effect('highlight', {}, 4000).fadeOut((success == 1) ? 1000 : 8000, function () { $(spanId).html("&nbsp;").show(); /* remove();*/ });
-    
+    $(spanId).effect('highlight', {}, 4000).fadeOut((success == 1) ? 1000 : 8000, function () { $(spanId).html("&nbsp;").remove(); /* show();*/ });
+
     //Special case for forms which need to do post processing        
-    //doFurtherProcessing(success); HT: Handled at the end of effect call back    
-    try {DisableSubmitButtons(false); /*$.unblockUI();*/ } catch (e) { }
+    //doFurtherProcessing(); HT: Handled at the end of effect call back    
+    try { DisableSubmitButtons(false); /*$.unblockUI();*/ } catch (e) { }
+}
+function showNOTY(msg, success) {
+    // Highlight, fadeOut and finally REMOVE!
+    //$(spanId).effect('highlight', {}, 4000).fadeOut((success == 1) ? 1000 : 8000, function () { $(spanId).html("&nbsp;").remove(); /* show();*/ });
+    noty({
+        text: msg,
+        type: success ? "success" : "error",
+        dismissQueue: true,
+        timeout: success ? 2000 : 7000,
+        layout: 'topCenter',
+        theme: 'defaultTheme',
+        killer: true
+    });
+
+    //Special case for forms which need to do post processing        
+    //doFurtherProcessing(); HT: Handled at the end of effect call back    
+    try { DisableSubmitButtons(false); /*$.unblockUI();*/ } catch (e) { }
 }
 
 function setDefaultIfEmpty(txt, defaultStr) {// use with onblur (don't use with jQuery.validate class = "required"

@@ -71,7 +71,7 @@
     </tfoot>
 </table>
 @*@{ QryString.SetSecondarySort(ViewData["SetPrevSort"]); }*@
-<script language="javascript" type="text/javascript" defer="defer">
+<script type="text/javascript">
  $('div.pager').children('a').click(function() { @reload });
         var loading = '<div style="text-align:center;display:block;"><img src=" @Url.Content("~/Content/Images/loading.gif") " title="" alt="Loading" /></div>';
         function reloadList(url) {

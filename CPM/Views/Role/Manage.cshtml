@@ -18,11 +18,7 @@
     <tr>
         <td align="center" class="w100">
         @*  Kept for debugging @Html.ValidationSummary(true)  *@
-            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-            @{bool? oprSuccess = ((bool?)ViewData["oprSuccess"]);
-              string oprResult = (!oprSuccess.HasValue)?"":
-                  Defaults.getOprResult(oprSuccess.Value, (ViewData["err"] ?? "").ToString());}
-            @if (oprSuccess.HasValue){ <span>@Html.Raw(oprResult) </span> }
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;            
             </td>
         <td align="right" class="sqz">
             <input type="button" value="Add New" data-bind="click:addNewRecord" id="btnAddNew" />        

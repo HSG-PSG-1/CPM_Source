@@ -24,7 +24,7 @@
     <tr>
     <td><b class="smallHeading">Dashboard</b></td>
     <td class="sqz" align="right">@*Quick search: <input type="text" class="textBox" data-bind = "value:quickSearch" title="all filters except Date and won't apply for Excel export" /> *@</td>
-    <td class="sqz" align="right">@Html.ActionLink("New Claim", "Manage", "Claim", new { ClaimId = 0}, null)&nbsp;</td>
+    <td class="sqz" align="right"><span class="ui-icon ui-icon-document" style="display:inline-block;vertical-align:bottom;"></span>@Html.ActionLink("New Claim", "Manage", "Claim", new { ClaimId = 0}, null)&nbsp;</td>
     </tr>
         <tr>
             <td colspan="3">
@@ -118,7 +118,7 @@
         </tr>
     </table>    
     
-<script language="javascript" type="text/javascript" defer="defer">
+<script type="text/javascript">
     // For future manipulation: $('div.pager').children('a').click(function () {@Defaults.chkCollapse }); // Add event to each page link to check & persist collapse search panel
 
         //var autoCompMinLen = 2; - now available in common.js
@@ -232,7 +232,7 @@
                     //vm_D.fields().valueHasMutated();*@
    }    
 </script>
-<script language="javascript" type="text/javascript" defer="defer">
+<script type="text/javascript">
     var ListURL = '@Html.Raw(@Url.Action("ClaimListKO", "Dashboard", new { index = 0, fetchAll = true }))';
     function doAJAXSubmit(frm) {
 
@@ -339,4 +339,3 @@
     </script>
 @*HT: Set min width required by Dashboard*@
 <img src="@Url.Content("~/Content/Images/spacer.gif")" height="1px" width="900px" />
-<script src="@Url.Content("~/Content/Scripts/jquery.taconite.js")" type="text/javascript" ></script>

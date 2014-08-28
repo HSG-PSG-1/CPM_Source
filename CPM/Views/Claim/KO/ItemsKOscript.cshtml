@@ -5,7 +5,7 @@
 @using CPM.Services
 @using CPM.Helper
 
-    <script type="text/javascript" language="javascript" defer="defer">    
+    <script type="text/javascript">
     @*function toggleLabel(td) {return;
         if (doTDHover) {
             var control = $('input:first', td)[0];
@@ -89,7 +89,7 @@
         }
 
         self.showAddNew = function () {
-            if(!brandHasItems()){alert("Please select a Brand which has atleast one item"); return;}
+            if (!brandHasItems()) { showNOTY("Please select a Brand which has atleast one item", false); return; }
 
             self.itemToAdd(cloneObservable(self.emptyItem));//self.itemToAdd(ko.mapping.fromJS(self.emptyItem));
 
@@ -116,7 +116,7 @@
         self.saveItem = function (item) {
             if (item.ItemCode == null || item.ItemCode == "")
             //if (self.itemToAdd.ItemCode == null || self.itemToAdd.ItemCode == "")
-                alert("Item is a required field");
+                showNOTY("Item is a required field", false);
             else {
                 @*//self.itemToAdd().PostedOn = Date111;//ko.mapping.fromJS(new Date())*@
                 if (!IsCDEditMode) {
@@ -200,8 +200,8 @@ var viewModelItems = new itemsModel();
              $("#itmEntryDailog").dialog({
                  modal: true,
                  autoOpen: false,
-                 height:420,
-                 width:639,
+                 height:430,
+                 width:710,
                  close: function( event, ui ) {viewModelItems.showGrid(true);}
              });
          });

@@ -1,6 +1,6 @@
 ﻿@using CPM.Services
 @using CPM.Helper
-<script language="javascript" type="text/javascript" defer="defer">
+<script type="text/javascript">
 var loading = '<div style="text-align:center;display:block;"><img src=" @Url.Content("~/Content/Images/loading.gif")" title="" alt="Loading" /></div>';
        
 function openPrintDialog(ClaimId)
@@ -8,11 +8,11 @@ function openPrintDialog(ClaimId)
     if(ClaimId > 0)
     return openWinScrollable("@HttpUtility.UrlDecode(Url.Action("Print", "Claim", new { ClaimID = -99 }))".replace('-99',ClaimId),648,838);
 } 
-function gotoClaim(ClaimId)
+@*function gotoClaim(ClaimId)
 {
     window.location.href = 
     "@HttpUtility.UrlDecode(Url.Action("Manage?", "Claim", new { ClaimId = -99 }))".replace('-99',ClaimId);
-}
+}*@
 
 @* KO based pagination *@
 function updatePagedRows(vm)

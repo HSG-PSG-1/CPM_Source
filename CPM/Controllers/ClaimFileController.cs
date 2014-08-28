@@ -119,7 +119,7 @@ namespace CPM.Controllers
                 #endregion
             }
             //Taconite XML
-            return this.Content(Defaults.getTaconite(proceed,
+            return this.Content(Defaults.getTaconiteRemoveTR(proceed,
                 Defaults.getOprResult(proceed, "Unable to delete file"), "fileOprMsg"), "text/xml");
         }
 
@@ -244,7 +244,7 @@ namespace CPM.Controllers
                 #endregion
             }
             //Taconite XML
-            return this.Content(Defaults.getTaconite(proceed,
+            return this.Content(Defaults.getTaconiteRemoveTR(proceed,
                 Defaults.getOprResult(proceed, "Unable to delete file"), "fileDetailOprMsg"), "text/xml");
         }
         

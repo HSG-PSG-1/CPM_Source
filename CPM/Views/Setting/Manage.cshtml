@@ -21,10 +21,7 @@
         </tr>
         <tr>
             <td align="center" class="w100">
-                @Html.ValidationSummary(true)
-                @{bool? oprSuccess = ((bool?)ViewData["oprSuccess"]);
-                  if (oprSuccess.HasValue){ @Html.Raw(Defaults.getOprResult(oprSuccess.Value, "Error") + "<br/>") }
-                }
+                @Html.ValidationSummary(true)                
                 <span><b>Note:</b> Settings will be refreshed after next login</span>
             </td>
             <td align="right" class="sqz">

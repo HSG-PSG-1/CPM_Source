@@ -1,4 +1,4 @@
-﻿<script type="text/javascript" language="javascript" defer="defer">        
+﻿<script type="text/javascript">
 var IsCCEditMode = false;
 var NextNewCommentID = -1;
 var commentsViewModel = function () {
@@ -27,7 +27,7 @@ var commentsViewModel = function () {
     self.addComment = function (comment) {
         if (comment.Comment1 == null || comment.Comment1 == "")            
             {@*//http://knockoutjs.com/documentation/event-binding.html*@
-                alert("Comment is a required field"); 
+            showNOTY("Comment is a required field", false);
                 return false; 
             }
         else {
@@ -97,7 +97,11 @@ var commentsViewModel = function () {
                     ClaimNo : _ClaimNo
                     },  
                     function (result) {   
-                    //alert(result); HT: we can notify user if a succesful email was sent
+                        //alert(result); HT: we can notify user if a successful email was sent
+                        showNOTY(result.msg, result.sendMail);
+                        if (result.sendMail) {
+                            $("#AssignToOLD").val(_AssignedTo).trigger("change");
+                        }
                     }
             );
         }

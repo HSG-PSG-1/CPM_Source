@@ -1,4 +1,4 @@
-﻿<script type="text/javascript" language="javascript" defer="defer">        
+﻿<script type="text/javascript">
 var IsCCEditMode = false;
 var NextNewrecordID = 0;
 var recordsViewModel = function () {
@@ -19,12 +19,12 @@ var recordsViewModel = function () {
         record.LastModifiedDate(Date111);
         
         var titl = record.Title();
-        if(titl == "") { alert("This field is required");}
+        if (titl == "") { showNOTY("This field is required", false); }
         else if($.grep(self.allRecords(), function(el)
                 {
                     return (!el.IsDeleted() && el.Title().toLowerCase() === titl.toLowerCase());}
                ).length > 1)
-            { alert("Duplicate entry found"); }
+        { showNOTY("Duplicate entry found", false); }
         else
            { record.TitleOLD(titl); return;}
 
@@ -78,15 +78,14 @@ var recordsViewModel = function () {
             success: function(data) {
                 if(data != null && data.length > 0)
                 {
-                    alert(data);
+                    showNOTY(data, false);
                     $("input[type=button]").removeAttr('disabled');
                 }
                 else
-                {
-                    //alert("Operation was successful"); 
+                {                    
                     window.location.href = window.location.href; // Refresh page
                 }
-                $("input[type=button]").removeAttr('disabled');
+                //$("input[type=button]").removeAttr('disabled');
             }
         });
         // ko.utils.postJson(location.href, jsonData ); //{ records: ko.mapping.toJS(self.allRecords) });

@@ -3,7 +3,7 @@
 @using Webdiyer.WebControls.Mvc
 @using CPM.Services
 @using CPM.Helper
-@{ ViewBag.Title = "User List"; Layout = Defaults.masterLayout;}
+@{ ViewBag.Title = "User List"; Layout = Defaults.masterLayout; ViewBag.Err = UserService.delRefChkMsg; }
 @section HeadContent {
     @*SOME scripts are better persisted in head *@ @*<script src="@Url.Content("~/Content/Scripts/KO/jquery-1.7.2.min.js")" type="text/javascript"></script>*@
     <script src="@Url.Content("~/Content/Scripts/KO/knockout-2.2.0.js")" type="text/javascript"></script>
@@ -20,8 +20,6 @@
         </td>
         <td align="center" style="width: 98%">
             <span id="msg">@Html.ValidationSummary(true)<br /><br />
-            @if (oprSuccess.HasValue)
-            { @Html.Raw(Defaults.getOprResult(oprSuccess.Value, UserService.delRefChkMsg))} 
             </span>
         </td>
         <td class="sqz" align="right" valign="top">
@@ -88,7 +86,7 @@ var mailToCellTemplate =
 <a data-bind="attr: { 'href': 'mailto:' + $data.getProperty($parent)}, html: $data.getProperty($parent)">
 hmnt</a>*@
 </script>
-<script language="javascript" type="text/javascript" defer="defer">    setFocus("UserName");
+<script type="text/javascript">
     var ListURL = '@Html.Raw(Url.Action("UserList", "User", new { index = 0, fetchAll = true })))';
     function doAJAXSubmit(frm) {
         vm_U.invokeSearch(1);
@@ -123,12 +121,13 @@ hmnt</a>*@
     }
     
     var MailTo = function (data) {
-        alert("Send mail to : " + data);
+        showNOTY("Send mail to : " + data, true);
         //Try this while using external KO template: https://groups.google.com/forum/#!msg/knockoutjs/1WDUJNd-VQ0/SBVuJttE91UJ
     }
     
     var skipCommitChk = false;
     $(document).ready(function () {
+        setFocus("UserName");
         createKO();
         @*//bind event to check claim commit*@
         window.onbeforeunload = function(e){            
@@ -158,4 +157,3 @@ hmnt</a>*@
         vm_U.search.OrgType(null);        
     }
     </script>
-<script src="@Url.Content("~/Content/Scripts/jquery.taconite.js")" type="text/javascript" ></script>

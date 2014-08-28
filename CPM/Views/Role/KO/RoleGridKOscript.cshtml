@@ -1,4 +1,4 @@
-﻿<script type="text/javascript" language="javascript" defer="defer">        
+﻿<script type="text/javascript">
 var IsCCEditMode = false;
 var NextNewrecordID = 0;
 var recordsViewModel = function () {
@@ -18,12 +18,12 @@ var recordsViewModel = function () {
         record.LastModifiedDate(Date111);
         
         var titl = record.Title();
-        if(titl == "") { alert("This field is required");}
+        if (titl == "") { showNOTY("This field is required", false); }
         else if($.grep(self.allRecords(), function(el)
                 {
                     return (!el.IsDeleted() && el.Title().toLowerCase() === titl.toLowerCase());}
                ).length > 1)
-            { alert("Duplicate entry found"); }
+        { showNOTY("Duplicate entry found", false);/*alert("Duplicate entry found"); */ }
         else
            { record.TitleOLD(titl); return;}
 
@@ -77,7 +77,7 @@ var recordsViewModel = function () {
                 if(data != null && data.length > 0)
                 {
                     showDlg(false);
-                    alert(data);
+                    showNOTY(data, false);
                     $("input[type=button]").removeAttr('disabled');
                 }
                 else

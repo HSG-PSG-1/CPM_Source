@@ -1,6 +1,6 @@
 ﻿@using CPM.Services
 @using CPM.Helper
-<script language="javascript" type="text/javascript" defer="defer">
+<script type="text/javascript">
 var loading = '<div style="text-align:center;display:block;"><img src=" @Url.Content("~/Content/Images/loading.gif")" title="" alt="Loading" /></div>';
        
 function gotoUser(ClaimId)
@@ -39,8 +39,24 @@ var viewModel = function(){
         self.invokeSearch = ko.observable(2);        
         
         self.removeSelected = function (user) {
-            if (user != null) // Prevent blanks and duplicates
-                self.fields.remove(user);
+            /*if (user != null) // Prevent blanks and duplicates
+                self.fields.remove(user); */
+
+            if (user == null || user.ID < 1) // NOT ID()
+            { showNOTY("Invalid data or operation", false); return; } // Prevent blanks and duplicates
+
+            var data = {}; data["UserId"] = user.ID;
+            showDlg(true);
+            $.post('@Url.Action("UserKODelete", "User", new { ID = "" })', data,
+                    function (result) {
+                        showDlg(false);
+                        if (deleteSuccess) {
+                            self.fields.remove(user);
+                            deleteSuccess = false;
+                        }
+                        //alert(result); HT: we can notify user if a succesful email was sent
+                    }
+            );
         };
 
         self.previousPage = function() {
@@ -127,7 +143,7 @@ var viewModel = function(){
             self.pageIndex(0);  self.cachedPagesTill(0);
         }
     };
-    var delID=-1;var isDel = false;
+    var delID = -1; var isDel = false; var usrIDToDel = "";
         function doUserDelPost(txtId, txtVal) {
             if(!isDel){@*alert("doUserDelPost:" + txtVal);*@ return true;}
             else isDel = false;
@@ -135,9 +151,14 @@ var viewModel = function(){
             var data = {}; data[txtId] = txtVal;
             var url = '@Url.Action("UserKODelete", "User", new { ID = "" })';
             $.post(url, data);
+
+            usrIDToDel = txtVal;
+
             return false; // prevent any postback
         }
         function doDelPost(txtId, txtVal) {
             isDel = true;
         }
+        var deleteSuccess = false;
+        function removeUser() { deleteSuccess = true; }//doFurtherProcessing
 </script>
