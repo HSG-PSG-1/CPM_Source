@@ -197,6 +197,7 @@
     <Content Include="Content\jQUI\css\images\ui-icons_888888_256x240.png" />
     <Content Include="Content\jQUI\css\images\ui-icons_cd0a0a_256x240.png" />
     <Content Include="Content\jQUI\css\jquery-ui.min.css" />
+    <Content Include="Content\jQUI\min\jquery-1.11.1.min.js" />
     <Content Include="Content\jQUI\min\jquery-2.1.1.min.js" />
     <Content Include="Content\jQUI\min\jquery-migrate-1.2.1.min.js" />
     <Content Include="Content\jQUI\min\jquery-ui.1.11.0.min.js" />
@@ -258,13 +259,11 @@
     <Content Include="Views\Common\Navigate.cshtml" />
     <Content Include="Views\User\ListKOGrid.cshtml" />
     <Content Include="Views\User\KO\UserList.cshtml" />
-    <Content Include="Views\Claim\KO\CommentsKOscript.cshtml" />
+    <Content Include="Content\Scripts\KOVM\CommentsFilesKOscript.js" />
     <Content Include="Views\Claim\Files.cshtml" />
-    <Content Include="Views\Claim\KO\FilesKOscript.cshtml" />
     <Content Include="Views\Claim\FilesDetail.cshtml" />
     <Content Include="Views\Claim\KO\FileDetailsKOscript.cshtml" />
     <Content Include="Views\Claim\Items.cshtml" />
-    <Content Include="Views\Claim\KO\ItemsKOscript.cshtml" />
     <Content Include="Views\Claim\Manage.cshtml" />
     <Content Include="Views\Claim\Archived.cshtml" />
     <Content Include="Views\Claim\FilesDetailArchived.cshtml" />
@@ -280,6 +279,7 @@
     <Content Include="Views\Role\KO\RoleGridKOscript.cshtml" />
     <Content Include="Views\Role\KO\RoleGrid.cshtml" />
     <Content Include="Views\Dashboard\ClaimWithDetails.cshtml" />
+    <Content Include="Content\Scripts\KOVM\ItemsKOscript.js" />
     <None Include="Properties\PublishProfiles\Profile1.pubxml" />
   </ItemGroup>
   <ItemGroup>

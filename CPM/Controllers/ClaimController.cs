@@ -67,6 +67,21 @@ namespace CPM.Controllers
             #endregion
         }
 
+        [CacheControl(HttpCacheability.NoCache), HttpGet]
+        public JsonResult ClaimEntryKOViewModel(int ClaimID, string ClaimGUID, int? AssignedTo)
+        {// NEW consolidated viewmodel
+
+            CEKOViewModel cvm = new CEKOViewModel(); // Main consolidated viewmodel
+
+            cvm.ClaimDetail = GetItemKOModel(ClaimID, ClaimGUID);
+            cvm.Comment = GetCommentKOModel(ClaimID, ClaimGUID, AssignedTo ?? -1);
+            cvm.File = GetFileKOModel(ClaimID, ClaimGUID);
+            // Status History
+            cvm.StatusHistory = new StatusHistoryService().FetchAll(ClaimID);
+
+            return Json(cvm, JsonRequestBehavior.AllowGet);
+        }
+
         [HttpPost]
         [AccessClaim("ClaimID")]
         public ActionResult Delete(int ClaimID, string ClaimGUID, int ClaimNo)
@@ -252,5 +267,19 @@ namespace CPM.DAL
         public vw_Claim_Master_User_Loc CVM { get; set; }
         public IEnumerable Statuses { get; set; }
         public IEnumerable Brands { get; set; }
+    }
+
+    public class CEKOViewModel
+    {
+        public ItemKOModel ClaimDetail { get; set; }
+
+        //public string LinesOrderExtTotal { get { return Lines.Sum(l => l.OrderExtension ?? 0.00M).ToString("#0.00"); } }
+        //public string OrderTotal { get { return Lines.Sum(l => l.QtyOrdered ?? 0).ToString(); } }
+
+        public CommentKOModel Comment { get; set; }
+
+        public FileKOModel File { get; set; }
+        
+        public List<vw_StatusHistory_Usr> StatusHistory { get; set; }
     }
 }

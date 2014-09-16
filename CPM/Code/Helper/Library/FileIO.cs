@@ -126,7 +126,31 @@ namespace CPM.Helper
             {
                 //Or refer the following to set system attributes when delete
                 //http://stackoverflow.com/questions/611921/how-do-i-delete-a-directory-with-read-only-files-in-c
+                // SO : 329355
+                System.Threading.Thread.Sleep(0);
+                Directory.Delete(delPath, true);
             }
+        }
+
+        /// <summary>
+        /// Depth-first recursive delete, with handling for descendant 
+        /// directories open in Windows Explorer.
+        /// </summary>
+        public static void DeleteDirectory(string path)
+        {
+            string[] files = Directory.GetFiles(path);            
+            foreach (string file in files)
+            {
+                File.SetAttributes(file, FileAttributes.Normal);
+                File.Delete(file);
+            }
+
+            foreach (string directory in Directory.GetDirectories(path))
+                DeleteDirectory(directory);
+
+            try { Directory.Delete(path, true); }
+            catch (IOException) { Directory.Delete(path, true); }
+            catch (UnauthorizedAccessException) { Directory.Delete(path, true); }
         }
 
         public static bool DeleteFile(string FileName)

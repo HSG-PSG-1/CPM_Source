@@ -18,10 +18,11 @@
                             <td colspan="4" align="center">
                                 <div style="display: none">
                                     <input type="checkbox" data-bind="checked:_Added" id="_Added" name="_Added" />
-                                    ID:<input id="ID" name="ID" data-bind="value:ID" /><br />
-                                    Claim ID:<input id="ClaimID" name="ClaimID" data-bind="value:ClaimID" /><br />
+                                    <input type="checkbox" ID="_Added" name="_Added" data-bind="checked:_Added" />
+                                    ID: <input id="ID" name="ID" data-bind="value:ID" /><br />
+                                    Claim ID: <input id="ClaimID" name="ClaimID" data-bind="value:ClaimID" />
                                     ClaimGUID:<input id="ClaimGUID" name="ClaimGUID" data-bind="value:ClaimGUID" /><br />
-                                    UploadedOn:<input type="text" id="UploadedOn" name="UploadedOn" data-bind="date: UploadedOn" /><br />
+                                    UploadedOn:<input type="text" id="UploadedOn" data-bind="date: UploadedOn" /><br />
                                     UserID:<input id="UserID" name="UserID" type="text" data-bind="value:UserID" /><br />
                                     <br />
                                 </div>
@@ -59,7 +60,7 @@
                             <td valign="top" align="right">Comment
                             </td>
                             <td rowspan="2" align="left">
-                                <textarea data-bind="value:Comment" class="textbox required" cols="60" id="Comment"
+                                <textarea data-bind="value:Comment" class="textbox" cols="60" id="Comment"
                                     name="Comment" onblur="return trimTextAreaMaxLen(this,250);" rows="2" style="width: 90%"></textarea>
                             </td>
                             <td colspan="2" valign="top" align="right">
@@ -137,7 +138,7 @@
                             <td data-bind="text:UploadedBy"></td>
                             <td data-bind="date: UploadedOn"></td>
                             <td align="center">
-                                <div class="dDialog" data-bind="click:$parent.TriggerOpenWin, visible:CodeStr().length > 0">@Html.Raw(Defaults.clipImg)</div>
+                                <div class="dDialog" data-bind="click:$parent.TriggerOpenWin, visible:CodeStr().length > 0">@Html.Raw(Defaults.clipImg)</div>                                
                             </td>
                         </tr>
                     </tbody>
@@ -148,12 +149,10 @@
             </td>
         </tr>
     </table>
-@*</body> </html>*@
+</div>
 @if (!isArchived)
 {    
-    <text>
-    @{ Html.RenderPartial("KO/FilesKOscript"); }
-
+    <text>    
     <script type="text/javascript">
         $(document).ready(function () {
             var bar = $('.bar');
@@ -198,7 +197,7 @@
                     if (xhr.responseXML != null && $.browser.msie) {// For IE
                       @*//IE8 $("#taco_niteDIVFH").append(xhr.responseXML.documentElement.xml);//xmlTxt);
                       //eval(xhr.responseXML.documentElement.xml);*@
-                        //var tc = new $.taconite(responseXML); // might work in IE8
+                        var tc = new $.taconite(responseXML); // might work in IE8
                       @*try{ 
                             // only to execute the function - kept for ref
                             //eval(xhr.responseXML.getElementsByTagName("eval")[0].text); // IE8 - xhr.responseXML.documentElement.xml
@@ -226,4 +225,3 @@
     </script>
     </text>
 }
-</div>

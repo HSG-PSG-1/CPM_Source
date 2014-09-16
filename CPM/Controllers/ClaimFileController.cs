@@ -26,18 +26,9 @@ namespace CPM.Controllers
         FileIO.mode DetailFM { get { return (IsAsync ? FileIO.mode.asyncDetail : FileIO.mode.detail); } }
 
         #region File Header Actions
-
-        //Files List (Claim\1\Files) & Edit (Claim\1\Files\2)
+                
         [CacheControl(HttpCacheability.NoCache), HttpGet]
-        public ActionResult Files(int ClaimID, string ClaimGUID) // PartialViewResultViewResultBase 
-        {
-            ViewData["Archived"] = false;
-            ViewData["ClaimGUID"] = ClaimGUID;
-            return View();
-        }
-
-        [CacheControl(HttpCacheability.NoCache), HttpGet]
-        public JsonResult FilesKOVM(int ClaimID, string ClaimGUID, int? FileID)
+        public FileKOModel GetFileKOModel(int ClaimID, string ClaimGUID)
         {
             //Set File object
             FileHeader newObj = new FileHeader() { ID = -1, _Added = true, ClaimID = ClaimID, ClaimGUID = ClaimGUID,
@@ -45,7 +36,7 @@ namespace CPM.Controllers
                 UserID = _SessionUsr.ID, Archived = false, FileName="", FileNameNEW="" };
 
             List<FileHeader> files = new List<FileHeader>();
-            DAL.FileKOModel vm = new FileKOModel()
+            FileKOModel vm = new FileKOModel()
             {
                 FileToAdd = newObj, EmptyFileHeader = newObj,
                 AllFiles = (new FileHeaderService().Search(ClaimID, null))
@@ -53,7 +44,7 @@ namespace CPM.Controllers
             // Lookup data
             vm.FileTypes = new LookupService().GetLookup(LookupService.Source.FileHeader);
 
-            return Json(vm, JsonRequestBehavior.AllowGet);
+            return vm;
         }
                 
         [HttpPost]

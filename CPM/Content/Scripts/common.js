@@ -86,9 +86,10 @@ function stopEvent(e, GoAhead) {
 
     if (!e) e = window.event;
     //e.cancelBubble is supported by IE - this will kill the bubbling process.
-    if (e.cancelBubble) e.cancelBubble = true;
+    if (e.cancelBubble != null) e.cancelBubble = true;
     if (e.stopPropagation) e.stopPropagation(); //e.stopPropagation works in Firefox.
     if (e.preventDefault) e.preventDefault();
+    if (e.returnValue != null) e.returnValue = false; // http://blog.patricktresp.de/2012/02/
     return false;
 }
 
@@ -407,7 +408,12 @@ function chartPieSelectHandler(chartObj,dataTbl,keyPos) {
     */
 }
 function DisableSubmitButtons(disable) {
-    $('input[type = "submit"]').prop('disabled', disable);
+    var allSubmits = $('input[type = "submit"]');
+    
+    if(disable)
+        allSubmits.attr('disabled', disable);
+    else // for IE < 8  SO : 6585214
+        allSubmits.removeAttr("disabled");
 }
 
 function showDlg(show) {

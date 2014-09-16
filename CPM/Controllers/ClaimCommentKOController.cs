@@ -23,37 +23,21 @@ namespace CPM.Controllers
             return View();            
         }
 
-        [CacheControl(HttpCacheability.NoCache), HttpGet]
-        public JsonResult CommentsKOVM(int ClaimID, string ClaimGUID, int AssignedTo) // PartialViewResultViewResultBase 
-        {
-            if (_Session.IsOnlyCustomer) 
-                return Json(null);//Customer doesn't have access to Comments
-
+        public CommentKOModel GetCommentKOModel(int ClaimID, string ClaimGUID, int AssignedTo)
+        {        
             //Set Comment object
             Comment newObj = new Comment() { ID = -1, _Added = true, ClaimID = ClaimID, ClaimGUID = ClaimGUID, CommentBy = _SessionUsr.Email, LastModifiedBy = _SessionUsr.ID, LastModifiedDate = DateTime.Now, PostedOn = DateTime.Now, UserID = _SessionUsr.ID, Archived = false };
-
-            #region Kept for testing
-            /*
-            List<Comment> comments = new List<Comment>();
-            try { comments = ((List<Comment>)Session["Comments_Demo"]); }
-            catch (Exception ex) { comments = null; }
-            bool sendResult = (comments != null && comments.Count() > 0);
-            if (sendResult) 
-                Session.Remove("Comments_Demo");
-            */
-            #endregion
 
             DAL.CommentKOModel vm = new CommentKOModel()
             {
                 CommentToAdd = newObj, EmptyComment = newObj, 
-                //AllComments = (sendResult? comments : new CAWcomment(false).Search(ClaimID, null, ClaimGUID)),
-                AllComments = new CommentService().Search(ClaimID, null),//(new CAWcomment(false).Search(ClaimID, null, ClaimGUID)),
+                AllComments = new CommentService().Search(ClaimID, null),
                 AssignedTo = AssignedTo
             };
 
             vm.Users = new LookupService().GetLookup(LookupService.Source.User);
 
-            return Json(vm, JsonRequestBehavior.AllowGet);
+            return vm;
         }
 
         [HttpPost]
