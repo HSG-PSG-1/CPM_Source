@@ -201,11 +201,14 @@
     <Content Include="Content\jQUI\min\jquery-2.1.1.min.js" />
     <Content Include="Content\jQUI\min\jquery-migrate-1.2.1.min.js" />
     <Content Include="Content\jQUI\min\jquery-ui.1.11.0.min.js" />
+    <Content Include="Content\Scripts\jquery.table.nav.1.0.js" />
     <Content Include="Content\Scripts\jquery.blockUI.js" />
     <Content Include="Content\Scripts\jquery.hint.js" />
     <Content Include="Content\Scripts\jquery.noty.packaged.v222.js" />
     <Content Include="Content\Scripts\jquery.validate.1.11.0.min.js" />
     <Content Include="Content\Scripts\json2.js" />
+    <Content Include="Content\Scripts\KOVM\ItemsKOscript.js" />
+    <Content Include="Content\Scripts\KOVM\DashboardKOscript.js" />
     <Content Include="Content\Scripts\KO\jquery.tmpl.js" />
     <Content Include="Content\Scripts\KO\knockout-2.2.0.js" />
     <Content Include="Content\Scripts\KO\knockout.mapping-latest.js" />
@@ -270,7 +273,6 @@
     <Content Include="packages.config" />
     <Content Include="Views\Dashboard\KO\ListInternal.cshtml" />
     <Content Include="Views\Dashboard\List.cshtml" />
-    <Content Include="Views\Dashboard\KO\ListInternalKOscript.cshtml" />
     <Content Include="Views\User\KO\UserListKOscript.cshtml" />
     <Content Include="Views\Master\Manage.cshtml" />
     <Content Include="Views\Master\KO\MasterGrid.cshtml" />
@@ -279,8 +281,9 @@
     <Content Include="Views\Role\KO\RoleGridKOscript.cshtml" />
     <Content Include="Views\Role\KO\RoleGrid.cshtml" />
     <Content Include="Views\Dashboard\ClaimWithDetails.cshtml" />
-    <Content Include="Content\Scripts\KOVM\ItemsKOscript.js" />
+    <Content Include="Content\Scripts\KOVM\ItemsKOscriptOLD.js" />
     <None Include="Properties\PublishProfiles\Profile1.pubxml" />
+    <Content Include="Views\Claim\ItemsNew.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Service Include="{3259AA49-8AA1-44D3-9025-A0B520596A8C}" />
@@ -307,7 +310,6 @@
     <Content Include="Content\Scripts\jquery.taconite.js" />
     <Content Include="Content\Scripts\ori_jquery.tablesorter.min.js" />
     <Content Include="Content\Scripts\jquery.tablesorter.pager.js" />
-    <Content Include="Content\Scripts\jquery.validate.1.9.0.min.js" />
     <Content Include="Content\Scripts\jquery.tablesorter.min.js" />
     <Content Include="Content\Scripts\jquery.tablesorter.filter.js" />
     <Content Include="EmailTemplates\ApplicationError.xml" />

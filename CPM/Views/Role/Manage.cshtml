@@ -4,11 +4,6 @@
 @using CPM.Services
 @{ ViewBag.Title = "Manage Security"; Layout = Defaults.masterLayout;}
 @{ string formID = "frmSecurity"; }
-@section HeadContent {
-    <script src="@Url.Content("~/Content/Scripts/KO/knockout-2.2.0.js")" type="text/javascript"></script>
-    <script src="@Url.Content("~/Content/Scripts/KO/knockout.mapping-latest.js")" type="text/javascript"></script>
-    <script src="@Url.Content("~/Content/Scripts/KO/KoExtra.js")" type="text/javascript"></script>   
-}
 @using (Html.BeginForm("Manage", "Roles", FormMethod.Post, new { id = "frmSecurity", style = "display:inline", @onsubmit = "$('#btnSubmit').prop('disabled', true);" }))
 {
 <table width="100%" border="0">

@@ -47,6 +47,8 @@ var commentsViewModel = function () {
                 self.allComments.splice(index, 0, comment);*/
                 ;
             }
+            $('#tblComments').tableNav(); // for newly created TR
+            setFocusEditableGrid("tblComments", false);
         }
         return true; // because we need to ajax submit the form
     };
@@ -111,6 +113,7 @@ var commentsViewModel = function () {
     });*/
 };
 var viewModelComments = new commentsViewModel();
+
 function createCommentsKO(comments, assignTo)//callDocReadyComments()
 {
     //setFocus("Comment1");
@@ -129,16 +132,14 @@ function createCommentsKO(comments, assignTo)//callDocReadyComments()
     viewModelComments.Users = ko.mapping.fromJS(comments.Users);
 
     ko.applyBindings(viewModelComments, document.getElementById("divComments"));
-    //});
+    //});    
 }
 
 /*function doCmtDelPost(comment) {    var data = {}; data[txtId] = txtVal;    var url = commentDeleteURL;    $.post(url, data);    
 return false; // prevent any postback
 }*/
 
-
 /* HT:CAUTION - using document.ready causes duplicate call which replicates the binding! */
-
 function setAssignedTo(ddl) {
     var ddlID = $(ddl).val();
     var ddlTXT = $(ddl).children("option").filter(":selected").text();
@@ -152,6 +153,7 @@ function setAssignedTo(ddl) {
 /* -------------------------- */
 var IsFHEditMode = false;
 var NextNewFileID = -1;
+
 var filesHeaderModel = function () {
     var self = this;
 
@@ -187,6 +189,9 @@ var filesHeaderModel = function () {
                 self.emptyFile.ID = NextNewFileID; // NOT WORKING as expected
             }
             else { /* Editmode Handled by KO */ }
+
+            $('#tblFilesH').tableNav(); // for newly created TR
+            setFocusEditableGrid("tblFilesH", false);
         }
         return true; // for ajax submit
     };
@@ -223,6 +228,7 @@ var filesHeaderModel = function () {
 };
 
 var viewModelFH = new filesHeaderModel();
+
 function createFilesHeaderKO(data) {
     //setFocus("Comment");
     if (data.FileToAdd.ID != -1) data.FileToAdd.ID = NextNewFileID;

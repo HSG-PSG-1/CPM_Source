@@ -80,7 +80,7 @@
                     @Html.LabelFor(model => model.Name)
                 </td>
                 <td colspan="3">
-                    @Html.CustomTextBoxFor(model => model.Name, new { })
+                    @Html.CustomTextBoxFor(model => model.Name, new { @autofocus = "autofocus" })
                     @Html.ValidationMessageFor(model => model.Name)
                 </td>
             </tr>
@@ -200,7 +200,7 @@
         
         //Caching: http://developwithstyle.com/articles/2010/05/14/jquery-ui-autocomplete-is-it-any-good.html
         $().ready(function() {     
-            setFocus("Name");
+            //setFocus("Name");
             $("#tabs").tabs({ 
             /*cache: true, spinner: 'Loading...', ajaxOptions: { cache: false },
             http://jqueryui.com/upgrade-guide/1.9/#deprecated-ajaxoptions-and-cache-options-added-beforeload-event */

@@ -98,11 +98,12 @@ namespace CPM.Controllers
                 new ActivityHistory() { ClaimID = ClaimID, ClaimText = ClaimNo.ToString() });
 
             #endregion
-
+            
             // Make sure the PREMANENT files are also deleted
-            FileIO.EmptyDirectory(FileIO.GetClaimDirPathForDelete(ClaimID, null, null, false));
-            // Reset Claim in session
-            _Session.ResetClaimInSessionAndEmptyTempUpload(ClaimGUID);
+            FileIO.DeleteDirectory(System.IO.Directory.GetParent(FileIO.GetClaimFilesDirectory(ClaimID, ClaimGUID)).FullName);
+            // Reset Claim in session (no GUID cleanup needed)
+            _Session.ClaimsInMemory.Remove(ClaimGUID); // Remove the Claim from session
+            //_Session.ResetClaimInSessionAndEmptyTempUpload(ClaimID, ClaimGUID);
 
             return Redirect("~/Dashboard");
         }
@@ -116,19 +117,20 @@ namespace CPM.Controllers
             new ActivityLogService(
                 Archive ? ActivityLogService.Activity.ClaimArchive : ActivityLogService.Activity.ClaimUnarchive)
                 .Add(new ActivityHistory() { ClaimID = ClaimID, ClaimText = ClaimNo.ToString() });
-            _Session.ResetClaimInSessionAndEmptyTempUpload(ClaimGUID);//reset after act log!
+            
+            if (Archive) 
+                _Session.ResetClaimInSessionAndEmptyTempUpload(ClaimID, ClaimGUID);//reset after act log!
+            
             if (Archive) return Redirect("~/Dashboard");
             else return RedirectToAction("Manage", new { ClaimID = ClaimID, ClaimGUID = ClaimGUID });
         }
-
-        public ActionResult Cancel(int ClaimID, string ClaimGUID)
-        {
+                
+        [HttpPost]
+        public JsonResult CleanupTempUpload(int ClaimID, string ClaimGUID)
+        {   // Unable to trigger action due to - e.returnValue = 'Make ..'; (frozen for now)
             // Make sure the temp files are also deleted
-            FileIO.EmptyDirectory(FileIO.GetClaimFilesTempFolder(ClaimGUID, true));
-            FileIO.EmptyDirectory(FileIO.GetClaimFilesTempFolder(ClaimGUID, false));            
-
-            _Session.ResetClaimInSessionAndEmptyTempUpload(ClaimGUID);
-            return Redirect("~/Dashboard");
+            _Session.ResetClaimInSessionAndEmptyTempUpload(ClaimID, ClaimGUID);
+            return new JsonResult() { Data = new{ msg = "Temp file upload cleanup triggered."}};
         }
 
         [HttpPost]
@@ -145,7 +147,7 @@ namespace CPM.Controllers
 
             #region Perform operation proceed and set result
 
-            int result = new CAWclaim(false).AsyncBulkAddEditDelKO(claimObj, claimObj.StatusIDold, items, comments, files);
+            int result = new ClaimService().AsyncBulkAddEditDelKO(claimObj, claimObj.StatusIDold, items, comments, files);
             success = result > 0;
 
             if (!success) {/*return View(claimObj);*/}
@@ -159,7 +161,8 @@ namespace CPM.Controllers
             #endregion
 
             base.operationSuccess = success;//Set opeaon success
-            _Session.ResetClaimInSessionAndEmptyTempUpload(claimObj.ClaimGUID); // reset because going back to Manage will automatically creat new session
+            _Session.ClaimsInMemory.Remove(claimObj.ClaimGUID); // Remove the Claim from session
+            //_Session.ResetClaimInSessionAndEmptyTempUpload(claimObj.ClaimGUID); // reset because going back to Manage will automatically create new GUID
             
             if(success)
                 TempData["printClaimAfterSave"] = printClaimAfterSave.HasValue && printClaimAfterSave.Value;

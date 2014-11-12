@@ -28,7 +28,7 @@
                 <table id="tblSearch" width="100%">
                     <tr>
                         <td nowrap="nowrap" width="5%">Activity</td>
-                        <td>@Html.DropDownList("ActivityID", new SelectList((IEnumerable)ViewData["Activities"], "ID", "TEXT", logSearch.ActivityID), "", new { @class = "dropDown" })</td>
+                        <td>@Html.DropDownList("ActivityID", new SelectList((IEnumerable)ViewData["Activities"], "ID", "TEXT", logSearch.ActivityID), "", new { @class = "dropDown", @autofocus = "autofocus" })</td>
                         <td nowrap="nowrap" width="5%">Claim</td>
                         <td>@Html.TextBox("ClaimText", logSearch.ClaimText)</td>                        
                         <td nowrap="nowrap" width="5%">File</td>
@@ -74,7 +74,7 @@
 </table>
 <script type="text/javascript">
     $().ready(function () {
-        setFocus("ActivityID");
+        //setFocus("ActivityID");
         //AJAXify form
         doAjaxForm('#frm', '#tdGrid', '#doReset');
 

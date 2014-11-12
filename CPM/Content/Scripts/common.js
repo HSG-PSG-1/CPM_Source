@@ -36,6 +36,7 @@ function renderAutoComplete(url, idBox, txtBox) {
     , minLength: autoCompMinLen
     , select: function (event, ui) { if (ui.item.id == null) { event.preventDefault(); } else log(ui.item, idBox, txtBox); }
     , focus: function(event, ui) {  if (ui.item.id == null) event.preventDefault(); }
+    , change: function (event, ui) { $(txtBox).trigger("change"); } // for chrome
     //, search: function(event, ui) {$("#msg").show();$("#msg").html($(txtBox + ', li').length); $("#msg").dialog();}
     //Tie up events to toggle dropdown images
     , open: function(event, ui) { toggleDDimg(ddSpan, true); $("#msg").hide(); } //$(txtBox).find('li').length
@@ -77,8 +78,8 @@ function confirmDeleteM(evt, msg) {
 }
 
 function confirmDelete(evt) {
-    var GoAhead = window.confirm("Are you sure you want to delete this record?");
-    return stopEvent(evt, GoAhead);
+    return confirmDeleteM(evt, "Are you sure you want to delete this record?");
+    //var GoAhead = window.confirm("Are you sure you want to delete this record?");    return stopEvent(evt, GoAhead);
 }
 
 function stopEvent(e, GoAhead) {
@@ -165,7 +166,7 @@ function checksession() {
 function clearForm(oForm) {
     var elements = oForm.elements;
     oForm.reset();
-
+    try{
     for (i = 0; i < elements.length; i++) {
 
 		if (!elements[i].type) continue;//HT: To avoid unwanted elements
@@ -195,6 +196,7 @@ function clearForm(oForm) {
             default: break;
         }
     }
+    }catch(e){}
 }
 
 //minSQLDate & maxSQLDate are declared in Master page
@@ -298,6 +300,7 @@ function openWinScrollable(url, h, w) {
     //Open new window
     targetWin1 = window.open(url, "_blank", "toolbar=no, location=no, directories=no, status=no, menubar=no, scrollbars=yes," + 
     " resizable=yes, copyhistory=no, width=" + w + ", height=" + h + ", top=" + top + ", left=" + left);
+    return targetWin1;
 }
 
 function setFocus(elemID) {    
@@ -306,7 +309,7 @@ function setFocus(elemID) {
         elem = document.getElementsByName(elemID); //special case for MVC who don't render id!
         if (elem.length > 0) elem = elem[0];//If its a checkbox it'll have 2 of same name
     }
-    try { elem.focus(); return; } catch (ex) { /*alert(elem + ":" + elemID + ":" + ex);*/ } //skip if id is wrong
+    try { elem.focus(); return; } catch (ex) { /*alert(elem + ":" + elemID + ":" + ex.message);*/ } //skip if id is wrong
 }
 
 function toggleTbody(tbod) {//http://bytes.com/topic/javascript/answers/147170-how-hide-table-rows-grouping-them-into-div//id
@@ -369,7 +372,6 @@ function showNOTY(msg, success) {
     //doFurtherProcessing(); HT: Handled at the end of effect call back    
     try { DisableSubmitButtons(false); /*$.unblockUI();*/ } catch (e) { }
 }
-
 function setDefaultIfEmpty(txt, defaultStr) {// use with onblur (don't use with jQuery.validate class = "required"
     if ($(txt).val() == '') $(txt).val(defaultStr).trigger("change"); // make sure defaultStr is a string
 }
@@ -408,19 +410,84 @@ function chartPieSelectHandler(chartObj,dataTbl,keyPos) {
     */
 }
 function DisableSubmitButtons(disable) {
-    var allSubmits = $('input[type = "submit"]');
-    
-    if(disable)
-        allSubmits.attr('disabled', disable);
-    else // for IE < 8  SO : 6585214
-        allSubmits.removeAttr("disabled");
+    $('input[type = "submit"]').prop('disabled', disable);
 }
-
 function showDlg(show) {
     if (show && $("#divdlg")){
         $("#divdlg").dialog({ title: "", modal: true, height: 110, width: 50});
         $("#divdlg").parent().find(".ui-dialog-titlebar").hide();  // Hide title : http://forum.jquery.com/topic/ui-dialog-remove-title-bar
     }
     else if($("#divdlg"))
-        $("#divdlg").dialog("destroy");        
+        $("#divdlg").dialog("destroy");
+}
+
+function createToFromjQDTP(FromDtpID, ToDtpID) {
+    var ToDtpID1 = ToDtpID + "1";
+    var FromDtpID1 = FromDtpID + "1";
+    //NEW : http://jqueryui.com/datepicker/#date-range
+    $(FromDtpID1).datepicker({
+        defaultDate: "+1w",
+        minDate: minSQLDate,
+        maxDate: maxSQLDate,
+        changeMonth: true,
+        numberOfMonths: 3,
+        altField: FromDtpID, altFormat: 'dd M yy',
+        onSelect: function (selectedDate) { $(FromDtpID).trigger("change"); }, // DON'T : .val(selectedDate)
+        onClose: function (selectedDate, inst) {
+            $(ToDtpID1).datepicker("option", "minDate", selectedDate);
+            if (selectedDate == '') { // special case SO : http://bugs.jqueryui.com/ticket/5734
+                $(inst.settings["altField"]).val(selectedDate);
+            }
+            $(FromDtpID).trigger("change"); // Specially for KO (not FromDtpID1)
+        }
+    });
+    $(ToDtpID1).datepicker({
+        defaultDate: "+1w",
+        changeMonth: true,
+        numberOfMonths: 3,
+        altField: ToDtpID, altFormat: 'dd M yy',
+        onSelect: function (selectedDate) { $(ToDtpID).trigger("change"); }, // DON'T : .val(selectedDate)        
+        onClose: function (selectedDate, inst) {
+            $(FromDtpID1).datepicker("option", "maxDate", selectedDate);
+
+            if (selectedDate == '') { // special case SO : http://bugs.jqueryui.com/ticket/5734
+                $(inst.settings["altField"]).val(selectedDate);
+            }
+            $(ToDtpID).trigger("change"); // Specially for KO (not ToDtpID1)
+        }
+    });
+
+    // Set format to be used by alt date field
+    //$(FromDtpID1).datepicker("option", "altField", FromDtpID);    $(FromDtpID1).datepicker("option", "altFormat", 'dd-M-yy');
+    //$(ToDtpID1).datepicker("option", "altField", ToDtpID);    $(ToDtpID1).datepicker("option", "altFormat", 'dd-M-yy');
+}
+
+function createjQDTP(DtpID) {
+    var DtpID1 = "#" + DtpID + "Str";
+    //NEW : http://jqueryui.com/datepicker/#date-range
+    $(DtpID1).datepicker({
+        minDate: minSQLDate,
+        maxDate: maxSQLDate,
+        changeMonth: true
+    });
+    // Set format to be used by alt date field
+    $(DtpID1).datepicker("option", "altField", "#" + DtpID);
+    $(DtpID1).datepicker("option", "altFormat", 'dd-M-yy');
+}
+
+function setAutofocus() { $('[autofocus]:not(:focus)').eq(0).focus(); }
+
+String.prototype.Ufloat = function () {
+    var val = parseFloat(this);
+    return parseFloat(((val > 0) ? val : 0.00).toFixed(2));
+}
+
+String.prototype.Uint = function () {
+    return parseInt((this > 0) ? this : 0); // DON'T as it might affect calculation .toFixed(2);
+}
+
+function setFocusEditableGrid(tableID, isFirstTROrLast) {
+    var trPosition = isFirstTROrLast ? "tr:first" : "tr:last";    
+    tableID = "#" + tableID;
+    $(tableID).find(trPosition).find('input[class=editableTX],textarea,select').filter(':visible:first').focus();
 }

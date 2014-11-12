@@ -39,7 +39,7 @@ namespace CPM.Controllers
         #region Will need GET (for AJAX) & Post
         
         [CacheControl(HttpCacheability.NoCache)]//Don't mention GET or post as this is required for both!
-        public JsonResult ClaimListKO(int? index, string qData, bool? fetchAll)
+        public ContentResult ClaimListKO(int? index, string qData, bool? fetchAll)
         {
             base.SetTempDataSort(ref index);// Set TempDate, Sort & index
             //Make sure searchOpts is assigned to set ViewState
@@ -54,56 +54,76 @@ namespace CPM.Controllers
                          select new
                          {
                              ID = vw_u.ID,
-                             ClaimNo = vw_u.ClaimNo,
+                             CNo = vw_u.ClaimNo,
                              StatusID = vw_u.StatusID,
-                             AssignToName = vw_u.AssignToName,
-                             CustRefNo = vw_u.CustRefNo,
-                             BrandName = vw_u.BrandName,
+                             AsgnTo = vw_u.AssignToName,
+                             CustRef = vw_u.CustRefNo,
+                             Brand = vw_u.BrandName,
                              CustOrg = vw_u.CustOrg,
-                             Salesperson = vw_u.Salesperson,
-                             ClaimDateOnly = vw_u.ClaimDateOnly,
-                             Archived = vw_u.Archived,
+                             SP = vw_u.Salesperson,
+                             CDate = vw_u.ClaimDateOnly,
+                             Archvd = vw_u.Archived,
                              Status = vw_u.Status,
-                             CommentsExist = vw_u.CommentsExist,
-                             FilesHExist = vw_u.FilesHExist,
-                             ClaimDateTxt = vw_u.ClaimDateTxt,//ClaimDate.ToString(Defaults.dtFormat, Defaults.ci),
-                             ShipToLocAndCode = vw_u.ShipToLocAndCode,
+                             Cmts = vw_u.CommentsExist,
+                             Files = vw_u.FilesHExist,
+                             CDtTxt = vw_u.ClaimDateTxt,//ClaimDate.ToString(Defaults.dtFormat, Defaults.ci),
+                             ShpLocCode = vw_u.ShipToLocAndCode
                          };
 
-            return Json(new { records = result, search = oldSearchOpts }, JsonRequestBehavior.AllowGet);
+            //return Json(new { records = result, search = oldSearchOpts }, JsonRequestBehavior.AllowGet);
+            
+            System.Web.Script.Serialization.JavaScriptSerializer jsSerializer =
+                new System.Web.Script.Serialization.JavaScriptSerializer { MaxJsonLength = Int32.MaxValue }; //Json(new { records = result, search = oldSearchOpts }, JsonRequestBehavior.AllowGet);
+            var jsonDataSet = new ContentResult
+            {
+                Content = jsSerializer.Serialize(new { records = result, search = oldSearchOpts }),
+                ContentType = "application/json",
+                //ContentEncoding = 
+            };
+            // MVC 4 : jsonResult.MaxJsonLength = int.MaxValue;
+            return jsonDataSet;
         }
 
         [CacheControl(HttpCacheability.NoCache)]//Don't mention GET or post as this is required for both!
-        public JsonResult ClaimListArchivedKO(bool? archived)
+        public ContentResult ClaimListArchivedKO(bool? archived)
         {
-            vw_Claim_Dashboard searchOpts1 = (vw_Claim_Dashboard)searchOpts;
-            bool oldSessionVal = searchOpts1.Archived;
-            searchOpts1.Archived = archived.HasValue ? archived.Value : false;
+            vw_Claim_Dashboard oldSearchOpts = (vw_Claim_Dashboard)searchOpts;
+            bool oldSessionVal = oldSearchOpts.Archived;
+            oldSearchOpts.Archived = archived.HasValue ? archived.Value : false;
 
             var result = from vw_u in new DashboardService().SearchKO(
-                sortExpr, 0, gridPageSize * 2, searchOpts1, true, _Session.IsOnlyCustomer)
+                sortExpr, 0, gridPageSize * 2, oldSearchOpts, true, _Session.IsOnlyCustomer)
                          select new
                          {
                              ID = vw_u.ID,
-                             ClaimNo = vw_u.ClaimNo,
+                             CNo = vw_u.ClaimNo,
                              StatusID = vw_u.StatusID,
-                             AssignToName = vw_u.AssignToName,
-                             CustRefNo = vw_u.CustRefNo,
-                             BrandName = vw_u.BrandName,
+                             AsgnTo = vw_u.AssignToName,
+                             CustRef = vw_u.CustRefNo,
+                             Brand = vw_u.BrandName,
                              CustOrg = vw_u.CustOrg,
-                             Salesperson = vw_u.Salesperson,
-                             ClaimDateOnly = vw_u.ClaimDateOnly,
-                             Archived = vw_u.Archived,
+                             SP = vw_u.Salesperson,
+                             CDate = vw_u.ClaimDateOnly,
+                             Archvd = vw_u.Archived,
                              Status = vw_u.Status,
-                             CommentsExist = vw_u.CommentsExist,
-                             FilesHExist = vw_u.FilesHExist,
-                             ClaimDateTxt = vw_u.ClaimDateTxt,//ClaimDate.ToString(Defaults.dtFormat, Defaults.ci),
-                             ShipToLocAndCode = vw_u.ShipToLocAndCode,
+                             Cmts = vw_u.CommentsExist,
+                             Files = vw_u.FilesHExist,
+                             CDtTxt = vw_u.ClaimDateTxt,//ClaimDate.ToString(Defaults.dtFormat, Defaults.ci),
+                             ShpLocCode = vw_u.ShipToLocAndCode                             
                          };
 
             //searchOpts1.Archived = oldSessionVal;//reset
-
-            return Json(result, JsonRequestBehavior.AllowGet);
+            //return Json(result, JsonRequestBehavior.AllowGet);
+            System.Web.Script.Serialization.JavaScriptSerializer jsSerializer = 
+                new System.Web.Script.Serialization.JavaScriptSerializer { MaxJsonLength = Int32.MaxValue }; //Json(new { records = result, search = oldSearchOpts }, JsonRequestBehavior.AllowGet);
+            var jsonDataSet = new ContentResult
+            {
+                Content = jsSerializer.Serialize(new { records = result, search = oldSearchOpts }),
+                ContentType = "application/json",
+                //ContentEncoding = 
+            };
+            // MVC 4 : jsonResult.MaxJsonLength = int.MaxValue;
+            return jsonDataSet;
         }
 
         [HttpPost]

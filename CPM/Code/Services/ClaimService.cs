@@ -282,113 +282,7 @@ namespace CPM.Services
         }
 
         #endregion
-    }
-
-    public class CAWclaim : _ServiceBase //: CAWBase - not needed because here we've kept the bulk Add, Edit & del function
-    {
-        #region Variables & Constructor
-        public bool IsAsync { get; set; }/*return true;for testing */
-        
-        public CAWclaim(bool Async){IsAsync = Async; }
-        #endregion
-
-        #region Add / Edit / Delete & Bulk
-        
-        /*
-        public int AddEdit(vw_Claim_Master_User_Loc vwObj, int StatusIDold)
-        {
-            if (!IsAsync)// Do Async add/edit
-                return new ClaimService().AddEdit(ClaimService.GetClaimObjFromVW(vwObj), StatusIDold, true);
-            else
-            {
-                #region Refresh Session claim Object with latest Claim data
-                Claim claimObj = _Session.Claims[vwObj.ClaimGUID];
-
-                //sessionClaimObj.ID = vwObj.ID;
-                //sessionClaimObj.AssignedTo = vwObj.AssignedTo; //HT? : CAUTION: Handled in Comments or not changed
-                claimObj.BrandID = vwObj.BrandID;
-                claimObj.ClaimDate = vwObj.ClaimDate; // Worst case handling when or anyreason the data was 1/1/1 ???
-                //ClaimNo = vwObj.ClaimNo, HT: NOT needed because its an auto-generted field
-                claimObj.CustID = vwObj.CustID;
-                claimObj.CustRefNo = vwObj.CustRefNo;
-                claimObj.SalespersonID = vwObj.SalespersonID;
-                claimObj.ShipToLocationID = vwObj.ShipToLocationID;
-                claimObj.StatusID = vwObj.StatusID;
-                //sessionClaimObj.VendorID = vwObj.VendorID;
-
-                _Session.Claims[vwObj.ClaimGUID] = claimObj;
-                #endregion
-                return AsyncBulkAddEditDel(claimObj, StatusIDold);//_Session.Claims[vwObj.ClaimGUID]
-            }
-        }
-                
-        public int AsyncBulkAddEditDel(Claim claimObj, int StatusIDold)
-        {
-            using (dbc)//Make sure this dbc is passed and persisted
-            {
-                bool isNewClaim = (claimObj.ID <= Defaults.Integer);
-                bool doSubmit = true;
-                string Progress = "";
-                #region Set Transaction
-                dbc.Connection.Open();
-                //System.Data.Common.DbTransaction 
-                var txn = dbc.Connection.BeginTransaction();
-                dbc.Transaction = txn;
-                //ExecuteReader requires the command to have a transaction when the connection assigned to the
-                //command is in a pending local transaction. The Transaction property of the command has not been initialized.
-                #endregion
-                try
-                {
-                    
-                    Progress = "Claim (" + claimObj.ID + ", " + claimObj.ClaimGUID + ", " + claimObj.ClaimDate.ToString() +")";//Update claim
-                    new ClaimService(dbc).AddEdit(claimObj, StatusIDold, true);//doSubmit must be TRUE
-                    //IMP: Note: The above addedit will return updated ClaimObj which will have Claim Id
-                                        
-                    Progress = "Comments";//Process comments
-                    new CommentService(dbc).BulkAddEditDel(claimObj.aComments, claimObj.ID, doSubmit);
-                    Progress = "HeaderFiles";//Process files (header) and files
-                    new FileHeaderService(dbc).BulkAddEditDel(claimObj.aFiles, claimObj, doSubmit, dbc);
-                    Progress = "Claimdetails";//Process items (and internally also process files(details)
-                    new ClaimDetailService(dbc).BulkAddEditDel(claimObj.aItems, claimObj, doSubmit, isNewClaim, dbc);
-                    //NOTE: For Async the Details files will have to be handled internally in the above function
-                    //EXTRA : Delete D_Temp folder ?
-                    if (claimObj.ID.ToString() != claimObj.ClaimGUID && 
-                        !string.IsNullOrEmpty(claimObj.ClaimGUID))//ensure there's NO confusion
-                        FileIO.EmptyDirectory(System.IO.Path.Combine(Config.UploadPath, claimObj.ClaimGUID.ToString()));
-
-                    if (!doSubmit) dbc.SubmitChanges();//Make a FINAL submit instead of periodic updates
-                    txn.Commit();//Commit
-                }
-                #region  Rollback if error
-                catch (Exception ex)
-                {
-                    txn.Rollback();
-                    Exception exMore = new Exception(ex.Message + " After " + Progress);                    
-                    throw exMore;
-                }
-                finally
-                {
-                    if (dbc.Transaction != null)
-                        dbc.Transaction.Dispose();
-                    dbc.Transaction = null;
-                }
-                #endregion
-            }
-
-            #region Check and send email to the final Claim Assignee!
-
-            if (Config.NofityAssignToEveryTime && claimObj.ID > Defaults.Integer && (claimObj.AssignedTo != _SessionUsr.ID))//Make sure "_Session.Claim" is available
-            {
-                string UserEmail = new UserService().GetUserEmailByID(claimObj.AssignedTo);
-                MailManager.AssignToMail(claimObj.ClaimNo.ToString(), claimObj.AssignToComment, claimObj.ID, UserEmail, (_SessionUsr.UserName), false);
-            }
-
-            #endregion
-
-            return claimObj.ID;//Return updated claimobj
-        }
-        */
-
+    
         public int AsyncBulkAddEditDelKO(vw_Claim_Master_User_Loc vwObj, int StatusIDold, 
             IEnumerable<ClaimDetail> items, IEnumerable<Comment> comments, IEnumerable<FileHeader> files)
         {
@@ -420,18 +314,19 @@ namespace CPM.Services
                     Progress = "Comments";//Process comments
                     if(comments != null && comments.Count() > 0)
                         new CommentService(dbc).BulkAddEditDel(comments.ToList(), claimObj.ID, doSubmit);
-                    Progress = "HeaderFiles";//Process files (header) and files
+                    Progress = "HeaderFiles";//Process files (header) and files (make sure Header files are processed before detail)
                     if (files != null && files.Count() > 0)
-                        new FileHeaderService(dbc).BulkAddEditDel(files.ToList(), claimObj, doSubmit, dbc);
+                        new FileHeaderService(dbc).BulkAddEditDel(files.ToList(), claimObj, doSubmit, dbc, isNewClaim);
                     Progress = "Claimdetails";//Process items (and internally also process files(details)
                     if (items != null && items.Count() > 0)
                         new ClaimDetailService(dbc).BulkAddEditDel(items.ToList(), claimObj, doSubmit, isNewClaim, dbc);
-                    //NOTE: For Async the Details files will have to be handled internally in the above function
-                    //EXTRA : Delete D_Temp folder ?
+                    
+                    // No need to cleanup the GUID folder or similar because now we rename
+                    /*NOTE: For Async the Details files will have to be handled internally in the above function
                     if (claimObj.ID.ToString() != claimObj.ClaimGUID &&
                         !string.IsNullOrEmpty(claimObj.ClaimGUID))//ensure there's NO confusion
                         FileIO.EmptyDirectory(System.IO.Path.Combine(Config.UploadPath, claimObj.ClaimGUID.ToString()));
-
+                    */
                     if (!doSubmit) dbc.SubmitChanges();//Make a FINAL submit instead of periodic updates
                     txn.Commit();//Commit
                 }
@@ -440,6 +335,8 @@ namespace CPM.Services
                 {
                     txn.Rollback();
                     Exception exMore = new Exception(ex.Message + " After " + Progress);
+                    // Make sure the temp files are also deleted
+                    _Session.ResetClaimInSessionAndEmptyTempUpload(claimObj.ID, claimObj.ClaimGUID);
                     throw exMore;
                 }
                 finally
@@ -463,8 +360,6 @@ namespace CPM.Services
 
             return claimObj.ID;//Return updated claimobj
         }
-
-        #endregion
     }
 
     public class StatusHistoryService : _ServiceBase

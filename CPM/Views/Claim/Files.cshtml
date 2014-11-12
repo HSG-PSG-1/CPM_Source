@@ -17,8 +17,7 @@
                         <tr>
                             <td colspan="4" align="center">
                                 <div style="display: none">
-                                    <input type="checkbox" data-bind="checked:_Added" id="_Added" name="_Added" />
-                                    <input type="checkbox" ID="_Added" name="_Added" data-bind="checked:_Added" />
+                                    <input data-bind="value:_Added" id="_Added" name="_Added" />
                                     ID: <input id="ID" name="ID" data-bind="value:ID" /><br />
                                     Claim ID: <input id="ClaimID" name="ClaimID" data-bind="value:ClaimID" />
                                     ClaimGUID:<input id="ClaimGUID" name="ClaimGUID" data-bind="value:ClaimGUID" /><br />
@@ -77,7 +76,7 @@
         }
         <tr>
             <td align="center">
-                <table class="thinBorder" width="100%" border="0" data-bind="visible:allFiles().length > 0">
+                <table class="thinBorder" width="100%" border="0" data-bind="visible:allFiles().length > 0" id="tblFilesH">
                     <thead class="header">
                         <tr>
                             @if (!isArchived)
@@ -101,7 +100,7 @@
                         </tr>
                     </thead>
                     <tbody data-bind="foreach: allFiles()">
-                        <tr data-bind="css:{deletedTR:_Deleted(),deletedTR_NO:!_Deleted()}">
+                        <tr data-bind="css:{deletedTR:_Deleted()}">
                             @if (!isArchived)
                             {
                                 <td nowrap="nowrap" style="display: none">
@@ -124,16 +123,13 @@
                             <td data-bind="text:FileName"></td>
                             <td title="click to edit">
                                 <div style="overflow: hidden">
-                                    <select class="dropbox noBorder" style="width: 120%; overflow: hidden;" onclick="editable(this, true);"
-                                        onblur="editable(this, false);" data-bind="options:$parent.FileTypes, value:FileType,
+                                    <select class="dropbox editableTX" data-bind="options:$parent.FileTypes, value:FileType,
                                          optionsText: 'value', optionsValue:'id', event:{change:$parent.setEditedFlag}">
                                     </select>
                                 </div>
                             </td>
                             <td title="click to edit">
-                                <input class="noBorder" data-bind="value:Comment, event:{change:$parent.setEditedFlag}"
-                                    style="border: none; width: 99%" type="text" onclick="editable(this, true);"
-                                    onblur="if(trimTextAreaMaxLen(this,250))editable(this, false);" />
+                                <textarea class="editableTX" data-bind="value:Comment, event:{change:$parent.setEditedFlag}" onblur="trimTextAreaMaxLen(this,250);" rows="1" ></textarea>
                             </td>
                             <td data-bind="text:UploadedBy"></td>
                             <td data-bind="date: UploadedOn"></td>

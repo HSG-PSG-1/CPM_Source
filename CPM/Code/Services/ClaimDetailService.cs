@@ -135,7 +135,7 @@ namespace CPM.Services
             //using{dbc}, try-catch and transaction must be handled in callee function
             foreach (ClaimDetail item in records)
             {
-                #region Perform Db operations
+                #region Perform DB operations
                 item.ClaimID = claimObj.ID; //Required when adding new Claim
                 item.LastModifiedBy = _SessionUsr.ID;
                 item.LastModifiedDate = DateTime.Now;
@@ -150,8 +150,7 @@ namespace CPM.Services
                 {
                     Delete(item, false);
                     // Make sure the Existing as well as Uploaded (Async) files are deleted
-                    FileIO.EmptyDirectory(FileIO.GetClaimDirPathForDelete(claimObj.ID, item.ID, claimObj.ClaimGUID, true));
-                    FileIO.EmptyDirectory(FileIO.GetClaimDirPathForDelete(claimObj.ID, item.ID, null,false));
+                    FileIO.DeleteDirectory(FileIO.GetClaimFilesDirectory(claimObj.ID, claimObj.ClaimGUID, item.ID));                    
                 }
                 else if (item._Edited)
                     AddEdit(item, false);
@@ -165,7 +164,7 @@ namespace CPM.Services
 
                 // Finally, If Item is NOT deleted then process its Files
                 if (!item._Deleted && item.aDFiles != null && item.aDFiles.Count() > 0) // Make sure item is not deleted
-                    new FileDetailService(dbc).BulkAddEditDel(item.aDFiles, claimObj, oldClaimDetailId, item.ID, doSubmit, dbcContext);
+                    new FileDetailService(dbc).BulkAddEditDel(item.aDFiles, claimObj, oldClaimDetailId, item.ID, doSubmit, dbcContext, (isNewClaim|| item._Added));
             }
             
         }

@@ -167,14 +167,14 @@ namespace CPM.Helper
             }
         }
 
-        public static Claims Claims { get{return new Claims();} }
+        public static Claims ClaimsInMemory { get{return new Claims();} }
 
-        public static void ResetClaimInSessionAndEmptyTempUpload(string ClaimGUID)
+        public static void ResetClaimInSessionAndEmptyTempUpload(int ClaimID, string ClaimGUID)
         { // Use ClaimGUID to find the exact claim from
             if (!string.IsNullOrEmpty(ClaimGUID)) // HT: ENSURE ClaimGUID is present
-                FileIO.EmptyDirectory(System.IO.Path.Combine(Config.UploadPath, ClaimGUID));
+                FileIO.CleanTempUpload(ClaimID, ClaimGUID);
             
-            Claims.Remove(ClaimGUID); // Remove the Claim from session
+            ClaimsInMemory.Remove(ClaimGUID); // Remove the Claim from session
             //HttpContext.Current.Session.Remove("ClaimObj");
         }
 

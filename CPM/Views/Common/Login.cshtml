@@ -61,7 +61,7 @@
                             &nbsp;@Html.LabelFor(m => m.Email)
                         </td>
                         <td nowrap="nowrap" width="98%">
-                            &nbsp;@Html.CustomTextBoxFor(m => m.Email, new { @class = "email" })
+                            &nbsp;@Html.CustomTextBoxFor(m => m.Email, new { @class = "email", @autofocus = "autofocus", @autocomplete="off" })
                             @Html.ValidationMessageFor(m => m.Email)
                         </td>
                     </tr>
@@ -71,7 +71,7 @@
                         </td>
                         <td nowrap="nowrap">
                             &nbsp;@(Html.CustomTextBoxFor(m => m.Password,
-                                  new { @value = Model.Password, @type = "password" }))
+                                  new { @value = Model.Password, @type = "password", @autocomplete="off" }))
                             @Html.ValidationMessageFor(m => m.Password)
                         </td>
                     </tr>
@@ -100,7 +100,7 @@
     </table>
     <div id="dialogForgotPWD" style="display:none;height:100px">
     @* Forgot Password : START*@
-        <table border="0" cellpadding="2" cellspacing="2" width="1%" align="center">
+        <table border="0" cellpadding="2" cellspacing="2" width="1%" align="center" id="tblForgotPwd">
             <tr><td colspan="2" nowrap="nowrap" align="center">
             @Html.ValidationMessage("UserEmail")
             </td></tr>
@@ -121,7 +121,7 @@
             <tr>
                 <td align="center" colspan="2">
                     <br />
-                    <a href="mailto:support@aot.com">Email Support Team</a>
+                    <a href="mailto:support@american-omni.com">Email Support Team</a>
                 </td>
             </tr>
         </table>       
@@ -134,9 +134,10 @@
     <script src="@Url.Content("~/Content/jQUI/min/jquery-migrate-1.2.1.min.js")" type="text/javascript"></script>
     @*<script src="@Url.Content("~/Content/jQUI/min/jquery-ui.1.10.2.min.js")" type="text/javascript"></script>*@
     <script src="@Url.Content("~/Content/jQUI/min/jquery-ui.1.11.0.min.js")" type="text/javascript"></script>
-    <script src="@Url.Content("~/Content/Scripts/jquery.validate.1.9.0.min.js")" type="text/javascript"></script>        
+    <script src="@Url.Content("~/Content/Scripts/jquery.validate.1.11.0.min.js")" type="text/javascript"></script>        
     <script src="@Url.Content("~/Content/Scripts/common.js")" type="text/javascript"></script>
     <script src="@Url.Content("~/Content/Scripts/jquery.noty.packaged.v222.js")" type="text/javascript"></script>
+    <script  src="@Url.Content("~/Content/Scripts/jquery.table.nav.1.0.js")" type="text/javascript" ></script>
         
     <script type="text/javascript">
     var isInIFrame = (window.location != window.parent.location) ? true : false;
@@ -170,17 +171,14 @@
         var containerID = "#dialogForgotPWD";
         $(containerID).dialog({
             modal: false, /* Using modal dialog causes scrollbars to appear because its rendered in a div */
-            @*open: function() {//$(this).load('@Url.Content("~/Dashboard/")' + action + '?ClaimID=' + claimID);
-            },*@
+            open: function(evt, ui) {setTimeout(function(){$('#UserEmail').focus(); $("#tblForgotPwd").tableNav();},1); },
             close: function() { IsForgotPassword(false); /* $("#IsForgotPassword").attr('checked', false);*/ },
             height: 190,
             width: 350,
             title: "Forgot Password"
         });
         //http://stackoverflow.com/questions/568784/jquery-modal-form-dialog-postback-problems
-        $(containerID).parent().appendTo($("form:first"));
-
-        
+        $(containerID).parent().appendTo($("form:first"));        
     }
     @** Render call to openSendPassword only if required **@
     @if ((bool)(ViewData["showSendPWD"] ?? false))
@@ -188,8 +186,8 @@
         /* Prevent the opr success result effect twice */
     @Html.Raw("$(\"#oprResult\").attr('done', '1');openSendPassword();")
     }
-    else
-    { @Html.Raw("$(document).ready(function () { $('#Email').focus(); });") }
+    @*else - handled with autofocus
+    { @Html.Raw("$(document).ready(function () { $('#Email').focus(); });") }*@
 
     function IsForgotPassword(yes){
          $("#IsForgotPassword").attr('checked', yes);
@@ -200,7 +198,7 @@
             $("table.header input[type=text],input[type=password]").removeAttr("disabled");
 
         //=== HT: Useful for Uno JS - in future when it is stable enuf to migrate
-        /*disable Uno JS (SO: 7389652)
+        @*disable Uno JS (SO: 7389652)
         $("form:first [data-val]").attr("data-val", !yes);
                         
         if(yes){
@@ -212,10 +210,10 @@
             $("form:first").validate();
             $.validator.unobtrusive.parse('form:first');
         }
-        */
+        *@
      }
      $(document).ready(function () {         
-         $("form:first").validate({ @Html.Raw(Defaults.validatorJQsetting), ignore: ":disabled,:hidden"}); // ignore disabled and hidden
+         $("form:first").validate({ ignore: ":disabled,:hidden", @Html.Raw(Defaults.validatorJQsetting) }); // ignore disabled and hidden
          $.validator.setDefaults({onkeyup: false, onfocusout: true, onsubmit: true});
 
         @{bool? oprSuccess = ((bool?)ViewData["oprSuccess"]);}
@@ -244,6 +242,9 @@
             max: jQuery.validator.format("Please enter a value less than or equal to {0}."),
             min: jQuery.validator.format("Please enter a value greater than or equal to {0}.")
         });
+
+         $("#tblLogin001").tableNav();
+         setAutofocus(); // Polyfill for < IE10
      });
 </script>
 </html>

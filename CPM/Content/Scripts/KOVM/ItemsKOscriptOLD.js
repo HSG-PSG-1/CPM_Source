@@ -22,8 +22,8 @@ var itemsModel = function () {
     self.MaxID = ko.computed(function () {
         _dummyObservable(); //retrieve and ignore the value
         var len = self.allItems().length;
-        var last = self.allItems()[len - 1];
-        return (last == null) ? -1 : last.ID();
+        var last = self.allItems()[len-1];
+        return (last == null)? -1 : last.ID();
     });
 
     self.CreditAmtTotal = ko.computed(function () {
@@ -53,23 +53,67 @@ var itemsModel = function () {
             item.InvoiceAmt1(item.InvoiceAmt1().toFixed(2));
             item.CreditAmt1(item.CreditAmt1().toFixed(2));
         });
-    };
+    }
 
     self.openAttachFilesDetail = function (item) {
-        var url = FilesDetailURL.replace("-999", item.ID()); /*"@Url.Action("FilesDetail", "Claim")" + "?ClaimDetailID=" + item.ID() + "&ClaimGUID=@ViewData["ClaimGUID"]"; */
+        var url = FilesDetailURL.replace("-999", item.ID()); /*"@Url.Action("FilesDetail", "Claim")" + "?ClaimDetailID=" + item.ID() + "&ClaimGUID=@ViewData["ClaimGUID"]"; */        
         var winFD = openWin(url, 450, 650);
         //winFD.onunload = 
-    };
+    }
 
     self.openAttachFilesDetailDirect = function (item) {
         var url = FilesDetailURL.replace("-999", item.ID());
         var winFD = openWin(url, 450, 650);
         self.itemToAdd(item);
+    }
+
+    self.showAddNew = function () {
+        if (!brandHasItems()) { showNOTY("Please select a Brand which has atleast one item", false); return; }
+
+        self.itemToAdd(cloneObservable(self.emptyItem)); //self.itemToAdd(ko.mapping.fromJS(self.emptyItem));
+
+        self.showGrid(false); $("#itmEntryDailog").dialog("open");
+        doBrandsFillAndNumericTXT();
+        IsCDEditMode = false;
+    }
+
+    self.setEdited = function (item) {
+        item._Edited(!item._Added());
+        item.LastModifiedDate(Date111);
+        /*if(item.aDFilesJSON == null || item.aDFilesJSON() == null){item.aDFilesJSON = ko.observable("[]");}*/
+
+        self.itemToAdd(item); //ko.mapping.fromJS(ko.toJS(item), self.itemToAdd);
+
+        self.showGrid(false); $("#itmEntryDailog").dialog("open");
+        doBrandsFillAndNumericTXT();
+        IsCDEditMode = true;
     };
 
     self.setEditedFlag = function (item) {
         item._Edited(!item._Added());
         item.LastModifiedDate(Date111);
+    };
+
+    self.saveItem = function (item) {
+        if (item.ItemCode == null || item.ItemCode == "")
+        //if (self.itemToAdd.ItemCode == null || self.itemToAdd.ItemCode == "")
+            showNOTY("Item is a required field", false);
+        else {
+            if (!IsCDEditMode) {
+                item.ID = NextNewItemID;
+                self.allItems.push(ko.mapping.fromJS(cloneObservable(item))); // self.allItems.push(item);
+                NextNewItemID = NextNewItemID - 1;
+            }
+            else {
+                /*var old = ko.utils.arrayFirst(self.allItems(), function (item) {return item.ID() == self.itemToAdd.ID(); });
+                self.allItems.replace(old, self.itemToAdd); //self.locations.valueHasMutated();*/
+            }
+
+            IsCDEditMode = false;
+            //HT: How to reset the add new obj
+            self.cancelItem(item); /*//ko.toJS(self.emptyItem) // ko.mapping.fromJS(ko.toJS(self.emptyItem), self.itemToAdd);*/
+            self.showGrid(true); $("#itmEntryDailog").dialog("close");
+        }
     };
 
     self.removeSelected = function (item) {
@@ -95,7 +139,7 @@ var itemsModel = function () {
             item._Deleted(false);
         }
     };
-
+    
     self.cancelItem = function (item) {
         IsCDEditMode = false;
         self.itemToAdd(cloneObservable(self.emptyItem)); //self.itemToAdd(ko.mapping.fromJS(self.emptyItem));
@@ -108,9 +152,9 @@ var itemsModel = function () {
     };
 
     /*self.createTableNav = function (data, element) {
-    return;
-    if (element.ID() == self.MaxID())
-    { alert(element.ID() + ":" + $("#tblItems").find('tbody').find('input:enabled').length); $("#tblItems").tableNav(); }
+        return;
+        if (element.ID() == self.MaxID())
+        { alert(element.ID() + ":" + $("#tblItems").find('tbody').find('input:enabled').length); $("#tblItems").tableNav(); }
     };*/
 };
 
@@ -132,9 +176,18 @@ function createItemsKO(data) {
     viewModelItems.invalidateToRefreshComputed();
     viewModelItems.formatData();
 
-    ko.applyBindings(viewModelItems, document.getElementById("divItems"));
+    ko.applyBindings(viewModelItems, document.getElementById("divItems"));    
 
-    initItemsAutocomplete();    
+    $("#itmEntryDailog").dialog({ // REQUIRED for old ITem entry
+        modal: true,
+        autoOpen: false,
+        height: 430,
+        width: 710,
+        close: function (event, ui) { viewModelItems.showGrid(true); },
+        open: function (event, ui) { setTimeout(function(){$('.ui-dialog-titlebar-close').blur();},1);}
+    });
+
+    doBrandsFillAndNumericTXT();
     //setTimeout(function () { $("#tblItems").tableNav(); },5000); // take time to create ko binding    
 }
 /*

@@ -18,7 +18,7 @@
                             </td>
                         </tr>
                         <tr>
-                            <td valign="top" rowspan="2" align="right" width="5%">New Comment</td>
+                            <td valign="top" rowspan="2" align="right" width="5%" nowrap="nowrap">New Comment :</td>
                             <td rowspan="2" width="70%">
                                 <textarea data-bind="value:Comment1" class="textbox required" cols="60" id="Comment1"
                                     name="Comment1" onblur="return trimTextAreaMaxLen(this,4000);" rows="3" style="width: 98%"
@@ -36,8 +36,10 @@
                         </tr>
                         <tr>
                             <td align="right" nowrap="nowrap" colspan="2" valign="top">
-                                <input id="btnCmtAdd" type="button" data-bind="click:$parent.addComment, enable: ($data.Comment1() != null && $data.Comment1().length > 0)" value="Add" class="button" />
-                                <input id="btnCmtReset" data-bind="click:$parent.cancelComment" type="reset" value="Cancel" class="button" />
+                            <input id="btnCmtAdd" type="button" data-bind="click:$parent.addComment, enable: ($data.Comment1() != null && $data.Comment1().length > 0)" value="Add"
+                                class="button" />
+                            <input id="btnCmtReset" data-bind="click:$parent.cancelComment" type="reset" value="Cancel"
+                                class="button" />
                             </td>
                         </tr>
                     </table>
@@ -51,19 +53,24 @@
                 <table class="thinBorder" width="99%" data-bind="visible:allComments().length > 0">
                     <thead class="header">
                         <tr>
-                            <th align="left" nowrap="nowrap" style="display: none; width: 3%">id &nbsp;&nbsp; A &nbsp;&nbsp; E &nbsp;&nbsp; D
+                            <th align="left" nowrap="nowrap" style="display: none; width: 3%">
+                                id &nbsp;&nbsp; A &nbsp;&nbsp; E &nbsp;&nbsp; D
                             </th>
-                            <th width="3%"></th>
-                            <th nowrap="nowrap" width="10%">Comment By
+                            <th width="3%">
                             </th>
-                            <th nowrap="nowrap" width="10%">Posted On
+                            <th nowrap="nowrap" width="10%">
+                                Comment By
                             </th>
-                            <th>Comment
+                            <th nowrap="nowrap" width="10%">
+                                Posted On
+                            </th>
+                            <th>
+                                Comment
                             </th>
                         </tr>
                     </thead>
                     <tbody data-bind="foreach: allComments()">
-                        <tr data-bind="css:{deletedTR:_Deleted(),deletedTR_NO:!_Deleted()}">
+                        <tr data-bind="css:{deletedTR:_Deleted()}">
                             <td nowrap="nowrap" style="display: none">
                                 <span data-bind='text:ID'></span>
                                 <input type="checkbox" data-bind="checked:_Added" />
@@ -71,7 +78,7 @@
                                 <input type="checkbox" data-bind="checked:_Deleted" />
                             </td>
                             <td nowrap="nowrap">
-                                <div class="dDialog" onclick="doEditableTA(this);" data-bind="visible:!_Deleted(), click:$parent.setEdited">@Html.Raw(@Defaults.editImg)</div>
+                                <div class="dDialog" onclick="doEditable(this);" data-bind="visible:!_Deleted(), click:$parent.setEdited">@Html.Raw(@Defaults.editImg)</div>
                                 &nbsp;
                                 <div class="dDialog" data-bind="visible:!_Deleted(), click:$parent.removeSelected">@Html.Raw(@Defaults.delImgForObj("comment"))</div>
                                 &nbsp;
@@ -83,9 +90,10 @@
                             @*<td data-bind="text:new Date(parseInt(PostedOn.substr(6)))"></td>*@
                             <td data-bind="date: PostedOn()"></td>@*http://forums.asp.net/t/1651593.aspx/1*@
                             <td title="click to edit">
-                                <textarea class="noBorder" data-bind="value:Comment1, event:{change:$parent.setEditedFlag}"
-                                    style="border: none; width: 99%" onclick="editable(this, true);"
-                                    onblur="if(doRequiredChk(this))editable(this, false);" title="click to edit" rows="1"></textarea>
+                                <textarea class="editableTX" data-bind="value:Comment1, event:{change:$parent.setEditedFlag}"                                    
+                                    onblur="doRequiredChk(this); $(this).height('auto');" title="click to view full content or edit" rows="1" style="overflow:auto; resize:vertical"
+                                     onfocus="$(this).height(this.scrollHeight);" onkeyup="$(this).height(this.scrollHeight);"></textarea>
+                                 @* http://chuvash.eu/2011/12/14/the-cleanest-auto-resize-for-a-textarea/ *@
                             </td>
                         </tr>
                     </tbody>

@@ -10,9 +10,10 @@ namespace CPM.Helper
     public class FileIO
     {
         #region Variables
+
+        public const char webPathSep = '/', fileNameSep = '~';
+        public static string sep = ";", fileNameSearchPattern = "{0}" + fileNameSep + "*.*"; // must match GetFileName
         public static readonly char dirPathSep = System.IO.Path.DirectorySeparatorChar;
-        
-        public const char webPathSep = '/';
         
         public enum result
         { 
@@ -24,38 +25,26 @@ namespace CPM.Helper
             noextension
         }
 
-        public enum mode
-        {
-            header,
-            detail,
-            asyncHeader,
-            asyncDetail
-        }
-
-        static string GetHD(mode upMode) {
-            switch (upMode)
-            {
-                case mode.detail: return "D";
-                case mode.header: return "H";
-                case mode.asyncHeader: return "H_Temp";
-                case mode.asyncDetail: return "D_Temp";
-                default: return "H";//non-reachable
-            }
+        static string GetHD(bool? isHdr = true)
+        { 
+            return (isHdr??true)?"H":"D";
         }
 
         #endregion
 
         #region Upload
-        
-        public static result UploadAndSave(HttpPostedFileBase upFile, ref string docName, string ClaimGUID, int? DetailId, mode upMode)
+
+        public static result UploadAndSave(HttpPostedFileBase upFile, int ClaimID, string ClaimGUID, int? DetailId)
         {
             #region Init variables
-            
-            string subsubDir = GetHD(upMode); bool hasDetail = (DetailId != null);
-            result resultIO = result.emptyNoFile;
 
+            string dir = (ClaimID > 0)?ClaimID.ToString():ClaimGUID; 
+            string subDir = GetHD(!DetailId.HasValue);
+            string fullPath = Config.UploadPath;
+            bool hasDetail = (DetailId != null);
+            result resultIO = result.emptyNoFile;
             string ext = Path.GetExtension(upFile.FileName);//Get extension
-            docName = Path.GetFileNameWithoutExtension(upFile.FileName);//Get only file name
+            string fileName = upFile.FileName;//Get only file name
 
             #endregion
 
@@ -68,28 +57,24 @@ namespace CPM.Helper
                 //if (ext.ToLower() == "exe" || ext.ToLower() == "ddl")
                 return result.noextension;
             
+            if (upFile.ContentLength > Config.MaxFileSizMB*1024*1024)
+                    return result.contentLength;
+            
             #endregion
 
             try
             {
-                if (upFile.ContentLength > Config.MaxFileSizMB*1024*1024)
-                    return result.contentLength;
-                else
-                {
-                    //Get full path
-                    string fullPath = CheckOrCreateDirectory(Config.UploadPath, ClaimGUID, subsubDir);
-                    //Special case for Details dir (check & create a claimID/D/detailID directory)
-                    if (hasDetail) fullPath = CheckOrCreateDirectory(fullPath, DetailId.ToString());
-                    // Gen doc name
-                    docName = docName + ext;
-                    // Check file duplication
-                    if (//upMode != mode.asyncDetail && upMode != mode.asyncHeader &&
-                        File.Exists(Path.Combine(fullPath, docName)))
-                        return result.duplicate;//Duplicate file exists!
+                fullPath = CheckAndCreateDirectory(Config.UploadPath, dir, subDir, (hasDetail ? DetailId.ToString() : ""));
+                // Gen doc name
+                fileName = GetFileName(fileName, ClaimID, ClaimGUID, DetailId);
+                // Check file duplication
+                if (File.Exists(Path.Combine(fullPath, upFile.FileName)) || File.Exists(Path.Combine(fullPath, fileName))) // skip checkto allow the user to overwrite a new version
+                    return result.duplicate;//Duplicate file exists!
 
-                    // All OK - so finally upload
-                    upFile.SaveAs(Path.Combine(fullPath, docName));//Save or Overwrite the file
-                }
+                // All OK - so finally upload
+                upFile.SaveAs(Path.Combine(fullPath, fileName));//Save or Overwrite the file
+                //reset original filename
+
             }
             catch { return result.fileUploadIssue; }
 
@@ -100,37 +85,17 @@ namespace CPM.Helper
 
         #region Check / Create / Delete Directory & File
 
-        public static string CheckOrCreateDirectory(string uploadPath, string dir, string subDir)
-        {//i.e. ../../Files/2/H
-            uploadPath = CheckOrCreateDirectory(uploadPath, dir);//Check and create directory
-            return CheckOrCreateDirectory(uploadPath, subDir);//Check and create SUB directory
-        }
-
-        public static string CheckOrCreateDirectory(string uploadPath, string dirName)
+        public static string CheckAndCreateDirectory(string uploadPath, params string[] directories)
         {
-            if (!Directory.Exists(Path.Combine(uploadPath, dirName)))//Check and create directory
-                Directory.CreateDirectory(Path.Combine(uploadPath, dirName));
-            
-            return Path.Combine(uploadPath, dirName);
-        }
-                
-        public static void EmptyDirectory(string delPath)
-        {
-            if (!Directory.Exists(delPath) || delPath == Config.UploadPath)
-                return; // avoid worst cases
-            try
+            foreach (string dir in directories)
             {
-                Directory.Delete(delPath, true);
+                if (string.IsNullOrEmpty(dir.Trim())) continue;
+                uploadPath = Path.Combine(uploadPath, dir);
+                 if(!Directory.Exists(uploadPath))//Check and create directory
+                     Directory.CreateDirectory(uploadPath);
             }
-            catch (System.IO.IOException ex)
-            {
-                //Or refer the following to set system attributes when delete
-                //http://stackoverflow.com/questions/611921/how-do-i-delete-a-directory-with-read-only-files-in-c
-                // SO : 329355
-                System.Threading.Thread.Sleep(0);
-                Directory.Delete(delPath, true);
-            }
-        }
+            return uploadPath;
+        }        
 
         /// <summary>
         /// Depth-first recursive delete, with handling for descendant 
@@ -138,7 +103,10 @@ namespace CPM.Helper
         /// </summary>
         public static void DeleteDirectory(string path)
         {
-            string[] files = Directory.GetFiles(path);            
+            if (!Directory.Exists(path) || path == Config.UploadPath)
+                return; // avoid worst cases
+
+            string[] files = Directory.GetFiles(path);
             foreach (string file in files)
             {
                 File.SetAttributes(file, FileAttributes.Normal);
@@ -152,107 +120,160 @@ namespace CPM.Helper
             catch (IOException) { Directory.Delete(path, true); }
             catch (UnauthorizedAccessException) { Directory.Delete(path, true); }
         }
-
-        public static bool DeleteFile(string FileName)
-        {
-            try
-            {
-                string FilePath = Path.Combine(Config.UploadPath, FileName);
-
-                if (File.Exists(FilePath))
-                    File.Delete(FilePath);
-                
-                return true; // HT: If file doesn't exist - we need not worry to delete it!
-                
-            }
-            catch { return false; }
-
-            //return false;
-        }
-
+        
         #endregion
 
         #region Claim File specific functions
-
-        public static string GetClaimFilePath(string ClaimGUID, int? ClaimDetailID, mode upMode, string FileName, bool webURL)
-        {
-            if (string.IsNullOrEmpty(ClaimGUID) || (string.IsNullOrEmpty(FileName) && webURL))
-                return "#"; 
-
-            string basePath = webURL ? Config.DownloadUrl : Config.UploadPath;
-            char sep = (webURL ? webPathSep : dirPathSep);
-            string dirPath = basePath + sep + ClaimGUID + sep + GetHD(upMode); // might be web url or physical path so can't use Path.Combine
-            
-            if (ClaimDetailID != null) //Special case for Details file
-                dirPath = dirPath + sep + ClaimDetailID.Value.ToString();
-
-            return string.IsNullOrEmpty(FileName) ? dirPath : dirPath + sep + FileName;
-        }
-
-        public static string Merge(string uri1, string uri2)
+        /*public static string Merge(string uri1, string uri2)
         {
             uri1 = uri1.TrimEnd('/');
             uri2 = uri2.TrimStart('/');
             return string.Format("{0}/{1}", uri1, uri2);
-        }
+        }*/
 
-        public static string GetClaimDirPathForDelete(int ClaimID, int? ClaimDetailID, string ClaimGUID, bool IsAsync)
-        {//Called from Claim-delete or ClaimDetail delete
-           string claimPath = Path.Combine(Config.UploadPath, (IsAsync?ClaimGUID.ToString():ClaimID.ToString()));
-           if (ClaimDetailID == null)
-               return claimPath; // returned to Claim - delete
-           else //if (DetailID != null) 
-               return Path.Combine(Path.Combine(claimPath, GetHD(IsAsync ? mode.asyncDetail : mode.detail)), ClaimDetailID.Value.ToString()); //// returned to ClaimDetail (Item) - delete
-        }
-
-        public static string GetClaimFilesTempFolder(string ClaimGUID, bool IsHeader)
-        {//Called from Claim-delete or ClaimDetail delete
-            string claimPath = Path.Combine(Config.UploadPath, ClaimGUID.ToString());
-            return Path.Combine(claimPath, GetHD(IsHeader ? mode.asyncHeader : mode.asyncDetail));
-        }
-
-        public static bool DeleteClaimFile(string docName, int ClaimID, int? ClaimDetailId, FileIO.mode upMode)
-        { return DeleteClaimFile(docName, ClaimID.ToString(), ClaimDetailId, upMode); }
-        public static bool DeleteClaimFile(string docName, string ClaimGUID, int? ClaimDetailId, FileIO.mode upMode)
+        public static string MergePath(string basePath, bool webURL, params string[] paths)
         {
-            return FileIO.DeleteFile(GetClaimFilePath(ClaimGUID, ClaimDetailId, upMode, docName, false));            
+            string fullPath = basePath;
+            foreach (string dir in paths)
+            {
+                if (dir.Trim().Length > 0)
+                {
+                    if (!webURL)
+                        fullPath = Path.Combine(fullPath, dir);
+                    else // is web url
+                        fullPath = fullPath + dirPathSep + dir;
+                }
+            }
+            return fullPath;
+        }
+
+        public static string GetFileName(string FileName, int ClaimID, string ClaimGUID = "", int? ClaimDetailID = null)
+        {
+            if ((FileName ?? "").Trim().Length == 0) return string.Empty;
+
+            if (ClaimID > 0 && (ClaimDetailID??1) > 0) // if its a new claim then NO need to change file name beause at the end we'll directly change the GID folder to ID
+                FileName = (ClaimGUID.Length > 0) ? (ClaimGUID + fileNameSep + FileName) : FileName; // GUID is sent only if its web and temp
+
+            return FileName;
+        }
+
+        public static string GetClaimFilePath(int ClaimID, string ClaimGUID, string FileName, int? ClaimDetailID = null, bool webURL = false)
+        {
+            if (string.IsNullOrEmpty(FileName) && webURL)
+                return "#";
+
+            string basePath = GetClaimFilesDirectory(ClaimID, ClaimGUID, ClaimDetailID, webURL);
+            return MergePath(basePath, webURL, GetFileName(FileName, ClaimID, ClaimGUID, ClaimDetailID));
+        }
+
+        public static string GetClaimFilesDirectory(int ClaimID, string ClaimGUID, int? ClaimDetailID = null, bool webURL = false)
+        {
+            string basePath = webURL ? Config.DownloadUrl : Config.UploadPath;
+            string claimDir = (ClaimID > 0) ? ClaimID.ToString() : ClaimGUID;
+            bool isHdr = !ClaimDetailID.HasValue;
+            string detailDir = !isHdr ? ClaimDetailID.Value.ToString() : "";
+            
+            return MergePath(basePath, webURL,claimDir, GetHD(isHdr), detailDir);
+        }
+        
+        public static bool DeleteClaimFile(int ClaimID, string ClaimGUID, string fileName, int? ClaimDetailID = null)
+        {
+            try
+            {
+                string FilePath = GetClaimFilePath(ClaimID, ClaimGUID, fileName, ClaimDetailID);
+
+                if (File.Exists(FilePath))
+                    File.Delete(FilePath);
+
+                return true; // HT: If file doesn't exist - we need not worry to delete it!
+
+            }
+            catch { return false; }
         }
         
         #endregion
 
-        #region Move / Get File download code
+        #region Move / Cleanup / Get File download code
 
-        public static void MoveAsyncClaimFiles(int claimID,string ClaimGUID, int? oldClaimDetailID, int? claimDetailID, bool isHeader)
-        {// Move all Async uploaded files from H_Temp to H
-            
-            mode FMode = (isHeader ? mode.header : mode.detail);
-            mode aFMode = (isHeader ? mode.asyncHeader : mode.asyncDetail);
+        public static void MoveFilesFolderNewClaimOrItem(int ClaimID, string ClaimGUID, int? OldClaimDetailID = null, int? ClaimDetailID = null)
+        {
+            // If its a new Claim - just need to rename GUID to NewID folder (same for new item folder) and rename ClaimDetailId
+            //  For H (invoke only once)
+            //  For D (invoke for each ClaimDetailId) : rename -1 to ClaimDetailID
+            string sourcePath = Directory.GetParent(GetClaimFilesDirectory(0, ClaimGUID)).FullName;
 
-            string sourcePath = GetClaimFilePath(ClaimGUID, oldClaimDetailID, aFMode, "", false);
-            string targetPath = GetClaimFilePath(claimID.ToString(), claimDetailID, FMode, "", false);
-
-            if (!Directory.Exists(sourcePath))
-                return;//Means there were only delete records which are already deleted
-
-            //check if the target directory exists (special case for first time upload during Async mode)
-            if (!Directory.Exists(targetPath))   
-                Directory.CreateDirectory(targetPath);
-
-            DirectoryInfo di = new DirectoryInfo(sourcePath);
-            //MOVE all the files into the new directory
-            foreach (FileInfo fi in di.GetFiles())
-                fi.CopyTo(Path.Combine(targetPath, fi.Name), true);
-            
-            // !! HT - handled after Claim entry save 
-            //Finally empty the source temp DIR
-            //EmptyDirectory(sourcePath);
+            if (Directory.Exists(sourcePath)) // GUID directory exists means its a new claim
+            {
+                string targetPath = Directory.GetParent(GetClaimFilesDirectory(ClaimID, "")).FullName;
+                new DirectoryInfo(sourcePath).MoveTo(targetPath);
+                if (!ClaimDetailID.HasValue) return; // header so return
+            }
+            // Only for Detail files
+            sourcePath = GetClaimFilesDirectory(ClaimID, "", OldClaimDetailID);
+            if (OldClaimDetailID < 1) // ClaimID < 1 is never possible because we always set the new ClaimId in child objects
+            {
+                if (Directory.Exists(sourcePath))
+                    new DirectoryInfo(sourcePath).MoveTo(GetClaimFilesDirectory(ClaimID, "", ClaimDetailID));
+                return;
+            }
         }
 
-        public static string getFileDownloadCode(string FileName, string ClaimGUID)
+        public static void StripGUIDFromClaimFileName(int ClaimID, string ClaimGUID, int? OldClaimDetailID = null, int? ClaimDetailID = null)
         {
-            string sepr = CPM.DAL.FileHeader.sep;
+            // If its a new Claim use - MoveFilesFolderNewClaimOrItem
+            //  For H : rename each GUID_fileH.ext to fileH.ext
+            //  For D : rename each GUID_fileD.ext to fileD.ext            
 
-            string codeStr = FileName + sepr + ClaimGUID + sepr + (false).ToString();
+            string sourcePath = GetClaimFilesDirectory(ClaimID, "", ClaimDetailID);
+            // Only for existing H or D
+            if (Directory.Exists(sourcePath))
+            {
+                foreach (FileInfo fi in GetFiles(sourcePath, ClaimGUID))
+                    fi.MoveTo(Path.Combine(sourcePath, fi.Name.Replace(ClaimGUID + fileNameSep, "")));
+            }
+        }
+        public static void CleanTempUpload(int ClaimID, string ClaimGUID)
+        {
+            string sourcePath = GetClaimFilesDirectory(ClaimID, ClaimGUID);
+
+            if (ClaimID < 1) // new claim so delete GUID directory
+            { DeleteDirectory(Directory.GetParent(sourcePath).FullName); return; }
+
+            // Header temp cleanup
+            if (Directory.Exists(sourcePath))
+                foreach (FileInfo fi in GetFiles(sourcePath, ClaimGUID))
+                    fi.Delete();
+            // Detail temp cleanup
+            sourcePath = Path.Combine(Directory.GetParent(sourcePath).FullName, GetHD(false));
+            if (!Directory.Exists(sourcePath)) return; // No 'D'etail folder
+            foreach (string delPath in Directory.GetDirectories(sourcePath))
+            {
+                int ClaimDetailID = 0;
+                //same as dir - string delPath = Path.Combine(sourcePath, dir);
+                if (Directory.Exists(delPath))
+                {
+                    string folderID = new DirectoryInfo(delPath).Name;
+                    if (int.TryParse(folderID, out ClaimDetailID) && ClaimDetailID < 0)
+                        DeleteDirectory(delPath); // delete temp directories like -1, -2
+                    else
+                        foreach (FileInfo fi in GetFiles(delPath, ClaimGUID))
+                            fi.Delete();
+                }
+            }
+        }
+
+        public static FileInfo[] GetFiles(string sourcePath, string ClaimGUID)
+        { 
+            string searchPattern = String.Format(fileNameSearchPattern, ClaimGUID);
+            if(Directory.Exists(sourcePath))
+                return new DirectoryInfo(sourcePath).GetFiles(searchPattern);
+            else
+                return new FileInfo[]{}; // path NOT found so return empty
+        }
+
+        public static string getFileDownloadCode(string FileName, int ClaimID, string ClaimGUID)
+        {
+            string codeStr = FileName + sep + ClaimID.ToString() + sep + ClaimGUID.ToString();                
             codeStr = HttpUtility.UrlEncode(Crypto.EncodeStr(codeStr.ToString(), true));
             // Make sure you do UrlEncode TWICE in code to get the code!!!
             return codeStr;
@@ -261,19 +282,14 @@ namespace CPM.Helper
         public static string getFileDownloadActionCode(string FileName, int ClaimID, int? ClaimDetailID)
         {
             bool isDetailFile = ClaimDetailID.HasValue;
-            string sepr = CPM.DAL.FileHeader.sep;
             
-            System.Text.StringBuilder codeStr = new System.Text.StringBuilder(FileName + sepr + ClaimID.ToString() + sepr);
-            if (isDetailFile) codeStr.Append(ClaimDetailID.ToString() + sepr);
-            codeStr.Append((false).ToString());
+            System.Text.StringBuilder codeStr = new System.Text.StringBuilder(FileName + sep + ClaimID.ToString());
+            if (isDetailFile) codeStr.Append(sep + ClaimDetailID.ToString());            
 
             // Make sure you do UrlEncode TWICE in code to get the code!!!
             return (isDetailFile?"GetFileD?":"GetFile?") + HttpUtility.UrlEncode(Crypto.EncodeStr(codeStr.ToString(), true));
         }
 
-        #endregion
-
-        //Merge two directories
-        //http://stackoverflow.com/questions/9053564/c-sharp-merge-one-directory-with-another
+        #endregion        
     }
 }

@@ -69,7 +69,7 @@ namespace CPM.Helper
         public static string lookupImgBtn ="<span class='lookup' >" +
         string.Format(lookupList, " onclick=\"$('#{0}').autocomplete('search',getStuffedAutoCompVal('#{0}')); \" ") + //$('#{0}').val()
         string.Format(lookupDown, " onclick=\"$('#{0}').autocomplete('close');\" style='display:none' ") + "</span>";
-        
+
         #endregion
 
         #region Edit, Cancel & Clip img

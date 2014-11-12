@@ -251,77 +251,6 @@ namespace CPM.DAL
         #region Extra Variables & Properties
         public string CommentBy { get; set; }
         #endregion
-
-        /* Set some required fields to proceed
-        public Comment setProp()
-        {
-            if (!_Deleted)
-            {//set necessary fields for Add & Edit
-                this.LastModifiedDate = DateTime.Now;
-                this.CommentBy = _SessionUsr.UserName;
-                this.UserID = _SessionUsr.ID;
-                this.PostedOn = DateTime.Now;
-            }
-
-            return this;
-        }
-
-        /// <summary>
-        /// Add, Edit or Delete
-        /// </summary>
-        /// <param name="aComments"> List of object</param>
-        /// <returns>Updated list of objects</returns>
-        public List<Comment> doOpr(List<Comment> aComments)
-        {
-            if (aComments == null) aComments = new List<Comment>();//When there're NO records
-
-            int index = aComments.FindIndex(p => p.ID == this.ID);//SO: 361921/list-manipulation-in-c-using-linq
-            base.setOpr(ID);//Set Add or Edit
-
-            #region Set data as per Operation
-
-            if (_Deleted)//Deleted =================
-            {
-                if (ID < 0) aComments.RemoveAt(index);//remove newly added
-                else aComments[index]._Deleted = true; 
-            }
-            else if (_Edited)//Edited=================
-            {
-                aComments[index] = this;
-            }
-            else //Added(or Newly added is edited)================
-            {
-                #region (New record: we assign -ve ClaimId to avoid conflicts)
-                if (index < 0)
-                {
-                    ID = (aComments.Count > 0) ?  (aComments.Min(c => c.ID) - 1) : Defaults.Integer - 1;
-                    while (ID >= 0) { ID = ID - 1; }//Make it < 0
-                    aComments.Add(this);
-                }
-                #endregion
-                else //Newly added is edited(we still maintain the flag until final commit)
-                    aComments[index] = this;
-            }
-
-            #endregion
-
-            return aComments;
-        }
-        /// <summary>
-        /// Add items to list
-        /// </summary>
-        /// <param name="child">Session Claim value</param>
-        /// <param name="records">Items</param>
-        /// <returns>Updated Claim variable</returns>
-        public static Claim lstAsync(Claim parent, List<Comment> records)
-        {
-            if (parent == null || records == null || records.Count < 1) return parent;
-
-            parent.aComments.AddRange(records);
-
-            return parent;
-        }
-        */
     }
 
     public class CommentMetadata
@@ -345,8 +274,7 @@ namespace CPM.DAL
     {
         #region Extra Variables & Properties
 
-        public bool IsAsync { get; set; }
-        string _ClaimGUID;
+        /*string _ClaimGUID;
         public string ClaimGUID
         {
             get
@@ -354,7 +282,7 @@ namespace CPM.DAL
                 return string.IsNullOrEmpty(_ClaimGUID) ? ClaimID.ToString() : _ClaimGUID;
             }
             set { _ClaimGUID = value; }
-        }
+        }*/
 
         public string UploadedBy { get; set; }
         public string FileNameNEW { get; set; }
@@ -363,94 +291,21 @@ namespace CPM.DAL
         {
             get
             {
-                if (_Added) return string.Empty;
+                if (_Added) //string.Empty;
+                    return HttpUtility.UrlEncode(CPM.Helper.Crypto.EncodeStr(FileName + sep + ClaimID.ToString() + sep + ClaimGUID, true));
                 else
-                    return HttpUtility.UrlEncode(CPM.Helper.Crypto.EncodeStr(FileName + sep + ClaimGUID.ToString() + sep + IsAsync, true));
+                    return HttpUtility.UrlEncode(CPM.Helper.Crypto.EncodeStr(FileName + sep + ClaimID.ToString(), true));
             }
         } // Can't use HttpUtility.UrlDecode - because it'll create issues with string.format and js function calls so handle in GetFile
         
         public string FilePath { //HT: Usage: <a href='<%= Url.Content("~/" + item.FilePath) %>' target="_blank">
-            get { return FileIO.GetClaimFilePath
-                (ClaimGUID, null, (IsAsync ? FileIO.mode.asyncHeader : FileIO.mode.header), FileName, true); 
+            get
+            {
+                return FileIO.GetClaimFilePath(ClaimID, ClaimGUID, FileName, webURL: true);
             }
         }
 
         #endregion
-
-        /* Set some required fields to proceed
-        public FileHeader setProp(bool Async)
-        {
-            if (!_Deleted)
-            {//set necessary fields for Add & Edit
-                this.LastModifiedDate = DateTime.Now;
-                this.UploadedOn = DateTime.Now;
-                this.UploadedBy = _SessionUsr.UserName;
-                //this.IsAsync = true;//Handled in controller action (not all updates are file-uploads)
-                this.UserID = _SessionUsr.ID;
-                this.IsAsync = Async;
-            }
-
-            return this;
-        }
-
-        /// <summary>
-        /// Add, Edit or Delete
-        /// </summary>
-        /// <param name="aComments"> List of object</param>
-        /// <returns>Updated list of objects</returns>
-        public List<FileHeader> doOpr(List<FileHeader> aFiles)
-        {
-            if (aFiles == null) aFiles = new List<FileHeader>();//When there're NO records
-
-            int index = aFiles.FindIndex(p => p.ID == this.ID);   //SO: 361921/list-manipulation-in-c-using-linq         
-            base.setOpr(ID);//Set Add or Edit
-
-            #region Set data as per Operation
-
-            if (_Deleted)//Deleted =================
-            {
-                if (ID < 0) aFiles.RemoveAt(index);//remove newly added
-                else aFiles[index]._Deleted = true;
-            }
-            else if (_Edited)//Edited=================
-            {
-                aFiles[index] = this;
-            }
-            else //Added(or Newly added is edited)================
-            {
-                this.IsAsync = true;//Set Async for newly added
-
-                #region New record: we assign -ve ClaimId to avoid conflicts
-                if (index < 0)
-                {
-                    ID = (aFiles.Count > 0) ? (aFiles.Min(c => c.ID) - 1) : Defaults.Integer - 1;
-                    while (ID >= 0) { ID = ID - 1; }//Make it < 0
-                    aFiles.Add(this);
-                }
-                #endregion
-                else //Newly added is edited(we still maintain the flag until final commit)
-                    aFiles[index] = this;
-            }
-
-            #endregion
-
-            return aFiles; // Updated object
-        }
-                
-        /// <summary>
-        /// Add items to list
-        /// </summary>
-        /// <param name="parent">Session Claim value</param>
-        /// <param name="records">Items</param>
-        /// <returns>Updated Claim variable</returns>
-        public static Claim lstAsync(Claim parent, List<FileHeader> records)
-        {
-            if (parent == null || records == null || records.Count < 1) return parent;
-
-            parent.aFiles.AddRange(records);
-            return parent;
-        }
-        */
     }
 
     public class FileHeaderMetadata
@@ -482,112 +337,30 @@ namespace CPM.DAL
     {
         #region Extra Variables & Properties
         
-        public bool IsAsync { get; set; }
-        string _ClaimGUID;
-        public string ClaimGUID
-        {
-            get
-            { // Return _ClaimGUID only for Async entries
-                return string.IsNullOrEmpty(_ClaimGUID) ? ClaimID.ToString() : _ClaimGUID;
-            }
-            set { _ClaimGUID = value; }
-        }
-        
         public string UploadedBy { get; set; }
         public string FileNameNEW { get; set; }
         public string FileTypeTitle { get; set; }
+
         public string CodeStr
         {
             get
             {
-                if (_Added) return string.Empty;
+                if (_Added) //string.Empty;
+                    return HttpUtility.UrlEncode(CPM.Helper.Crypto.EncodeStr(FileName + sep + ClaimDetailID.ToString() + sep + ClaimGUID, true));
                 else
-                    return HttpUtility.UrlEncode(CPM.Helper.Crypto.EncodeStr
-                    (FileName + sep + ClaimGUID + sep + ClaimDetailID.ToString() + sep + IsAsync, true));
-            }// Can't use HttpUtility.UrlDecode - because it'll create issues with string.format and js function calls so handle in GetFile
-        }
-        
-        public string FilePath { //HT: Usage: <a href='<%= Url.Content("~/" + item.FilePath) %>' target="_blank">
-            get { 
-                return FileIO.GetClaimFilePath
-                    (ClaimGUID, ClaimDetailID, (IsAsync ? FileIO.mode.asyncDetail : FileIO.mode.detail), FileName, true); 
+                    return HttpUtility.UrlEncode(CPM.Helper.Crypto.EncodeStr(FileName + sep + ClaimDetailID.ToString(), true));
+            }
+        } // Can't use HttpUtility.UrlDecode - because it'll create issues with string.format and js function calls so handle in GetFile
+
+        public string FilePath
+        { //HT: Usage: <a href='<%= Url.Content("~/" + item.FilePath) %>' target="_blank">
+            get
+            {
+                return FileIO.GetClaimFilePath(ClaimID, ClaimGUID, FileName, ClaimDetailID, true);
             }
         }
-
+        
         #endregion
-
-        /* Set some required fields to proceed
-        public FileDetail setProp(bool Async)
-        { 
-            if (!_Deleted)
-            {//set necessary fields for Add & Edit
-                this.LastModifiedDate = DateTime.Now;
-                this.UploadedOn = DateTime.Now;
-                this.UploadedBy = _SessionUsr.UserName;
-                //this.IsAsync = true;//Handled in controller action (not all updates are file-uploads)
-                this.UserID = _SessionUsr.ID;
-                this.IsAsync = Async;
-            }
-
-            return this;
-        }
-        
-        /// <summary>
-        /// Add, Edit or Delete
-        /// </summary>
-        /// <param name="aComments"> List of object</param>
-        /// <returns>Updated list of objects</returns>
-        public List<FileDetail> doOpr(List<FileDetail> aFiles)
-        {
-            if (aFiles == null) aFiles = new List<FileDetail>();//When there're NO records
-
-            int index = aFiles.FindIndex(p => p.ID == this.ID); //SO: 361921/list-manipulation-in-c-using-linq
-            base.setOpr(ID);//Set Add or Edit
-
-            #region Set data as per Operation
-            
-            if (_Deleted)//Deleted =================
-            {
-                if (ID < 0) aFiles.RemoveAt(index);//remove newly added
-                else aFiles[index]._Deleted = true;
-            }
-            else if (_Edited)//Edited=================
-            {
-                aFiles[index] = this;
-            }
-            else //Added(or Newly added is edited)================
-            {
-                #region New record: we assign -ve ClaimId to avoid conflicts
-                if (index < 0)
-                {
-                    ID = (aFiles.Count > 0)? (aFiles.Min(c => c.ID) - 1) : Defaults.Integer-1;
-                    while (ID >= 0) { ID = ID - 1; }//Make it < 0
-                    aFiles.Add(this);
-                }
-                #endregion
-                else //Newly added is edited(we still maintain the flag until final commit)
-                    aFiles[index] = this;
-            }
-
-            #endregion
-
-            return aFiles; // Updated object
-        }
-
-        /// <summary>
-        /// Add items to list
-        /// </summary>
-        /// <param name="parent">Session Claim value</param>
-        /// <param name="records">Items</param>
-        /// <returns>Updated Claim variable</returns>
-        public static Claim lstAsync(Claim parent, int ClaimDetailID, List<FileDetail> records)
-        {
-            if (parent == null || records == null || records.Count < 1) return parent;
-
-            parent.aItems.Single(p => p.ID == ClaimDetailID).aDFiles.AddRange(records);
-            return parent;
-        }
-        */
     }
 
     public class FileDetailMetadata

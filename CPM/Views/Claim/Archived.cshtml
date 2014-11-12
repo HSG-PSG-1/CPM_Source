@@ -83,6 +83,7 @@
                                             open: function () {
                                                 $(this).html(loading);
                                                 $(this).load('@Url.Content("~/Claim/")@(claim.ID)/Status');
+                                                setTimeout(function () { $('.ui-dialog-titlebar-close').blur(); }, 1);
                                             },
                                             height: 360,
                                             width: 650,

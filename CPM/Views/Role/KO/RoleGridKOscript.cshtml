@@ -10,18 +10,18 @@ var recordsViewModel = function () {
     @*//self.jsonText = ko.computed(function() { return ("JSON: " + ko.toJSON(self.recordToAdd())); });*@
 
     self.setEdited = function (record) {
-        record.IsUpdated(!record.IsAdded());
+        record._Updated(!record._Added());
         record.LastModifiedDate(Date111); 
     }
     self.setEditedFlag = function (record) {
-        record.IsUpdated(!record.IsAdded());
+        record._Updated(!record._Added());
         record.LastModifiedDate(Date111);
         
         var titl = record.Title();
         if (titl == "") { showNOTY("This field is required", false); }
         else if($.grep(self.allRecords(), function(el)
                 {
-                    return (!el.IsDeleted() && el.Title().toLowerCase() === titl.toLowerCase());}
+                    return (!el._Deleted() && el.Title().toLowerCase() === titl.toLowerCase());}
                ).length > 1)
         { showNOTY("Duplicate entry found", false);/*alert("Duplicate entry found"); */ }
         else
@@ -40,17 +40,19 @@ var recordsViewModel = function () {
         NextNewrecordID = NextNewrecordID - 1;
         self.newRecord.ID(NextNewrecordID);        
         
+        $("#sortable").tableNav(); // for newly created TR
+        setFocusEditableGrid("sortable", false);
         return true;
     };        
 
     self.removeSelected = function (record) {
         if (record != null)
         {
-            record.IsDeleted(true);
+            record._Deleted(true);
             //if(record.Title().length < 1)   record.Title("(Deleted)")
-            if (record.IsAdded()) {                
+            if (record._Added()) {                
                 self.allRecords.remove(record);
-                //record.IsAdded(false);
+                //record._Added(false);
             }
         }
     };
@@ -58,7 +60,7 @@ var recordsViewModel = function () {
     self.unRemoveSelected = function (record) {
         if (record != null) // Prevent blanks and duplicates
         {
-            record.IsDeleted(false);
+            record._Deleted(false);
         }
     };
     
@@ -101,19 +103,21 @@ function createRecordsKO()
              var data = dataSet.records;
              var newRec;
              if(data != null && data.length > 0)
-               {newRec = data.pop(); newRec.IsAdded = true;}
+               {newRec = data.pop(); newRec._Added = true;}
             
             vmMaster.allRecords = ko.mapping.fromJS(data);// Make sure the last record is removed
             vmMaster.newRecord = ko.mapping.fromJS(newRec);
 
             vmMaster.OrgTypes = ko.mapping.fromJS(dataSet.OrgTypes);
             ko.applyBindings(vmMaster);
+            
+            $("#sortable").tableNav();            
+            $('#sortable').find('input[type=text],textarea,select').filter(':visible:first').focus();
         });
 }
 
 $(document).ready(function () {
-    createRecordsKO();
-    //setFocus("record1");
+    createRecordsKO();    
 });
 
 </script>   

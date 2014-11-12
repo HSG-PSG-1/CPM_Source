@@ -24,20 +24,19 @@
             </tr>
         </thead>
         <tbody data-bind="foreach: allRecords()">
-            <tr data-bind="css:{deletedTR:IsDeleted(),deletedTR_NO:!IsDeleted()}">
+            <tr data-bind="css:{deletedTR:_Deleted()}">
                 <td nowrap="nowrap">
-                    <div class="dDialog" onclick="doEditable(this);" data-bind="visible:!IsDeleted(), click:$parent.setEdited">@Html.Raw(@Defaults.editImg)</div>
+                    <div class="dDialog" onclick="doEditable(this);" data-bind="visible:!_Deleted(), click:$parent.setEdited">@Html.Raw(@Defaults.editImg)</div>
                     &nbsp;
-                    <div class="dDialog" data-bind="visible:!IsDeleted() && CanDelete(), click:$parent.removeSelected">@Html.Raw(@Defaults.delImgForObj("record"))</div>
+                    <div class="dDialog" data-bind="visible:!_Deleted() && CanDelete(), click:$parent.removeSelected">@Html.Raw(@Defaults.delImgForObj("record"))</div>
                     &nbsp;
-                    <div class="dDialog" data-bind="visible:IsDeleted(), click:$parent.unRemoveSelected">@Html.Raw(@Defaults.cancelImgOnly)
+                    <div class="dDialog" data-bind="visible:_Deleted(), click:$parent.unRemoveSelected">@Html.Raw(@Defaults.cancelImgOnly)
                         &nbsp; &nbsp;
                     </div>
                 </td>
                 <td title="click to edit">
-                    <input class="noBorder" data-bind="value:Title, event:{change:$parent.setEditedFlag}"
-                        style="border: none; width: 99%" type="text" onfocus="editable(this, true);" maxlength="50" title="click to edit"
-                        onblur ="editable(this, false);" />                        
+                    <input class="editableTX" data-bind="value:Title, event:{change:$parent.setEditedFlag}"
+                        type="text" maxlength="50" title="click to edit" />
                 </td>
                 <td style="display: none">
                     <input type="text" data-bind="value:SortOrder" /><span data-bind="html:SortOrder" />
@@ -46,25 +45,25 @@
                     <select id="FileType" name="OrgTypeId" class="dropbox" data-bind="options: $parent.OrgTypes, value:RoleData.OrgTypeId, optionsText: 'value', optionsValue:'id'" style="width: 100%"></select>
                 </td>
                 <td align="center">
-                    <input type="checkbox" data-bind="checked:RoleData.ManageRole" style="width: 40%" />
+                    <input type="checkbox" data-bind="checked:RoleData.ManageRole" class="editableTX" style="width: 40%" />
                 </td>
                 <td align="center">
-                    <input type="checkbox" data-bind="checked:RoleData.ManageMaster" style="width: 40%" />
+                    <input type="checkbox" data-bind="checked:RoleData.ManageMaster" class="editableTX" style="width: 40%" />
                 </td>
                 <td align="center">
-                    <input type="checkbox" data-bind="checked:RoleData.ManageUser" style="width: 40%" />
+                    <input type="checkbox" data-bind="checked:RoleData.ManageUser" class="editableTX" style="width: 40%" />
                 </td>
                 <td align="center">
-                    <input type="checkbox" data-bind="checked:RoleData.DeleteClaim" style="width: 40%" />
+                    <input type="checkbox" data-bind="checked:RoleData.DeleteClaim" class="editableTX" style="width: 40%" />
                 </td>
                 <td align="center">
-                    <input type="checkbox" data-bind="checked:RoleData.ViewActivity" style="width: 40%" />
+                    <input type="checkbox" data-bind="checked:RoleData.ViewActivity" class="editableTX" style="width: 40%" />
                 </td>
                 <td align="center">
-                    <input type="checkbox" data-bind="checked:RoleData.ManageSetting" style="width: 40%" />
+                    <input type="checkbox" data-bind="checked:RoleData.ManageSetting" class="editableTX" style="width: 40%" />
                 </td>
                 <td align="center">
-                    <input type="checkbox" data-bind="checked:RoleData.ArchiveClaim" style="width: 40%" />
+                    <input type="checkbox" data-bind="checked:RoleData.ArchiveClaim" class="editableTX" style="width: 40%" />
                 </td>
                 <td data-bind="text:LastModifiedByVal">
                 </td>
@@ -73,9 +72,9 @@
                 </td>@*http://forums.asp.net/t/1651593.aspx/1*@
                 <td nowrap="nowrap" style="display: none">
                     <span data-bind='text:ID'></span>
-                    <input type="checkbox" data-bind="checked:IsAdded" />
-                    <input type="checkbox" data-bind="checked:IsUpdated" />
-                    <input type="checkbox" data-bind="checked:IsDeleted() && CanDelete()" />
+                    <input type="checkbox" data-bind="checked:_Added" />
+                    <input type="checkbox" data-bind="checked:_Updated" />
+                    <input type="checkbox" data-bind="checked:_Deleted() && CanDelete()" />
                 </td>
             </tr>
         </tbody>
