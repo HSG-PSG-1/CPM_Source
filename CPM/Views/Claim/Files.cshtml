@@ -30,9 +30,9 @@
                         <tr>
                             <td valign="middle" align="right" width="5%">File
                             </td>
-                            <td align="left" width="70%" nowrap="nowrap">@* HT : DON'T class="required" because it'll err in edit mode*@
+                            <td align="left" width="70%">@* HT : DON'T class="required" because it'll err in edit mode*@
                                 <input type="file" id="FileNameNEW" name="FileNameNEW" title="@maxFileSizMB" data-bind="value:FileNameNEW"
-                                    onchange='javascript:var fName = $(this).parent().children("input[type=text]:first");fName.val($(this).val());fName.trigger("change");' />
+                                    onchange='var fName = $(this).parent().children("input[type=text]:first");fName.val($(this).val()); fName.trigger("change");$("#btnFHSubmit").removeAttr("disabled");' />
                                 <span class="small">@maxFileSizMB</span>
                                 <div class="progress" style="display: inline">
                                     <div class="bar" style="display: inline">
@@ -43,8 +43,7 @@
                                 <div id="status" style="display: inline" class="error">
                                 </div>
                                 @*<input id="FileNameNEW" type="text" data-bind="value:FileNameNEW" />*@
-                                <input id="FileName" name="FileName" type="text" style="display: none" data-bind="value:FileName"
-                                    onchange='if($(this).val() != ""){$("#btnFHSubmit").removeAttr("disabled");} else {$("#btnFHSubmit").attr("disabled", true);}' />
+                                <input id="FileName" name="FileName" type="text" style="display: none" data-bind="value:FileName" />
                             </td>
                             <td valign="middle" align="right" nowrap="nowrap" width="5%">&nbsp;&nbsp;File Type
                             </td>
@@ -64,8 +63,8 @@
                             </td>
                             <td colspan="2" valign="top" align="right">
                                 <input type="submit" data-bind="click:$parent.addFile, enable: (FileName.length > 0)"
-                                    value="Add" class="button" onclick1="javascript:$('#frmFiles').submit();" title="Select a file, set type and click Add"
-                                    id="btnFHSubmit" />@*onclick="setDDLtext('FileType', 'FileTypeTitle');"*@
+                                    value="Add" class="button" onclick="$(this).attr('disabled', true);" title="Select a file, set type and click Add"
+                                    id="btnFHSubmit" />
                                 <input type="reset" data-bind="click:$parent.cancelFile" value="Cancel" class="button"
                                     id="btnFHReset" />
                         </tr>
@@ -129,7 +128,8 @@
                                 </div>
                             </td>
                             <td title="click to edit">
-                                <textarea class="editableTX" data-bind="value:Comment, event:{change:$parent.setEditedFlag}" onblur="trimTextAreaMaxLen(this,250);" rows="1" ></textarea>
+                                <textarea class="editableTX" data-bind="value:Comment, event:{change:$parent.setEditedFlag}" 
+                                onblur="trimTextAreaMaxLen(this,250);" rows="1" ></textarea>
                             </td>
                             <td data-bind="text:UploadedBy"></td>
                             <td data-bind="date: UploadedOn"></td>

@@ -56,9 +56,9 @@
                         new_x = new_x > max_x ? 0 : new_x;
                         new_y = new_y < 0 ? max_y : new_y;
                         new_y = new_y > max_y ? 0 : new_y;
-                        
-                        if ($(this).is("select")) {
-                            $(this).prop('selectedIndex',parseInt($(this).attr("oldIndex")));                            
+
+                        if ($(this).is("select")) { // trigger change necessary for KO likedata binding things
+                            $(this).prop('selectedIndex', parseInt($(this).attr("oldIndex"))).trigger("change");
                         }
                         if ($(this).hasClass("hasDatepicker")) {
                             $(this).datepicker("hide");

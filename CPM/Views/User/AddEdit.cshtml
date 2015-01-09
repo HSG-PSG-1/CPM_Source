@@ -74,7 +74,7 @@
                 <li><a href="#Locations"><span>Locations</span></a></li>
             </ul>
             <div id="Details">
-            <table cellpadding="2" cellspacing="2" style="width:50%">
+            <table cellpadding="2" cellspacing="2" style="width:50%" id="tblUsrAddEdit">
             <tr>
                 <td class = "rtsqz">
                     @Html.LabelFor(model => model.Name)
@@ -92,7 +92,7 @@
                     @(Html.DropDownListFor(model => model.RoleID, new SelectList((IEnumerable)ViewData["Roles"], "ID", "TEXT", Model.RoleID), new
                 {
                     @class = "dropDown required",
-                    @onchange = "fillOrgs(true);"
+                    @onmouseup = "fillOrgs(true);" // alert(this.selectedIndex + ':' + $(this).attr('oldindex'));
                 }))
                     @Html.ValidationMessageFor(model => model.RoleID)
                     @Html.HiddenFor(model => model.OrgType, new { @class = "ignore" })
@@ -179,6 +179,7 @@
         function fillOrgs(reset) {
             var ddl = document.getElementById("RoleID");
             var pos = (ddl.selectedIndex > 0)?ddl.selectedIndex:0;
+            //if(this.selectedIndex != $(this).attr('oldindex'))
             doOrgsDDL(ddl.options[pos].value, reset);//refresh Orgs dll
             showSalesperson();//show or hide sp row
         }
@@ -199,8 +200,8 @@
         }
         
         //Caching: http://developwithstyle.com/articles/2010/05/14/jquery-ui-autocomplete-is-it-any-good.html
-        $().ready(function() {     
-            //setFocus("Name");
+        $().ready(function() {
+            $("#tblUsrAddEdit").tableNav();
             $("#tabs").tabs({ 
             /*cache: true, spinner: 'Loading...', ajaxOptions: { cache: false },
             http://jqueryui.com/upgrade-guide/1.9/#deprecated-ajaxoptions-and-cache-options-added-beforeload-event */

@@ -175,6 +175,12 @@ namespace CPM.Controllers
             return View("Excel", result);
         }
 
+        [HttpGet]
+        public ActionResult Excel(string dummy)
+        { // special case handling for sessiontimeout while loading excel download or user somehow trying to access the excel directly. SO : 16658020
+            return RedirectToAction("List", "Dashboard");
+        }
+
         public ActionResult ExcelPDF()
         {   
             populateData(false);

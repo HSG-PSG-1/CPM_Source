@@ -47,21 +47,41 @@ function setDTPdateForKO() {
     $("#ClaimDateTo").val($("#ClaimDateTo1").val()).trigger("change");
 }
 
+function resetForm(btn) {
+    clearForm(document.getElementById('frm'));
+    document.getElementById('doReset').checked = true;
+    resetDatepicker('#ClaimDateFrom1, #ClaimDateTo1');
+    //trigger changeClaimStatusPost for KO binding notification
+    vm_D.search.ClaimNos(null);
+    vm_D.search.StatusID(0);
+    vm_D.search.AssignToName(null);
+    vm_D.search.CustRefNo(null);
+    vm_D.search.BrandName(null);
+    vm_D.search.CustOrg(null);
+    vm_D.search.Salesperson(null);
+    vm_D.search.ClaimDateFrom(null);
+    vm_D.search.ClaimDateTo(null);
+    var hadArchived = vm_D.search.Archived();
+    vm_D.search.Archived(false);
+    if (hadArchived == true)
+        getArchivedData($("#Archived"));
+    /*vm_D.quickSearch(null);*/
+}
 function showDialog(action, claimID, archived) {
     var containerID = "#dialog" + claimID;
     $(containerID).dialog({
         modal: false,
         open: function () {
             $(this).html(loading);
-            $(this).load(dialogPartialURL + action + '?ClaimID=' + claimID + '&Archived=' + archived);
-            setTimeout(function () { $('.ui-dialog-titlebar-close').blur(); }, 1);
+            $(this).load(dialogPartialURL + action + '?ClaimID=' + claimID + '&Archived=' + archived, function () { $("#NewStatusID").focus(); });
+            /*setTimeout(function () { $('.ui-dialog-titlebar-close').blur(); }, 1);*/
         },
         height: 360,
         width: 650,
         title: action,
         close: function (event, ui) { //NOTE: Required so that multiple dialog controls can be references with the same id
             $(this).dialog("destroy").empty();
-        }//Can't use .remove() as in SO: 6515052 so we empty the html.
+        } //Can't use .remove() as in SO: 6515052 so we empty the html.
     });
 }
 
@@ -75,77 +95,16 @@ function changeClaimStatusPost(ClaimId, OldStatusID, NewStatusID) {
     $.post(ChangeClaimStatusURL.replace('-99', ClaimId), data);
     return false; // prevent any postback
 }
-function openPrintDialog(ClaimId) {
-    if (ClaimId > 0) return openWinScrollable(printURL.replace('-99', ClaimId), 648, 838);
-}
-
-/* KO based pagination */
-function updatePagedRows(vm) {// Starts with : index=0
-    ListURL = ListURL.replace("index=" + (vm.pageIndex() - 1), "index=" + vm.pageIndex());
-    showDlg(true);
-    $.getJSON(ListURL, function (data) {
-        showDlg(false);
-        //vmDashboard.Claims = ko.observableArray(data); // Initial items
-        //ko.applyBindings(vmDashboard);
-        if (data != null)
-            ko.utils.arrayForEach(data, function (item) {
-                vm_D.fields.push(item);
-            });
-        else
-            vm_D.pageIndex(0);//reset            
-    });
-}
-
-
-function resetForm(btn) {
-    clearForm(document.getElementById('frm'));
-    document.getElementById('doReset').checked = true;
-    resetDatepicker('#ClaimDateFrom1, #ClaimDateTo1');
-
-    //trigger changeClaimStatusPost for KO binding notification
-    vm_D.search.ClaimNos(null);
-    vm_D.search.StatusID(0);
-    vm_D.search.AssignToName(null);
-    vm_D.search.CustRefNo(null);
-    vm_D.search.BrandName(null);
-    vm_D.search.CustOrg(null);
-    vm_D.search.Salesperson(null);
-
-    vm_D.search.ClaimDateFrom(null);
-    vm_D.search.ClaimDateTo(null);
-
-    var hadArchived = vm_D.search.Archived();
-    vm_D.search.Archived(false);
-
-    if (hadArchived == true)
-        getArchivedData($("#Archived"));
-
-    /*vm_D.quickSearch(null);*/
-}
-
 function getArchivedData(chk) {
     var archived = $(chk).is(':checked');
 
     $.getJSON(ArchivedURL.replace('-99', archived), function (data) {
         vm_D.fields(data.records);
         vm_D.invokeSearch(3);
+        vm_D.sortField("CNo"); vm_D.sortOrderNxtAsc(false);
+        vm_D.sortData(null, null, vm_D.sortField());
     });
 }
-
-function excelPostback(e) {
-    skipCommitChk = true;
-    $.ajax({
-        type: "POST",
-        //contentType: "application/json; charset=utf-8", dataType: "json",
-        data: $("#frm").serialize(),
-        url: SetSearchOptsURL,
-        success: function (data) {
-            $("#frmExcel").submit();
-        }
-    });
-    return false; // to cause form postback
-}
-
 
 var claimObj = "";//will be set whn the cell is clicked
 function updateStatusHistory() {
@@ -163,16 +122,31 @@ function updateStatusHistory() {
     //persist updated status in textbox
     $(oldStatID).val($(newStatID).val());
     $(oldStat).val($(newStatID).children("option:selected").text());
-    //update in Grid (NOTE: make sure 'claimObj' is set when td is clicked
+    /*update in Grid (NOTE: make sure 'claimObj' is set when td is clicked*/
     $("#statusDIV" + claimObj.ID).text($(oldStat).val()).trigger("change").effect('highlight', {}, 2000);
     claimObj.Status = $(oldStat).val(); claimObj.StatusID = $(newStatID).val();
 }
 
-/* ==================== Dashboard ViewModel ==================== */
+function excelPostback(e) {
+    skipCommitChk = true;
+    $.ajax({
+        type: "POST",
+        //contentType: "application/json; charset=utf-8", dataType: "json",
+        data: $("#frm").serialize(),
+        url: SetSearchOptsURL,
+        success: function (data) { $("#frmExcel").submit(); }
+    });
+    return false; // to cause form postback
+}
+function openPrintDialog(ClaimId) {
+    if (ClaimId > 0) return openWinScrollable(printURL.replace('-99', ClaimId), 648, 838);
+}
+function doAJAXSubmit(frm) { vm_D.invokeSearch(1); return false; }
+/* ============== ============== ============== ============== */
 
 var vmDashboard = function () {
     var self = this;
-    self.fields = ko.observableArray();//jsondata
+    self.fields = ko.observableArray(); //jsondata
     self.pageSize = ko.observable(gridPageSize);
     self.pageIndex = ko.observable(0);
     self.cachedPagesTill = ko.observable(0);
@@ -279,22 +253,22 @@ var vmDashboard = function () {
                 self.fields.sort(function (l, r) { return new Date(l.CDate) > new Date(r.CDate) ? 1 * sortOrder : -1 * sortOrder }); // ClaimDate
                 break;
             case "CustRef": // Need to convert into string while comparison
-                self.fields.sort(function (l, r) { return l.CustRef + "" > r.CustRef + "" ? 1 * sortOrder : -1 * sortOrder });
+                self.fields.sort(function (l, r) { return $.trim(l.CustRef) + "" > $.trim(r.CustRef) + "" ? 1 * sortOrder : -1 * sortOrder });
                 break;
             case "CustOrg":
-                self.fields.sort(function (l, r) { return l.CustOrg > r.CustOrg ? 1 * sortOrder : -1 * sortOrder });
+                self.fields.sort(function (l, r) { return $.trim(l.CustOrg) > $.trim(r.CustOrg) ? 1 * sortOrder : -1 * sortOrder });
                 break;
             case "ShpLocCode"://ShipToLoc
-                self.fields.sort(function (l, r) { return l.ShpLocCode > r.ShpLocCode ? 1 * sortOrder : -1 * sortOrder });
+                self.fields.sort(function (l, r) { return $.trim(l.ShpLocCode) > $.trim(r.ShpLocCode) ? 1 * sortOrder : -1 * sortOrder });
                 break;
             case "Brand":
-                self.fields.sort(function (l, r) { return l.Brand > r.Brand ? 1 * sortOrder : -1 * sortOrder });
+                self.fields.sort(function (l, r) { return $.trim(l.Brand) > $.trim(r.Brand) ? 1 * sortOrder : -1 * sortOrder });
                 break;
             case "SP":
-                self.fields.sort(function (l, r) { return l.SP > r.SP ? 1 * sortOrder : -1 * sortOrder });
+                self.fields.sort(function (l, r) { return $.trim(l.SP) > $.trim(r.SP) ? 1 * sortOrder : -1 * sortOrder });
                 break;
             case "Status":
-                self.fields.sort(function (l, r) { return l.Status > r.Status ? 1 * sortOrder : -1 * sortOrder });
+                self.fields.sort(function (l, r) { return $.trim(l.Status) > $.trim(r.Status) ? 1 * sortOrder : -1 * sortOrder });
                 break;
             case "Cmts":
                 self.fields.sort(function (l, r) { return l.Cmts > r.Cmts ? 1 * sortOrder : -1 * sortOrder });
@@ -316,3 +290,40 @@ var vmDashboard = function () {
         self.pageIndex(0); self.cachedPagesTill(0);
     }
 };
+var vm_D;
+function createKO() {
+showDlg(true);
+$.getJSON(ListURL, function (data) {
+vm_D = new vmDashboard();
+   showDlg(false);
+   //vm_D.Claims = ko.observableArray(data); // Initial items
+   vm_D.fields(data.records);
+   vm_D.search = ko.mapping.fromJS(data.search); // Otherwise the search button will be needed
+   /*vm_D.quickSearch("");*/
+   vm_D.invokeSearch(2);
+   vm_D.pageSize(gridPageSize);
+   ko.applyBindings(vm_D);
+   
+   //pagedGrid.DisplayFields(data);
+   setDTPdateForKO();
+});
+
+
+}
+
+/* KO based pagination */
+function updatePagedRows(vm) {// Starts with : index=0
+    ListURL = ListURL.replace("index=" + (vm.pageIndex() - 1), "index=" + vm.pageIndex());
+    showDlg(true);
+    $.getJSON(ListURL, function (data) {
+        showDlg(false);
+        //vmDashboard.Claims = ko.observableArray(data); // Initial items
+        //ko.applyBindings(vmDashboard);
+        if (data != null)
+            ko.utils.arrayForEach(data, function (item) {
+                vm_D.fields.push(item);
+            });
+        else
+            vm_D.pageIndex(0);//reset            
+    });
+}

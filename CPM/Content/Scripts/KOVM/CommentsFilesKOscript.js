@@ -1,6 +1,7 @@
 ﻿var IsCCEditMode = false;
 var NextNewCommentID = -1;
-var commentsViewModel = function () {
+var commentsViewModel = function ()
+{
     var self = this;
     self.emptyComment = "";
 
@@ -50,7 +51,7 @@ var commentsViewModel = function () {
             $('#tblComments').tableNav(); // for newly created TR
             setFocusEditableGrid("tblComments", false);
         }
-        return true; // because we need to ajax submit the form
+        return true; /* because we need to ajax submit the form */
     };
 
     self.removeSelected = function (comment) {
@@ -116,7 +117,6 @@ var viewModelComments = new commentsViewModel();
 
 function createCommentsKO(comments, assignTo)//callDocReadyComments()
 {
-    //setFocus("Comment1");
     var ClaimAssignedTo = $("#AssignedTo").val();
     /*$.getJSON('@Html.Raw(Url.Action("CommentsKOVM", "Claim", new { ClaimGUID = ViewData["ClaimGUID"] }))' +  '&AssignedTo=' + ClaimAssignedTo ,
         function (data) {*/
@@ -135,7 +135,10 @@ function createCommentsKO(comments, assignTo)//callDocReadyComments()
     //});    
 }
 
-/*function doCmtDelPost(comment) {    var data = {}; data[txtId] = txtVal;    var url = commentDeleteURL;    $.post(url, data);    
+/*function doCmtDelPost(comment) {
+    var data = {}; data[txtId] = txtVal;
+    var url = commentDeleteURL;
+    $.post(url, data);
 return false; // prevent any postback
 }*/
 
@@ -188,8 +191,7 @@ var filesHeaderModel = function () {
                 NextNewFileID = NextNewFileID - 1;
                 self.emptyFile.ID = NextNewFileID; // NOT WORKING as expected
             }
-            else { /* Editmode Handled by KO */ }
-
+            else { /* Editmode Handled by KO */; }
             $('#tblFilesH').tableNav(); // for newly created TR
             setFocusEditableGrid("tblFilesH", false);
         }
@@ -229,8 +231,7 @@ var filesHeaderModel = function () {
 
 var viewModelFH = new filesHeaderModel();
 
-function createFilesHeaderKO(data) {
-    //setFocus("Comment");
+function createFilesHeaderKO(data) {    
     if (data.FileToAdd.ID != -1) data.FileToAdd.ID = NextNewFileID;
 
     viewModelFH.emptyFile = data.EmptyFileHeader; // THIS SHUD NOT BE AN OBSERVABLE

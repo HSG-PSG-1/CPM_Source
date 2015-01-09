@@ -275,11 +275,11 @@
     <Content Include="Views\Dashboard\List.cshtml" />
     <Content Include="Views\User\KO\UserListKOscript.cshtml" />
     <Content Include="Views\Master\Manage.cshtml" />
-    <Content Include="Views\Master\KO\MasterGrid.cshtml" />
-    <Content Include="Views\Master\KO\MasterGridKOscript.cshtml" />
+    <Content Include="Views\Master\MasterGrid.cshtml" />
+    <Content Include="Content\Scripts\KOVM\MasterGridKOscript.js" />
     <Content Include="Views\Role\Manage.cshtml" />
-    <Content Include="Views\Role\KO\RoleGridKOscript.cshtml" />
-    <Content Include="Views\Role\KO\RoleGrid.cshtml" />
+    <Content Include="Content\Scripts\KOVM\RoleGridKOscript.js" />
+    <Content Include="Views\Role\RoleGrid.cshtml" />
     <Content Include="Views\Dashboard\ClaimWithDetails.cshtml" />
     <Content Include="Content\Scripts\KOVM\ItemsKOscriptOLD.js" />
     <None Include="Properties\PublishProfiles\Profile1.pubxml" />

@@ -86,9 +86,10 @@ input[type="button"] {FONT-SIZE: 12px;font-family:Verdana}
 
 /* Editable textbox (make sure it is after : input[type="text"] */
 *:focus { outline: 1px solid #F9C437; }
+td:focus { outline: none; }
 input.editableTX { border: none; width: 99% ;}
 input.editableTX { border: none; width: 99% ;}
-select.editableTX { border: none; width: 120%; overflow: hidden; }
+select.editableTX { border: none; width: 132%; overflow: hidden; }
 textarea.editableTX { border: none; width: 99%; height:99%; }
 input.editableTX:focus, select.editableTX:focus, textarea.editableTX:focus { BACKGROUND-COLOR: #ffffcc; }
 input.editableTX:hover, select.editableTX:hover, textarea.editableTX:hover { cursor:text; }

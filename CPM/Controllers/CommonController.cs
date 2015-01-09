@@ -20,12 +20,14 @@ namespace CPM.Controllers
     {
         #region Login/off Send password
 
-        [HttpGet]
+        [AcceptVerbs(HttpVerbs.Get | HttpVerbs.Head)] /* For future generic capturing of HEAD - SO: 8329101 */
         //[ValidateInput(false)] // SO: 2673850/validaterequest-false-doesnt-work-in-asp-net-4
-        public ActionResult Login(string from)
+        public ActionResult Login(string from, string email, string pwd, bool remember = false)
         {
             if ((from ?? "").ToLower() == "logoff") LogOff();// Special Case: using an action named logoff creates complexity
             
+            if (remember)
+                SetCookie(new LogInModel() { Email = email, Password = Crypto.EncodeStr(pwd, false), RememberMe = remember });
             HttpCookie authCookie = Request.Cookies[Defaults.cookieName];
             LogInModel loginM = new LogInModel();
 

@@ -42,7 +42,9 @@
                                @autofocus = "autofocus"
                            })
                             </td>
-                            <td nowrap="nowrap" width="5%">Status</td>
+                        <td nowrap="nowrap" width="5%">
+                            Status
+                        </td>
                             <td>
                                 @Html.DropDownList("StatusID", new SelectList((IEnumerable)ViewData["Status"], "id", "value", dSearch.StatusID), " ", new { @class = "dropDown", data_bind = "value:search.StatusID" })
                             </td>
@@ -130,16 +132,14 @@
 </table>
 
 <script type="text/javascript">
-
+    var LookupURL = '@Defaults.commonRoot/Lookup?id=';
+    var dialogPartialURL = '@Url.Content("~/Dashboard/")';
+    
+    var ChangeClaimStatusURL = '@Url.Action("ChangeClaimStatus", "Claim", new { ClaimID = -99 })';
     var ListURL = '@Html.Raw(@Url.Action("ClaimListKO", "Dashboard", new { index = 0, fetchAll = true }))';
     var SetSearchOptsURL = '@Html.Raw(@Url.Action("SetSearchOpts", "Dashboard"))';
     var ArchivedURL = '@Html.Raw(@Url.Action("ClaimListArchivedKO", "Dashboard", new { archived = -99 }))';
-    var ChangeClaimStatusURL = '@Url.Action("ChangeClaimStatus", "Claim", new { ClaimID = -99 })';
-    var dialogPartialURL = '@Url.Content("~/Dashboard/")';
-    var LookupURL = '@Defaults.commonRoot/Lookup?id=';
-    //Required to show/hide search-panel
-    var showImgPath = "@Url.Content("~/Content/Images/aroL.gif")"; //"../../Resources/images/aroL.gif";
-    var hideImgPath = "@Url.Content("~/Content/Images/aroB.gif")";// "../../Resources/images/aroB.gif";
+    
     var gridPageSize = @ViewData["gridPageSize"];
     var printURL = "@HttpUtility.UrlDecode(Url.Action("Print", "Claim", new { ClaimID = -99 }))";
     var brandLookup = "@Html.Raw(brandLookup)";
@@ -149,26 +149,9 @@
         renderAutoComplete(LookupURL + source, IDctrl, ctrl);// idBox, txtBox);
     }
         
-   function doAJAXSubmit(frm) { vm_D.invokeSearch(1); return false; }
-
-   
-   var skipCommitChk = false; var vm_D;
-   $(document).ready(function () {
-       vm_D = new vmDashboard();   
-       showDlg(true);
-       $.getJSON(ListURL, function (data) {
-           showDlg(false);
-           //vm_D.Claims = ko.observableArray(data); // Initial items
-           vm_D.fields(data.records);
-           vm_D.search = ko.mapping.fromJS(data.search); // Otherwise the search button will be needed
-           /*vm_D.quickSearch("");*/
-           vm_D.invokeSearch(2);
-           ko.applyBindings(vm_D);
-           //pagedGrid.DisplayFields(data);
-           setDTPdateForKO();
-           setAutofocus();/*setFocus("ClaimNos"); // required for the second time !*/
-       });
-
+   var skipCommitChk = false;
+   $(document).ready(function () {      
+       createKO();
        //bind event to check claim commit
        window.onbeforeunload = function (e) {
            if (skipCommitChk) { skipCommitChk = false; return; }
@@ -177,14 +160,14 @@
                data: $("#frm").serialize(),
                url: ListURL
            , async: false // SO: 14645011 (for FF to ensure the postback is not
-               /*,success: function (data) {
+               @*,success: function (data) {
                    if (data != null) { //vm_D.fields.removeAll();
-                       vm_D.pageIndex(0);  self.cachedPagesTill(0);
+                       vm_D.pageIndex(0);  vm_D.cachedPagesTill(0);
                        vm_D.fields(data.records);
                        vm_D.search(data.search);
                        document.getElementById('doReset').checked = false;
                    }
-               }*/
+               }*@
            });
 
        };

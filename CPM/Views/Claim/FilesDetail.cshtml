@@ -59,21 +59,19 @@
                                 </td>
                                 <td align="left" width="70%" nowrap="nowrap">@* HT : DON'T class="required" because it'll err in edit mode*@
                                     <input type="file" id="FileDetailNameNEW" name="FileDetailNameNEW" title="@maxFileSizMB" autofocus="autofocus"
-                                    onchange='javascript:var fName = $(this).parent().children("input[type=text]:first");fName.val($(this).val());fName.trigger("change");' />
+                                    onchange='var fName = $(this).parent().children("input[type=text]:first");fName.val($(this).val()); fName.trigger("change"); $("#btnFDSubmit").removeAttr("disabled");' />
                                     <span
                                         class="small">@maxFileSizMB</span>
                                     <div class="progress" style="display:inline"><div class="bar" style="display:inline"></div >
-                                    <div class="percent note" style="display:inline"></div ></div><div id="status" style="display:inline" class="error"></div>
-                                    @*<input id="FileDetailNameNEW" type="text" data-bind="value:FileDetailNameNEW" />*@
-                                    <input id="FileName" name="FileName" type="text" style="display:none" data-bind="value:FileName"
-                                     onchange='if($(this).val() != ""){$("#btnFDSubmit").removeAttr("disabled");} else {$("#btnFDSubmit").attr("disabled", true);}' />                                    
+                                    <div class="percent note" style="display:inline"></div ></div><div id="status" style="display:inline" class="error"></div>                                    
+                                    <input id="FileName" name="FileName" type="text" style="display:none" data-bind="value:FileName" />                                    
                                 </td>
                                 <td valign="middle" align="right" nowrap="nowrap" width="5%">
                                     &nbsp;&nbsp;File Type
                                 </td>
                                 <td width="20%">
                                     <select id="FileType" name="FileType" value="FileType" class="dropbox" data-bind="options: $parent.FileDetailTypes, value:FileType, optionsText: 'value', optionsValue:'id'" style="width:100%"
-                                        onchange='javascript:$(this).parent().children("input:first").val($(this).children("option").filter(":selected").text());$(this).parent().children("input:first").trigger("change");'>
+                                        onchange='$(this).parent().children("input:first").val($(this).children("option").filter(":selected").text());$(this).parent().children("input:first").trigger("change");'>
                                     </select>
                                     <input id="FileTypeTitle" name="FileTypeTitle" type="hidden" data-bind="value:FileTypeTitle" />
                                 </td>
@@ -87,8 +85,8 @@
                                         name="Comment" onblur="return trimTextAreaMaxLen(this,250);" rows="2" style="width: 90%"></textarea>
                                 </td>
                                 <td colspan="2" valign="top" align="right">
-                                    <input type="submit" data-bind="click:$parent.addFile, enable: (FileName.length > 0)" value="Add" class="button" 
-                                    onclick1="javascript:$('#frmFilesDetail').submit();" title="Select a file, set type and click Add" id="btnFDSubmit" />@*onclick="setDDLtext('FileType', 'FileTypeTitle');"*@
+                                    <input type="submit" data-bind="click:$parent.addFile, enable: ($data.FileName.length > 0)" value="Add" class="button" 
+                                    onclick="$(this).attr('disabled', true);" title="Select a file, set type and click Add" id="btnFDSubmit" />
                                     <input type="reset" data-bind="click:$parent.cancelFile" value="Cancel" class="button" id="btnFDReset" />
                             </tr>
                         </table>

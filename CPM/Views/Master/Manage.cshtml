@@ -24,7 +24,6 @@
 new { @class = "dropDown", @onchange = "changeMaster(this, this.value);", @autofocus = "autofocus" }))
         </td>
         <td align="center">
-        @* For debug<%= Html.ValidationSummary(true)%>*@        
         &nbsp;
         </td>
             <td align="right"  class="sqz">
@@ -35,17 +34,19 @@ new { @class = "dropDown", @onchange = "changeMaster(this, this.value);", @autof
         </tr>
         <tr>
             <td colspan="3">
-                @{ Html.RenderPartial("KO/MasterGrid"); }
+                @{ Html.RenderPartial("MasterGrid"); }
             </td>
         </tr>
         <tr>
-            <td colspan="3" align="right"><i class="small">NOTE: Drag a row to change the sort order</i></td>
+            <td colspan="3" align="right">
+                <i class="small">NOTE: Drag a row to change the sort order</i>
+            </td>
         </tr>
     </table>
         <span></span>
-    @*  For Debug: <textarea id="tx1" name="tx1" cols="50" rows="10"></textarea><textarea id="tx2" name="tx2" cols="50" rows="10"></textarea>*@
      }  
     <script type="text/javascript">
+    var manageKOVMURL = "@Html.Raw(Url.Action("ManageKOVM", "Master"))";
 	    function changeMaster(ddl, val) { window.location.replace(ddl.options[ddl.selectedIndex].text); }
 	    //.disableSelection();	WON'T allow to edit inputs or else follow: http://stackoverflow.com/questions/4027158
 	    $(document).ready(function () {
@@ -81,3 +82,4 @@ new { @class = "dropDown", @onchange = "changeMaster(this, this.value);", @autof
             }
         });
 	</script>
+<script src="@Url.Content("~/Content/Scripts/KOVM/MasterGridKOscript.js")" type="text/javascript"></script>

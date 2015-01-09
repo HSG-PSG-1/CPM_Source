@@ -1,5 +1,5 @@
 <email>
-  <subject>AOT login details</subject>
+  <subject>AOT CPM login details</subject>
   <body>
     <![CDATA[
 <FONT SIZE="2" COLOR="" FACE="Verdana">
@@ -7,6 +7,8 @@
 	Your AOT login details:<br>
 Email:<b>[EMAIL]</b><br/>
 Password:<b>[PASSWORD]</b>
+<br/><br/>
+<a href="[LOGINURL]" title="Goto Login">Click here</a> to login.
 <br/>
 </FONT>
 ]]>

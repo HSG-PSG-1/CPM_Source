@@ -41,11 +41,10 @@
                         maxlength="50" title="click to edit" />
                 </td>
                 <td style="display:none">
-                    <input type="text" data-bind="value:SortOrder" /><span data-bind="html:SortOrder" />
+                    <input type="text" data-bind="value:SortOrder, event:{change:$parent.setEdited}" /><span data-bind="html:SortOrder" />
                 </td>
                 <td data-bind="text:LastModifiedByVal">
                 </td>
-                @*<td data-bind="text:new Date(parseInt(PostedOn.substr(6)))"></td>*@
                 <td data-bind="date: LastModifiedDate()">
                 </td>@*http://forums.asp.net/t/1651593.aspx/1*@
                 <td nowrap="nowrap" style="display: none">                    
@@ -60,4 +59,3 @@
         </tfoot>
     </table>
 </div>
-@{ Html.RenderPartial("KO/MasterGridKOscript"); }

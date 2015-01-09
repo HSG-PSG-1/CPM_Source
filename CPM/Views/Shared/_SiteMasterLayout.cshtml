@@ -17,16 +17,6 @@
         var minSQLDate = new Date("@Defaults.minSQLDate.ToString(Defaults.dtUniFormat2)");
         var maxSQLDate = new Date("@Defaults.maxSQLDate.ToString(Defaults.dtUniFormat2)");
         var usrName = '@_SessionUsr.UserName', todayDT = '@DateTime.Now.ToString(Defaults.dtFormat, Defaults.ci)';
-
-        /* ===== Functions used in diff pages ===== */
-        function setFocus(elemID) {//useful on most of the pages while inline rendering (allows to defer common.js include until end)
-            var elem = document.getElementById(elemID);
-            if (elem == null) {
-                elem = document.getElementsByName(elemID); //special case for MVC who don't render id!
-                if (elem.length > 0) elem = elem[0]; //If its a checkbox it'll have 2 of same name
-            }
-            try { elem.focus(); return; } catch (ex) { /*alert(elem + ":" + elemID + ":" + ex.message);*/ } //skip if id is wrong
-        }
     </script>
     <link rel="shortcut icon" href="@Url.Content("~/Content/favicon.ico")" type="image/x-icon" />
     <link rel="icon" href="@Url.Content("~/Content/favicon.ico")" type="image/ico" />

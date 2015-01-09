@@ -314,8 +314,8 @@ namespace CPM.Controllers
                 string filePath = FileIO.GetClaimFilePath(claimID, claimGUID, filename, claimDetailId, false);
 
                 if (System.IO.File.Exists(filePath))//AppDomain.CurrentDomain.BaseDirectory 
-                    /*System.IO.Path.GetFileName(filePath)*/
-                    return File("~/" + filePath, "Content-Disposition: attachment;", filename);
+                    /*System.IO.Path.GetFileName(filePath)//return File("~/" + filePath, "Content-Disposition: attachment;", filename);*/
+                    return File(filePath, "Content-Disposition: attachment;", filename);
                 else/*Invalid or deleted file (from Log)*/
                 { ViewData["Message"] = "File not found"; return View("DataNotFound"); }
 

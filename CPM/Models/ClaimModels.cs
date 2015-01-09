@@ -48,7 +48,7 @@ namespace CPM.DAL
         public List<ClaimDetail> aItems { get; set; }
         public List<FileHeader> aFiles { get; set; }
 
-        public bool AssignToChanged { get; set; }
+        /*public bool AssignToChanged { get; set; }*/
         public string AssignToVal { get; set; }
         public string AssignToComment { get; set; }
 

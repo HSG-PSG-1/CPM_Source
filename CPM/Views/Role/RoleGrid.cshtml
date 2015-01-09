@@ -39,7 +39,7 @@
                         type="text" maxlength="50" title="click to edit" />
                 </td>
                 <td style="display: none">
-                    <input type="text" data-bind="value:SortOrder" /><span data-bind="html:SortOrder" />
+                    <input type="text" data-bind="value:SortOrder, event:{change:$parent.setEdited}" /><span data-bind="html:SortOrder" />
                 </td>
                 <td>
                     <select id="FileType" name="OrgTypeId" class="dropbox" data-bind="options: $parent.OrgTypes, value:RoleData.OrgTypeId, optionsText: 'value', optionsValue:'id'" style="width: 100%"></select>
@@ -82,4 +82,3 @@
         </tfoot>
     </table>
 </div>
-@{ Html.RenderPartial("KO/RoleGridKOscript"); }

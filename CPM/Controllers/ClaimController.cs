@@ -217,7 +217,7 @@ namespace CPM.Controllers
         [AccessClaim("ClaimID")]
         public ActionResult ChangeClaimStatus(int ClaimID, int OldStatusID, int NewStatusID)
         {
-            bool result = false;
+            bool result = false; string msg = String.Empty;
             if (OldStatusID != NewStatusID)
             {
                 result = new StatusHistoryService().UpdateClaimStatus(ClaimID, OldStatusID, NewStatusID);
@@ -225,9 +225,11 @@ namespace CPM.Controllers
                 new ActivityLogService(ActivityLogService.Activity.ClaimEdit)
                     .Add(new ActivityHistory() { ClaimID = ClaimID, ClaimText = ClaimID.ToString() });
             }
+            else // same status so no need to update
+                msg = "No change, same status.";
             //Taconite XML
             return this.Content(Defaults.getTaconiteResult(result,
-                Defaults.getOprResult(result, String.Empty), "msgStatusHistory", "updateStatusHistory()"), "text/xml");
+                Defaults.getOprResult(result, msg), "msgStatusHistory", "updateStatusHistory()"), "text/xml");
         }
 
         [AccessClaim("ClaimID")]

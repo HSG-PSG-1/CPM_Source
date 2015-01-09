@@ -87,7 +87,7 @@ hmnt</a>*@
 
     var viewModel = new userListModel();
     function createKO() {
-        //setFocus("UserName");
+        setFocus("UserName");
 
         $.getJSON(ListURL, function (data) {
             viewModel.Users = ko.observableArray(data.records); //ko.mapping.fromJS(data.AllComments); // Initial items                      

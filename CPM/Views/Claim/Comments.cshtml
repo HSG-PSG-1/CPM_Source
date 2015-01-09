@@ -19,14 +19,14 @@
                         </tr>
                         <tr>
                             <td valign="top" rowspan="2" align="right" width="5%" nowrap="nowrap">New Comment :</td>
-                            <td rowspan="2" width="70%">
+                            <td rowspan="2" width="60%">
                                 <textarea data-bind="value:Comment1" class="textbox required" cols="60" id="Comment1"
                                     name="Comment1" onblur="return trimTextAreaMaxLen(this,4000);" rows="3" style="width: 98%"
-                                    onkeyup='setSubmitBtn(this,"btnCmtAdd")'></textarea>
+                                    onkeyup1='setSubmitBtn(this,"btnCmtAdd");'></textarea>
                             </td>
                             <td valign="top" nowrap="nowrap" align="right" width="5%">Assign To</td>
-                            <td valign="top" align="right" width="20%">
-                                <select id="AssignTo" class="dropbox" name="AssignTo" style="width: 90%"
+                            <td valign="top" align="right" width="30%">
+                                <select id="AssignTo" class="dropbox" name="AssignTo" style="width: 300px;"
                                     data-bind="options: $parent.Users, value:$parent.AssignTo, optionsText: 'value', optionsValue:'id', enable: ($data.Comment1() != null && $data.Comment1().length > 0)"
                                     onchange="setAssignedTo(this)">
                                 </select><br />

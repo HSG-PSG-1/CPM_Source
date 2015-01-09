@@ -295,8 +295,7 @@
     }
     var LinesOrderExtTotal, OrderTotal;
     function doTabLoadWithKOCallback(CEVM) {
-       @* @if (!printClaimAfterSave)
-        {<text>setFocus("StatusID");</text>} Set focus will hide the print window - if invoked *@                      
+       @* @if (!printClaimAfterSave){<text>setFocus("StatusID");</text>} Set focus will hide the print window - if invoked *@                      
            
         // Create KO binding based UI
         if(createClaimKO())
@@ -359,18 +358,18 @@
         switch (ui.newPanel.index()) {
             case 1: //Details
                 setFocus("StatusID"); break;
-            case 2: //Items
-                setFocus("ItemCode");
+            case 2: //Items                
                 if(!itmsTableNavDone) { $("#tblItems").tableNav(); itmsTableNavDone = true; }
+                setFocus("ItemCode");
                 break; // Done in the cshtml (partial)
             case 3: //Comments
                 @if (IsOnlyCustomer)
-                { @Html.Raw("setFocus(\"FileType\"); if(!filsTableNavDone) { $('#tblFilesH').tableNav(); filsTableNavDone = true; };") }
+                { @Html.Raw("if(!filsTableNavDone) { $('#tblFilesH').tableNav(); filsTableNavDone = true; }; setFocus(\"FileType\");") }
                 else
-                { @Html.Raw("setFocus(\"Comment1\"); if(!cmtsTableNavDone) { $('#tblComments').tableNav(); cmtsTableNavDone = true; };") }  break;
-            case 4: //Files
-                setFocus("FileType"); 
+                { @Html.Raw("if(!cmtsTableNavDone) { $('#tblComments').tableNav(); cmtsTableNavDone = true; }; setFocus(\"Comment1\");") }  break;
+            case 4: //Files                
                 if(!filsTableNavDone) { $("#tblFilesH").tableNav(); filsTableNavDone = true; };
+                setFocus("FileType");
                 break;
         }
     }
