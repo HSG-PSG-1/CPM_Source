@@ -1,5 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
@@ -18,7 +19,7 @@
     </FileUpgradeFlags>
     <UpgradeBackupLocation>
     </UpgradeBackupLocation>
-    <OldToolsVersion>3.5</OldToolsVersion>
+    <OldToolsVersion>4.0</OldToolsVersion>
     <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
@@ -41,7 +42,6 @@
     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="AdamTibi.Web.Security, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL" />
     <Reference Include="Elmah, Version=1.2.14706.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>Lib\ELMAH\Elmah.dll</HintPath>
@@ -181,6 +181,7 @@
     <Content Include="Content\Images\reset.png" />
     <Content Include="Content\Images\search.gif" />
     <Content Include="Content\jQUI\min\jquery-1.9.1.min.js" />
+    <Content Include="Content\jQUI\min\jquery-2.1.4.min.js" />
     <Content Include="Content\jQUI\min\jquery-migrate-1.1.0.min.js" />
     <Content Include="Content\jQUI\min\jquery-migrate-1.1.1.min.js" />
     <Content Include="Content\jQUI\min\jquery-ui-1.10.0.custom.js" />
@@ -309,6 +310,8 @@
     <Content Include="Views\Role\KO\RoleGridKOscript.cshtml" />
     <Content Include="Views\Role\KO\RoleGrid.cshtml" />
     <Content Include="Views\Dashboard\ClaimWithDetails.cshtml" />
+    <Content Include="Content\jQUI\min\jquery-1.11.3.min.map" />
+    <None Include="Properties\PublishProfiles\Profile1.pubxml" />
   </ItemGroup>
   <ItemGroup>
     <Service Include="{3259AA49-8AA1-44D3-9025-A0B520596A8C}" />
@@ -361,8 +364,13 @@
       <Name>PdfReportGenerator</Name>
     </ProjectReference>
   </ItemGroup>
+  <PropertyGroup>
+    <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
+    <VSToolsPath Condition="'$(VSToolsPath)' == ''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)</VSToolsPath>
+  </PropertyGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
-  <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v10.0\WebApplications\Microsoft.WebApplication.targets" />
+  <Import Project="$(VSToolsPath)\WebApplications\Microsoft.WebApplication.targets" Condition="'$(VSToolsPath)' != ''" />
+  <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v10.0\WebApplications\Microsoft.WebApplication.targets" Condition="false" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

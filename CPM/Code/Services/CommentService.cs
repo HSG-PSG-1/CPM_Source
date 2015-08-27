@@ -20,7 +20,7 @@ namespace CPM.Services
 
         #endregion
 
-        #region Search / Fetch
+        #region Search / Fetch / Mail
 
         public List<Comment> Search(int claimID, int? userID)
         {
@@ -56,6 +56,30 @@ namespace CPM.Services
                 cmt.Claim = new Claim();//HT: So that it doesn't complain NULL later
                 return cmt;
             }
+        }
+
+        public static bool SendEmail(int ClaimID, int AssignTo, string PONumber, Comment CommentObj, ref string Err)
+        {
+            bool isSelfNotification = (AssignTo == _SessionUsr.ID);
+            bool sendMail = (ClaimID > Defaults.Integer && !isSelfNotification);// No need to send mail if its current user
+            Err = isSelfNotification ? "Self notification : No email queued" : Err;
+            try
+            {
+                #region Check and send email
+                if (sendMail)
+                {// No need to send mail if its current user
+                    string UserEmail = new UserService().GetUserEmailByID(AssignTo);
+                    MailManager.AssignToMail(PONumber, CommentObj.Comment1, ClaimID, UserEmail, (_SessionUsr.UserName), true);
+                }
+                #endregion
+            }
+            catch (Exception ex)
+            {
+                sendMail = false; Err = ex.Message + "<br/>" +
+(ex.InnerException ?? new Exception()).Message;
+            }
+
+            return sendMail;
         }
 
         #endregion
