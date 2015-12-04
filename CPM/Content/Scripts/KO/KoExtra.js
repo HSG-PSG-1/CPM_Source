@@ -33,7 +33,7 @@ ko.bindingHandlers.date = {
         var value = new Date(); // today by default         
         //alert(value.toString());        
         if (jsonDate != null && jsonDate != Date111) {
-            try { value = new Date(parseInt(jsonDate.substr(6))); } catch (e) { alert(e.message); } //value = new Date();
+        try { value = new Date(parseInt(jsonDate.substr(6))); } catch (e) { alert(e.message); } //value = new Date();
         }
         */
         var ret = ParseJSONdate(jsonDate); //value.getMonth() + 1 + "/" + value.getDate() + "/" + value.getFullYear();
@@ -53,6 +53,7 @@ function ParseJSONdate(jsonDate) {
     if (jsonDate != null && jsonDate != Date111) {
         try { value = new Date(parseInt(jsonDate.substr(6))); } catch (e) { alert(e.message + ":" + jsonDate + "."); }
     }
+    value = makeDateTimezoneNeutral(value); // HT: DON'T forget
     return value.getMonth() + 1 + "/" + value.getDate() + "/" + value.getFullYear();
 }
 
@@ -98,8 +99,12 @@ function editable(ctrl, show)
 
 function doEditable(editDiv)
 {
-    var selector = "td input[class='editableTX'], textarea[class='editableTX']";
-    try { $(editDiv).closest('tr').find(selector).eq(0).focus().trigger("click"); } catch (e) { alert(e.message); }
+    try{$(editDiv).closest('tr').find("td input[class='noBorder']").focus().trigger("click");}catch(e){alert(e);}
+    //editDiv.parentElement.parentElement.children[4].click();
+}
+
+function doEditableTA(td) {
+    try { $(td).closest('tr').find("td textarea[class='noBorder']").focus().trigger("click"); } catch (e) { alert(e); }
     //editDiv.parentElement.parentElement.children[4].click();
 }
 
@@ -112,7 +117,7 @@ function doRequiredChk(ctrl)
 {
     var val = $(ctrl).val();
     if (val == null || val.length < 1) {
-        showNOTY("This field is required", false);
+        alert("This field is required")
         $(ctrl).focus();
         return false;
     }
@@ -120,71 +125,12 @@ function doRequiredChk(ctrl)
 }
 
 /*<span data-bind="text:new Date(parseInt(PostedOn.toString().substr(6))).toLocaleFormat('%d/%m/%Y')"></span>*/
-
-ko.bindingHandlers.datepicker = {
-    init: function (element, valueAccessor, allBindingsAccessor) {
-        try {
-            //initialize datepicker with some optional options
-            var options = allBindingsAccessor().datepickerOptions || {};
-
-            var funcOnSelectdate = function () {
-                var observable = valueAccessor();
-                observable($(element).datepicker("getDate"));
-
-                // explicitly trigger change for alt field which stored the text date
-                try { $($(element).datepicker("option", 'altField')).change(); }
-                catch (e) { ; }
-            }
-
-            options.onSelect = funcOnSelectdate;
-
-            // NEW : special case SO : http://bugs.jqueryui.com/ticket/5734
-            options.onClose = function (selectedDate, inst) {
-                if (selectedDate == '') {
-                    $(inst.settings["altField"]).val(selectedDate);
-                }
-            };
-
-            $(element).datepicker(options);
-
-            //handle the field changing
-            ko.utils.registerEventHandler(element, "change", funcOnSelectdate);
-
-            //handle disposal (if KO removes by the template binding)
-            ko.utils.domNodeDisposal.addDisposeCallback(element, function () {
-                $(element).datepicker("destroy");
-            });
-
-        } catch (ex) { alert(ex.message); }
-    },
-    update: function (element, valueAccessor) {
-        try {
-            var value = ko.utils.unwrapObservable(valueAccessor());
-
-            //handle date data coming via json from Microsoft
-            if (String(value).indexOf('/Date(') == 0) {
-                value = new Date(parseInt(value.replace(/\/Date\((.*?)\)\//gi, "$1")));
-            }
-
-            current = $(element).datepicker("getDate");
-
-            if (value - current !== 0) {
-                $(element).datepicker("setDate", value);
-            }
-
-            /* For string data passed as yy-mm-dd
-            if (typeof (value) === "string") { // JSON string from server
-            value = value.split("T")[0]; // Removes time
-            }
-
-            var current = $(element).datepicker("getDate");
-
-            if (value - current !== 0) {
-            var parsedDate = $.datepicker.parseDate('yy-mm-dd', value);
-            $(element).datepicker("setDate", parsedDate);
-            } */
-
-        } catch (ex) { alert(ex.message); }
-    }
-};
-/* <input data-bind="datepicker: myDate, datepickerOptions: { minDate: new Date() }" /> */
+function makeDateTimezoneNeutral(dt) {
+    console.log(dt);
+    // HT: SPECIAL CASE - some time zone client browsers will show upto 1 day offset based on the UTC time diff
+    //DOESN'T work - dt = new Date(dt.getTime() - dt.getTimezoneOffset() * 60000);
+    dt.setHours(dt.getHours() + dt.getTimezoneOffset() / 60);
+    // ^^^ this shud nullify that difference as per SO : 1486476 (works),  26028466 (nope)
+    console.log(dt);
+    return dt;
+}

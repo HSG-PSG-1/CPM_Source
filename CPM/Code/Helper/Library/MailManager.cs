@@ -123,11 +123,8 @@ namespace CPM.Helper
             //fetch subject and contents
             string Subject = template.Subject;
             System.Text.StringBuilder Body = new System.Text.StringBuilder(template.Body);
-            string LoginURL = HttpContext.Current.Request.Url.GetLeftPart(UriPartial.Authority) +
-            new System.Web.Mvc.UrlHelper(HttpContext.Current.Request.RequestContext).Action("Login", "Common", 
-            new { email = UserEmail, pwd = Crypto.EncodeStr(Password, true), remember = true });
             //set contents
-            Body = Body.Replace("[EMAIL]", UserEmail).Replace("[PASSWORD]", Password).Replace("[LOGINURL]", LoginURL);
+            Body = Body.Replace("[EMAIL]", UserEmail).Replace("[PASSWORD]", Password);
             //send email
             return Send(ConfigureMailMessage(From, UserEmail, Body.ToString(), Subject, ""));
         }        

@@ -52,7 +52,7 @@ namespace ReportManagement
                 pi.CreateNoWindow = true;
                 pi.UseShellExecute = false;
                 pi.WorkingDirectory = piDirectory;
-                pi.Arguments = "\"" + fileAbsPath + "\" \"" + filePdfAbsPath + "\"";
+                pi.Arguments = fileAbsPath + " " + filePdfAbsPath;
 
                 using (var process = System.Diagnostics.Process.Start(pi))
                 {

@@ -67,21 +67,6 @@ namespace CPM.Controllers
             #endregion
         }
 
-        [CacheControl(HttpCacheability.NoCache), HttpGet]
-        public JsonResult ClaimEntryKOViewModel(int ClaimID, string ClaimGUID, int? AssignedTo)
-        {// NEW consolidated viewmodel
-
-            CEKOViewModel cvm = new CEKOViewModel(); // Main consolidated viewmodel
-
-            cvm.ClaimDetail = GetItemKOModel(ClaimID, ClaimGUID);
-            cvm.Comment = GetCommentKOModel(ClaimID, ClaimGUID, AssignedTo ?? -1);
-            cvm.File = GetFileKOModel(ClaimID, ClaimGUID);
-            // Status History
-            cvm.StatusHistory = new StatusHistoryService().FetchAll(ClaimID);
-
-            return Json(cvm, JsonRequestBehavior.AllowGet);
-        }
-
         [HttpPost]
         [AccessClaim("ClaimID")]
         public ActionResult Delete(int ClaimID, string ClaimGUID, int ClaimNo)
@@ -98,12 +83,11 @@ namespace CPM.Controllers
                 new ActivityHistory() { ClaimID = ClaimID, ClaimText = ClaimNo.ToString() });
 
             #endregion
-            
+
             // Make sure the PREMANENT files are also deleted
-            FileIO.DeleteDirectory(System.IO.Directory.GetParent(FileIO.GetClaimFilesDirectory(ClaimID, ClaimGUID)).FullName);
-            // Reset Claim in session (no GUID cleanup needed)
-            _Session.ClaimsInMemory.Remove(ClaimGUID); // Remove the Claim from session
-            //_Session.ResetClaimInSessionAndEmptyTempUpload(ClaimID, ClaimGUID);
+            FileIO.EmptyDirectory(FileIO.GetClaimDirPathForDelete(ClaimID, null, null, false));
+            // Reset Claim in session
+            _Session.ResetClaimInSessionAndEmptyTempUpload(ClaimGUID);
 
             return Redirect("~/Dashboard");
         }
@@ -117,20 +101,19 @@ namespace CPM.Controllers
             new ActivityLogService(
                 Archive ? ActivityLogService.Activity.ClaimArchive : ActivityLogService.Activity.ClaimUnarchive)
                 .Add(new ActivityHistory() { ClaimID = ClaimID, ClaimText = ClaimNo.ToString() });
-            
-            if (Archive) 
-                _Session.ResetClaimInSessionAndEmptyTempUpload(ClaimID, ClaimGUID);//reset after act log!
-            
+            _Session.ResetClaimInSessionAndEmptyTempUpload(ClaimGUID);//reset after act log!
             if (Archive) return Redirect("~/Dashboard");
             else return RedirectToAction("Manage", new { ClaimID = ClaimID, ClaimGUID = ClaimGUID });
         }
-                
-        [HttpPost]
-        public JsonResult CleanupTempUpload(int ClaimID, string ClaimGUID)
-        {   // Unable to trigger action due to - e.returnValue = 'Make ..'; (frozen for now)
+
+        public ActionResult Cancel(int ClaimID, string ClaimGUID)
+        {
             // Make sure the temp files are also deleted
-            _Session.ResetClaimInSessionAndEmptyTempUpload(ClaimID, ClaimGUID);
-            return new JsonResult() { Data = new{ msg = "Temp file upload cleanup triggered."}};
+            FileIO.EmptyDirectory(FileIO.GetClaimFilesTempFolder(ClaimGUID, true));
+            FileIO.EmptyDirectory(FileIO.GetClaimFilesTempFolder(ClaimGUID, false));            
+
+            _Session.ResetClaimInSessionAndEmptyTempUpload(ClaimGUID);
+            return Redirect("~/Dashboard");
         }
 
         [HttpPost]
@@ -147,7 +130,7 @@ namespace CPM.Controllers
 
             #region Perform operation proceed and set result
 
-            int result = new ClaimService().AsyncBulkAddEditDelKO(claimObj, claimObj.StatusIDold, items, comments, files);
+            int result = new CAWclaim(false).AsyncBulkAddEditDelKO(claimObj, claimObj.StatusIDold, items, comments, files);
             success = result > 0;
 
             if (!success) {/*return View(claimObj);*/}
@@ -161,8 +144,7 @@ namespace CPM.Controllers
             #endregion
 
             base.operationSuccess = success;//Set opeaon success
-            _Session.ClaimsInMemory.Remove(claimObj.ClaimGUID); // Remove the Claim from session
-            //_Session.ResetClaimInSessionAndEmptyTempUpload(claimObj.ClaimGUID); // reset because going back to Manage will automatically create new GUID
+            _Session.ResetClaimInSessionAndEmptyTempUpload(claimObj.ClaimGUID); // reset because going back to Manage will automatically creat new session
             
             if(success)
                 TempData["printClaimAfterSave"] = printClaimAfterSave.HasValue && printClaimAfterSave.Value;
@@ -217,7 +199,7 @@ namespace CPM.Controllers
         [AccessClaim("ClaimID")]
         public ActionResult ChangeClaimStatus(int ClaimID, int OldStatusID, int NewStatusID)
         {
-            bool result = false; string msg = String.Empty;
+            bool result = false;
             if (OldStatusID != NewStatusID)
             {
                 result = new StatusHistoryService().UpdateClaimStatus(ClaimID, OldStatusID, NewStatusID);
@@ -225,11 +207,9 @@ namespace CPM.Controllers
                 new ActivityLogService(ActivityLogService.Activity.ClaimEdit)
                     .Add(new ActivityHistory() { ClaimID = ClaimID, ClaimText = ClaimID.ToString() });
             }
-            else // same status so no need to update
-                msg = "No change, same status.";
             //Taconite XML
             return this.Content(Defaults.getTaconiteResult(result,
-                Defaults.getOprResult(result, msg), "msgStatusHistory", "updateStatusHistory()"), "text/xml");
+                Defaults.getOprResult(result, String.Empty), "msgStatusHistory", "updateStatusHistory()"), "text/xml");
         }
 
         [AccessClaim("ClaimID")]
@@ -272,19 +252,5 @@ namespace CPM.DAL
         public vw_Claim_Master_User_Loc CVM { get; set; }
         public IEnumerable Statuses { get; set; }
         public IEnumerable Brands { get; set; }
-    }
-
-    public class CEKOViewModel
-    {
-        public ItemKOModel ClaimDetail { get; set; }
-
-        //public string LinesOrderExtTotal { get { return Lines.Sum(l => l.OrderExtension ?? 0.00M).ToString("#0.00"); } }
-        //public string OrderTotal { get { return Lines.Sum(l => l.QtyOrdered ?? 0).ToString(); } }
-
-        public CommentKOModel Comment { get; set; }
-
-        public FileKOModel File { get; set; }
-        
-        public List<vw_StatusHistory_Usr> StatusHistory { get; set; }
     }
 }

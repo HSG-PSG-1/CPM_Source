@@ -5,7 +5,7 @@
 @using CPM.Services
 @using CPM.Helper
 
-<script type="text/javascript">
+<script type="text/javascript" language="javascript" defer="defer">        
     var IsFDEditMode = false;
     var NextNewFileDetailID = -1;
     var filesDetailModel = function () {
@@ -31,7 +31,7 @@
             if (file.FileName == null || file.FileName == "")
                 {
                    //http://knockoutjs.com/documentation/event-binding.html
-                showNOTY("Please select a file to upload", false); return false;
+                   alert("Please select a file to upload"); return false; 
                 }
             else {// SO: 857618/javascript-how-to-extract-filename-from-a-file-input-control
                     file.FileName = file.FileName.split(/(\\|\/)/g).pop(); //file.FileName.replace("C:\\fakepath\\","");
@@ -118,13 +118,13 @@
 
             viewModelFD.FileDetailTypes = ko.mapping.fromJS(data.FileDetailTypes);
              
-            try{ko.applyBindings(viewModelFD, document.getElementById("divFilesDetail"));}catch(e){alert(e.message);}
+            try{ko.applyBindings(viewModelFD, document.getElementById("divFilesDetail"));}catch(e){alert(e);}
         });
  }
       
           // Put script at bottom to avoid early-references
     $(document).ready(function () {
-        setAutofocus();//setFocus("FileDetailNameNEW");        
+        setFocus("FileDetailNameNEW");        
         createFilesDetailKO();
     });
 

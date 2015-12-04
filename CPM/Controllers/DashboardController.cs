@@ -39,7 +39,7 @@ namespace CPM.Controllers
         #region Will need GET (for AJAX) & Post
         
         [CacheControl(HttpCacheability.NoCache)]//Don't mention GET or post as this is required for both!
-        public ContentResult ClaimListKO(int? index, string qData, bool? fetchAll)
+        public JsonResult ClaimListKO(int? index, string qData, bool? fetchAll)
         {
             base.SetTempDataSort(ref index);// Set TempDate, Sort & index
             //Make sure searchOpts is assigned to set ViewState
@@ -70,31 +70,35 @@ namespace CPM.Controllers
                              ShpLocCode = vw_u.ShipToLocAndCode
                          };
 
-            //return Json(new { records = result, search = oldSearchOpts }, JsonRequestBehavior.AllowGet);
-            
-            System.Web.Script.Serialization.JavaScriptSerializer jsSerializer =
-                new System.Web.Script.Serialization.JavaScriptSerializer { MaxJsonLength = Int32.MaxValue }; //Json(new { records = result, search = oldSearchOpts }, JsonRequestBehavior.AllowGet);
-            var jsonDataSet = new ContentResult
-            {
-                Content = jsSerializer.Serialize(new { records = result, search = oldSearchOpts }),
-                ContentType = "application/json",
-                //ContentEncoding = 
-            };
-            // MVC 4 : jsonResult.MaxJsonLength = int.MaxValue;
-            return jsonDataSet;
+            return Json(new { records = result, search = oldSearchOpts }, JsonRequestBehavior.AllowGet);
         }
 
         [CacheControl(HttpCacheability.NoCache)]//Don't mention GET or post as this is required for both!
-        public ContentResult ClaimListArchivedKO(bool? archived)
+        public JsonResult ClaimListArchivedKO(bool? archived)
         {
-            vw_Claim_Dashboard oldSearchOpts = (vw_Claim_Dashboard)searchOpts;
-            bool oldSessionVal = oldSearchOpts.Archived;
-            oldSearchOpts.Archived = archived.HasValue ? archived.Value : false;
+            vw_Claim_Dashboard searchOpts1 = (vw_Claim_Dashboard)searchOpts;
+            bool oldSessionVal = searchOpts1.Archived;
+            searchOpts1.Archived = archived.HasValue ? archived.Value : false;
 
             var result = from vw_u in new DashboardService().SearchKO(
-                sortExpr, 0, gridPageSize * 2, oldSearchOpts, true, _Session.IsOnlyCustomer)
+                sortExpr, 0, gridPageSize * 2, searchOpts1, true, _Session.IsOnlyCustomer)
                          select new
                          {
+                             /*ID = vw_u.ID,
+                             ClaimNo = vw_u.ClaimNo,
+                             StatusID = vw_u.StatusID,
+                             AssignToName = vw_u.AssignToName,
+                             CustRefNo = vw_u.CustRefNo,
+                             BrandName = vw_u.BrandName,
+                             CustOrg = vw_u.CustOrg,
+                             Salesperson = vw_u.Salesperson,
+                             ClaimDateOnly = vw_u.ClaimDateOnly,
+                             Archived = vw_u.Archived,
+                             Status = vw_u.Status,
+                             CommentsExist = vw_u.CommentsExist,
+                             FilesHExist = vw_u.FilesHExist,
+                             ClaimDateTxt = vw_u.ClaimDateTxt,//ClaimDate.ToString(Defaults.dtFormat, Defaults.ci),
+                             ShipToLocAndCode = vw_u.ShipToLocAndCode */
                              ID = vw_u.ID,
                              CNo = vw_u.ClaimNo,
                              StatusID = vw_u.StatusID,
@@ -109,21 +113,12 @@ namespace CPM.Controllers
                              Cmts = vw_u.CommentsExist,
                              Files = vw_u.FilesHExist,
                              CDtTxt = vw_u.ClaimDateTxt,//ClaimDate.ToString(Defaults.dtFormat, Defaults.ci),
-                             ShpLocCode = vw_u.ShipToLocAndCode                             
+                             ShpLocCode = vw_u.ShipToLocAndCode
                          };
 
             //searchOpts1.Archived = oldSessionVal;//reset
-            //return Json(result, JsonRequestBehavior.AllowGet);
-            System.Web.Script.Serialization.JavaScriptSerializer jsSerializer = 
-                new System.Web.Script.Serialization.JavaScriptSerializer { MaxJsonLength = Int32.MaxValue }; //Json(new { records = result, search = oldSearchOpts }, JsonRequestBehavior.AllowGet);
-            var jsonDataSet = new ContentResult
-            {
-                Content = jsSerializer.Serialize(new { records = result, search = oldSearchOpts }),
-                ContentType = "application/json",
-                //ContentEncoding = 
-            };
-            // MVC 4 : jsonResult.MaxJsonLength = int.MaxValue;
-            return jsonDataSet;
+
+            return Json(result, JsonRequestBehavior.AllowGet);
         }
 
         [HttpPost]
@@ -176,11 +171,11 @@ namespace CPM.Controllers
         }
 
         [HttpGet]
-        public ActionResult Excel(string dummy)
-        { // special case handling for sessiontimeout while loading excel download or user somehow trying to access the excel directly. SO : 16658020
+        public ActionResult Excel(string nothing1)
+        {//to handle session timeout while requesting excel
             return RedirectToAction("List", "Dashboard");
         }
-
+        
         public ActionResult ExcelPDF()
         {   
             populateData(false);

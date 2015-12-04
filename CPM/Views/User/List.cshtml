@@ -3,8 +3,12 @@
 @using Webdiyer.WebControls.Mvc
 @using CPM.Services
 @using CPM.Helper
-@{ ViewBag.Title = "User List"; Layout = Defaults.masterLayout; ViewBag.Err = UserService.delRefChkMsg; }
-
+@{ ViewBag.Title = "User List"; Layout = Defaults.masterLayout;}
+@section HeadContent {
+    @*SOME scripts are better persisted in head *@ @*<script src="@Url.Content("~/Content/Scripts/KO/jquery-1.7.2.min.js")" type="text/javascript"></script>*@
+    <script src="@Url.Content("~/Content/Scripts/KO/knockout-2.2.0.js")" type="text/javascript"></script>
+    <script src="@Url.Content("~/Content/Scripts/KO/knockout.mapping-latest.js")" type="text/javascript"></script>    
+}
 @{ CPM.DAL.vw_Users_Role_Org usrSearch = ((CPM.DAL.vw_Users_Role_Org)(ViewData["SearchData"]));
    object routeValues = new { qData = Request["qData"] };   
    bool? oprSuccess = ((bool?)ViewData["oprSuccess"]);
@@ -16,6 +20,8 @@
         </td>
         <td align="center" style="width: 98%">
             <span id="msg">@Html.ValidationSummary(true)<br /><br />
+            @if (oprSuccess.HasValue)
+            { @Html.Raw(Defaults.getOprResult(oprSuccess.Value, UserService.delRefChkMsg))} 
             </span>
         </td>
         <td class="sqz" align="right" valign="top">
@@ -38,7 +44,7 @@
                             <td nowrap="nowrap" width="5%">
                                 Name
                             </td>
-                            <td>@Html.TextBox("UserName", usrSearch.UserName, new { @class = "hdrTxt textBox", data_bind = "value:search.UserName", @autofocus = "autofocus" })
+                            <td>@Html.TextBox("UserName", usrSearch.UserName, new { @class = "hdrTxt textBox", data_bind = "value:search.UserName" })
                             </td>
                             <td nowrap="nowrap" width="5%">
                                 Email
@@ -82,7 +88,7 @@ var mailToCellTemplate =
 <a data-bind="attr: { 'href': 'mailto:' + $data.getProperty($parent)}, html: $data.getProperty($parent)">
 hmnt</a>*@
 </script>
-<script type="text/javascript">
+<script language="javascript" type="text/javascript" defer="defer">    setFocus("UserName");
     var ListURL = '@Html.Raw(Url.Action("UserList", "User", new { index = 0, fetchAll = true })))';
     function doAJAXSubmit(frm) {
         vm_U.invokeSearch(1);
@@ -117,13 +123,12 @@ hmnt</a>*@
     }
     
     var MailTo = function (data) {
-        showNOTY("Send mail to : " + data, true);
+        alert("Send mail to : " + data);
         //Try this while using external KO template: https://groups.google.com/forum/#!msg/knockoutjs/1WDUJNd-VQ0/SBVuJttE91UJ
     }
     
     var skipCommitChk = false;
-    $(document).ready(function () {        
-        $("#tblSearch").tableNav();
+    $(document).ready(function () {
         createKO();
         @*//bind event to check claim commit*@
         window.onbeforeunload = function(e){            
@@ -153,3 +158,4 @@ hmnt</a>*@
         vm_U.search.OrgType(null);        
     }
     </script>
+<script src="@Url.Content("~/Content/Scripts/jquery.taconite.js")" type="text/javascript" ></script>

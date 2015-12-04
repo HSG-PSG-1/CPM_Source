@@ -154,9 +154,7 @@ namespace CPM.Services
                 
                 //Get filters - if any
                 //dasQ = PrepareQuery(dasQ, das);
-                // Apply Sorting, Pagination and return PagedList
-
-                //sorting already applied by the view
+                
                 return dasQ.ToList<vw_ClaimWithItemDetail>();                
             }
         }

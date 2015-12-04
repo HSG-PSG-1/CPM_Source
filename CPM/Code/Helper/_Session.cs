@@ -167,14 +167,14 @@ namespace CPM.Helper
             }
         }
 
-        public static Claims ClaimsInMemory { get{return new Claims();} }
+        public static Claims Claims { get{return new Claims();} }
 
-        public static void ResetClaimInSessionAndEmptyTempUpload(int ClaimID, string ClaimGUID)
+        public static void ResetClaimInSessionAndEmptyTempUpload(string ClaimGUID)
         { // Use ClaimGUID to find the exact claim from
             if (!string.IsNullOrEmpty(ClaimGUID)) // HT: ENSURE ClaimGUID is present
-                FileIO.CleanTempUpload(ClaimID, ClaimGUID);
+                FileIO.EmptyDirectory(System.IO.Path.Combine(Config.UploadPath, ClaimGUID));
             
-            ClaimsInMemory.Remove(ClaimGUID); // Remove the Claim from session
+            Claims.Remove(ClaimGUID); // Remove the Claim from session
             //HttpContext.Current.Session.Remove("ClaimObj");
         }
 
@@ -250,7 +250,8 @@ namespace CPM.Helper
             }
             set
             {
-                HttpContext.Current.Session["ErrDetailsForELMAH"] = value;
+                if (HttpContext.Current != null && HttpContext.Current.Session != null)
+                    HttpContext.Current.Session["ErrDetailsForELMAH"] = value;
             }
         }
 

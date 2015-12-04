@@ -76,14 +76,13 @@
                                 &nbsp;
                                 <div id="ddlg" style="text-align: right">
                                 </div>
-                                <script type="text/javascript">
+                                <script type="text/Javascript" language="javascript">
                                     function showDialog(containerID) {
                                         $(containerID).dialog({
                                             modal: false,
                                             open: function () {
                                                 $(this).html(loading);
                                                 $(this).load('@Url.Content("~/Claim/")@(claim.ID)/Status');
-                                                setTimeout(function () { $('.ui-dialog-titlebar-close').blur(); }, 1);
                                             },
                                             height: 360,
                                             width: 650,

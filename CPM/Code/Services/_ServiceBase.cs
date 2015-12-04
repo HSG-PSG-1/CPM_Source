@@ -45,4 +45,14 @@ namespace CPM.Services
 
         #endregion
     }
+
+    public abstract class CAWBase
+    {
+        #region Variables & Constructor
+
+        public bool IsAsync { get; set; }/*return true;for testing  Async*/
+        public CAWBase(bool Async) { IsAsync = Async; }
+
+        #endregion
+    }
 }

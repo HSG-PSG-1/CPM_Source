@@ -20,17 +20,19 @@ namespace CPM.Controllers
         [CacheControl(HttpCacheability.NoCache), HttpGet]
         public ActionResult Items(int ClaimID, string ClaimGUID, int? DetailID)
         {
-            //ViewData["Brands"] = new LookupService().GetLookup(LookupService.Source.BrandItems);
-            //ViewData["ClaimGUID"] = ClaimGUID;
+            ViewData["Brands"] = new LookupService().GetLookup(LookupService.Source.BrandItems);
+            ViewData["ClaimGUID"] = ClaimGUID;
             return View();
         }
                 
-        public ItemKOModel GetItemKOModel(int ClaimID, string ClaimGUID)
+        [AccessClaim("ClaimID")]
+        [CacheControl(HttpCacheability.NoCache), HttpGet]
+        public ActionResult ItemsKOVM(int ClaimID)
         {
            //Set Item object
             ClaimDetail newObj = new ClaimDetail() { ID = 0, _Added = true, ClaimID = ClaimID, LastModifiedBy = _SessionUsr.ID, LastModifiedDate = DateTime.Now, Archived = false, aDFilesJSON = "" };
 
-            ItemKOModel vm = new ItemKOModel()
+            DAL.ItemKOModel vm = new ItemKOModel()
             {
                  ItemToAdd = newObj, EmptyItem = newObj,
                  AllItems = new ClaimDetailService().Search(ClaimID, null)
@@ -40,7 +42,7 @@ namespace CPM.Controllers
             vm.Defects = new LookupService().GetLookup(LookupService.Source.Defect);
             
             vm.showGrid = true;
-            return vm;
+            return Json(vm, JsonRequestBehavior.AllowGet);
         }        
         
         #endregion

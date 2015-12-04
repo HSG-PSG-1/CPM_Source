@@ -168,7 +168,7 @@ namespace CPM.Services
         public void BulkAddEditDel(List<RoleRights> items)
         {
             // Cleanup newly added & deleted records
-            items.RemoveAll(i => i.ID == Defaults.Integer && i._Deleted);
+            items.RemoveAll(i => i.ID == Defaults.Integer && i.IsDeleted);
 
             using (dbc)
             {
@@ -186,11 +186,11 @@ namespace CPM.Services
                         item.LastModifiedBy = _SessionUsr.ID;
                         item.LastModifiedDate = DateTime.Now;
 
-                        if (item._Added && !item._Deleted) // Because we're NOT removing the deleted items
+                        if (item.IsAdded && !item.IsDeleted) // Because we're NOT removing the deleted items
                             Add(item);
-                        else if (item._Deleted && item.CanDelete)//double check the can-delete flag
+                        else if (item.IsDeleted && item.CanDelete)//double check the can-delete flag
                             Delete(item);//Make sure Ref check brfore Delete is done
-                        else //if (item._Updated)//Make sure update is LAST
+                        else //if (item.IsUpdated)//Make sure update is LAST
                             Update(item);
                     }
                     dbc.SubmitChanges();//Make a FINAL submit instead of periodic updates

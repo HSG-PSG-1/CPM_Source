@@ -28,7 +28,7 @@
         <tr>
             <td nowrap="nowrap" data-bind="click: function(data,event){return doUserDelPost('UserId',data.ID);}">
                 <a data-bind="attr : { href: '@Html.Raw(Url.Action("AddEdit"))'+'/'+ ID } ">@Html.Raw(Defaults.editImg)</a>
-                &nbsp;@Html.Raw(Defaults.delImgForObjKO("user")) @*Html.Raw(Defaults.delPOSTImgTACO("UserId", -999))*@
+                &nbsp;@Html.Raw(Defaults.delPOSTImgTACO("UserId", -999))                
             </td>
             <td data-bind="text:OrgType">
             </td>

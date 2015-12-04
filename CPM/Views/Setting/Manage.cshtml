@@ -8,12 +8,8 @@
         $('form').submit(function () { $('#btnSubmit').prop('disabled', true); });
         //SO: 2823471/jquery-how-to-find-first-visible-input-select-textarea-excluding-buttons
         $('#tblSettings').find('input[type=text],textarea,select').filter(':visible:first').focus();
-        $("#tblSettings").tableNav();
-    });    
+    });
 </script>
-    <style>
-        @*table*@
-    </style>
 }
     @using (Html.BeginForm())
     {@Html.ValidationSummary(true)
@@ -25,7 +21,10 @@
         </tr>
         <tr>
             <td align="center" class="w100">
-                @Html.ValidationSummary(true)                
+                @Html.ValidationSummary(true)
+                @{bool? oprSuccess = ((bool?)ViewData["oprSuccess"]);
+                  if (oprSuccess.HasValue){ @Html.Raw(Defaults.getOprResult(oprSuccess.Value, "Error") + "<br/>") }
+                }
                 <span><b>Note:</b> Settings will be refreshed after next login</span>
             </td>
             <td align="right" class="sqz">

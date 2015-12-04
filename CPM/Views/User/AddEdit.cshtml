@@ -45,7 +45,7 @@
         function checkAndSubmit() {
             document.getElementById('chkDone').checked = true;//For debug - alert('e:' + $("#frmUsr").validate().numberOfInvalids()); //validator.defaultShowErrors();
             return true;
-        }        
+        }
     </script>
 
 }
@@ -55,7 +55,7 @@
        bool hasbeenSalesperson = (Model.RoleID == (int)SecurityService.Roles.Sales || !string.IsNullOrEmpty(Model.SalespersonCode));
     } 
        
-    @using (Html.BeginForm("AddEdit", "Users", new { id = Model.ID }, FormMethod.Post, new { @id = "frmUsr", @name = "frmUsr" }))
+    @using (Html.BeginForm("AddEdit", "Users", new { id = Model.ID }, FormMethod.Post, new { @id = "frmUsr", @name = "frmUsr", @onsubmit = "$('#btnSubmit').prop('disabled', true);" }))
     {
     <table width="100%"><tr><td>
     <b class="smallHeading">@opr User</b>
@@ -74,13 +74,13 @@
                 <li><a href="#Locations"><span>Locations</span></a></li>
             </ul>
             <div id="Details">
-            <table cellpadding="2" cellspacing="2" style="width:50%" id="tblUsrAddEdit">
+            <table cellpadding="2" cellspacing="2" style="width:50%">
             <tr>
                 <td class = "rtsqz">
                     @Html.LabelFor(model => model.Name)
                 </td>
                 <td colspan="3">
-                    @Html.CustomTextBoxFor(model => model.Name, new { @autofocus = "autofocus" })
+                    @Html.CustomTextBoxFor(model => model.Name, new { })
                     @Html.ValidationMessageFor(model => model.Name)
                 </td>
             </tr>
@@ -92,7 +92,7 @@
                     @(Html.DropDownListFor(model => model.RoleID, new SelectList((IEnumerable)ViewData["Roles"], "ID", "TEXT", Model.RoleID), new
                 {
                     @class = "dropDown required",
-                    @onmouseup = "fillOrgs(true);" // alert(this.selectedIndex + ':' + $(this).attr('oldindex'));
+                    @onchange = "fillOrgs(true);"
                 }))
                     @Html.ValidationMessageFor(model => model.RoleID)
                     @Html.HiddenFor(model => model.OrgType, new { @class = "ignore" })
@@ -173,13 +173,12 @@
         </div>       
     </td></tr></table>
     }     
-    <script type="text/javascript">
+    <script language="javascript" type="text/javascript" defer="defer">        setFocus("Name");
         function checkReq1(ctrl, impactCtrl) { if (!(ctrl.value.length > 0)) $("#" + impactCtrl).val(''); }
 
         function fillOrgs(reset) {
             var ddl = document.getElementById("RoleID");
             var pos = (ddl.selectedIndex > 0)?ddl.selectedIndex:0;
-            //if(this.selectedIndex != $(this).attr('oldindex'))
             doOrgsDDL(ddl.options[pos].value, reset);//refresh Orgs dll
             showSalesperson();//show or hide sp row
         }
@@ -200,8 +199,7 @@
         }
         
         //Caching: http://developwithstyle.com/articles/2010/05/14/jquery-ui-autocomplete-is-it-any-good.html
-        $().ready(function() {
-            $("#tblUsrAddEdit").tableNav();
+        $().ready(function() {            
             $("#tabs").tabs({ 
             /*cache: true, spinner: 'Loading...', ajaxOptions: { cache: false },
             http://jqueryui.com/upgrade-guide/1.9/#deprecated-ajaxoptions-and-cache-options-added-beforeload-event */
@@ -282,9 +280,4 @@
         //Empty the other textbox
         $(txt2).val($(txt2).val().replace("," + chk.value,""));
         }
-
-        $('#frmUsr').submit(function () {            
-            if($(this).valid())
-            { try{DisableSubmitButtons(true);@*$.blockUI();*@}catch(e){}}
-        });
     </script>

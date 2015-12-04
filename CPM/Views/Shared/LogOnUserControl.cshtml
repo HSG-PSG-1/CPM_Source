@@ -10,5 +10,5 @@
     else
     {
         LogOnHTML = string.Format(template, _SessionUsr.UserName, _SessionUsr.RoleName, _SessionUsr.OrgName);
-        <span>@LogOnHTML [ <span class="ui-icon ui-icon-power" style="display:inline-block;vertical-align:bottom;"></span>@Html.ActionLink("Log Off", "Login", "Common", new { from = "logoff"}, new { @style="display:inline" }) ] </span>
+        <span>@LogOnHTML [ @Html.ActionLink("Log Off", "Login", "Common", new { from = "logoff" }, null) ] </span>
     }

@@ -43,11 +43,11 @@ namespace CPM.Models
         [Column(Name = "Category")]
         public string Category { get; set; }
 
-        public bool _Updated { get; set; }
-        /*get { return !_Added && !_Deleted && (ID>0) &&
+        public bool IsUpdated { get; set; }
+        /*get { return !IsAdded && !IsDeleted && (ID>0) &&
             (TitleChanged || SortOrderChanged); }*/
-        public bool _Added { get; set; }
-        public bool _Deleted { get; set; }
+        public bool IsAdded { get; set; }
+        public bool IsDeleted { get; set; }
 
         public const string delRefChkMsg = "One or more entry marked for delete is being referred by another entity. So cannot delete it.";
         public const string insTitleDuplicateMsg = "One or more new entries have duplicate title.";
@@ -76,9 +76,9 @@ namespace CPM.Models
     {
         public CPM.DAL.MasterRole RoleData { get; set; }
         //Delete after further review for future: public bool rightsChanged { get; set; }
-        public new bool _Updated
+        public new bool IsUpdated
         {
-            get { return base._Updated /*|| rightsChanged*/; }
+            get { return base.IsUpdated /*|| rightsChanged*/; }
         } 
         //DON'T forget to set TitleOLD and SortOrderOLD in FetchAll because it won't be bound using [Column(Name =
         //that is because we're NOT fetching it in a List<Master>

@@ -158,7 +158,7 @@ namespace CPM.Helper
 
             CPM.Models.Master mObj = (CPM.Models.Master)value;
 
-            if (mObj._Deleted || !(mObj._Added || mObj._Updated))
+            if (mObj.IsDeleted || !(mObj.IsAdded || mObj.IsUpdated))
             {
                 return true;//Record will NOT be processed
             }

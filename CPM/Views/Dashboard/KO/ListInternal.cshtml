@@ -10,9 +10,7 @@
     @*NOTE: DO NOT change column order without updating the Group logic variables below*@
         <tr>
             <th nowrap="nowrap" data-bind="click: function(data,event){$root.sortData(data, event,'CNo')}">           
-            @Html.Raw(HttpUtility.HtmlDecode(Html.SortableColumn("Claim #", "CNo", reload, routeValues, true, false))) 
-                <span class="ui-icon ui-icon-extlink" style="display:inline-block;vertical-align:bottom;" title="navigates to detail view"></span>
-            </th>
+            @Html.Raw(HttpUtility.HtmlDecode(Html.SortableColumn("Claim #", "CNo", reload, routeValues, true, false))) </th>
             <th nowrap="nowrap" data-bind="click: function(data,event){$root.sortData(data, event,'CDate')}">
             @Html.Raw(Html.SortableColumn("Claim Date", "CDate", reload, routeValues))            
             </th>
@@ -33,8 +31,7 @@
                 @Html.Raw(Html.SortableColumn("Salesperson", "SP", reload, routeValues))</th>
             } 
             <th nowrap="nowrap" data-bind="click: function(data,event){$root.sortData(data, event,'Status')}">
-            @Html.Raw(Html.SortableColumn("Status", "Status", reload, routeValues))
-                <span class="ui-icon ui-icon-newwin" style="display:inline-block;vertical-align:bottom;" title="opens a dialog"></span></th>
+            @Html.Raw(Html.SortableColumn("Status", "Status", reload, routeValues))</th>
             @if (!isCustomer){ 
                 <th nowrap="nowrap"data-bind="click: function(data,event){$root.sortData(data, event,'Cmts')}">
                 @Html.Raw(Html.SortableColumn("Comment", "Cmts", reload, routeValues))</th>
@@ -47,11 +44,8 @@
     <tbody data-bind="foreach: pagedRows">@* Claims *@
     <tr>
         <td align="center">            
-                @*<u><div title="Click to view this claim" style="height: 99%; cursor: pointer;" data-bind="text:$data.CNo, 
-                click:function(data,event){ gotoClaim($data.ID);return false;}"></div></u>  *@
-            <a title="Click to view this claim" data-bind="text:$data.CNo, 
-                attr:{href:'@HttpUtility.UrlDecode(Url.Action("Manage?", "Claim", new {ClaimId = -99 }))'.replace('-99', $data.CNo)}">
-                </a>
+                <u><div title="Click to view this claim" style="height: 99%; cursor: pointer;" data-bind="text:$data.CNo, 
+                click:function(data,event){ gotoClaim($data.ID);return false;}"></div></u>            
         </td>
         <td align="center" data-bind="text:CDtTxt"></td>
         <td align="center" data-bind="text:CustRef"></td>
@@ -113,5 +107,5 @@
         </tr>
     </tfoot>
 </table>
-@*{ Html.RenderPartial("KO/ListInternalKOscript", 
-       new ViewDataDictionary { { "gridPageSize", ViewData["gridPageSize"] } }); }*@
+@{ Html.RenderPartial("KO/ListInternalKOscript", 
+       new ViewDataDictionary { { "gridPageSize", ViewData["gridPageSize"] } }); }

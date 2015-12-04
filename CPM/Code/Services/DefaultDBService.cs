@@ -28,7 +28,7 @@ namespace CPM.Services
         {
             return new RoleRights()
                 {
-                    _Added = false,
+                    IsAdded = false,
                     ID = -1,
                     Title = "[Role-1]",//Required otherwise it'll be considered as ModelState error !
                     TitleOLD = "[Role-1]",
