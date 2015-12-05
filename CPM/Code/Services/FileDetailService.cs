@@ -107,8 +107,8 @@ namespace CPM.Services
             if(doSubmit) dbc.SubmitChanges();
         }
 
-        public void BulkAddEditDel(List<FileDetail> records, Claim claimObj, int oldclaimDetailId, int claimDetailId, bool doSubmit, 
-            CPMmodel dbcContext)
+        public void BulkAddEditDel(List<FileDetail> records, Claim claimObj, int oldclaimDetailId, int claimDetailId, bool doSubmit,
+            CPMmodel dbcContext, bool isNewClaim)
         {
             //using{dbc}, try-catch and transaction must be handled in callee function
             foreach (FileDetail item in records)
@@ -136,31 +136,38 @@ namespace CPM.Services
                 if (item._Added || item._Edited)
                 {//Special case: Call the econd overload which has "doSubmit" parameter
                     new ActivityLogService(ActivityLogService.Activity.ClaimFileUpload, dbcContext).Add(
-                        new ActivityHistory() { FileName = item.FileName, ClaimID = item.ClaimID, ClaimDetailID = item.ClaimDetailID,
-                                                ClaimText = claimObj.ClaimNo.ToString()
+                        new ActivityHistory()
+                        {
+                            FileName = item.FileName,
+                            ClaimID = item.ClaimID,
+                            ClaimDetailID = item.ClaimDetailID,
+                            ClaimText = claimObj.ClaimNo.ToString()
                         }, doSubmit);
                 }
                 #endregion
             }
             if (doSubmit) dbc.SubmitChanges(); //Make a FINAL submit instead of periodic updates
             //Move Item detail files
-            ProcessFiles(records, claimObj.ID, claimObj.ClaimGUID, oldclaimDetailId, claimDetailId);
+            if (isNewClaim)
+                FileIO.MoveFilesFolderNewClaimOrItem(claimObj.ID, claimObj.ClaimGUID, oldclaimDetailId, claimDetailId);
+            else
+                ProcessFiles(records, claimObj.ID, claimObj.ClaimGUID, oldclaimDetailId, claimDetailId);
         }
 
         #endregion
 
         #region Extra functions
 
-        void ProcessFiles(List<FileDetail> records, int claimId, string ClaimGUID, int oldclaimDetailId, int claimDetailId)
+        void ProcessFiles(List<FileDetail> records, int claimID, string claimGUID, int oldclaimDetailId, int claimDetailId)
         {
             if (records == null || records.Count < 1) return;
 
             foreach (FileDetail item in records)
-                if (item._Deleted)//Delete will always be for existing not Async(so use ClaimID)
-                    FileIO.DeleteClaimFile(item.FileName, item.ClaimID, claimDetailId, FileIO.mode.detail);//HT:CAUTION: Don't use the item.ID
+                if (item._Deleted)//Delete will always be for existing not Async(so use ClaimID & not GUID)
+                    FileIO.DeleteClaimFile(claimID, "", item.FileName, claimDetailId);//HT:CAUTION: Don't use the item.ID
 
             if (records.Count > 0)//finally copy all the files from D_Temp to D
-            FileIO.MoveAsyncClaimFiles(claimId, ClaimGUID, oldclaimDetailId, claimDetailId, false);
+            FileIO.StripGUIDFromClaimFileName(claimID, claimGUID, oldclaimDetailId, claimDetailId);
         }
 
         #endregion

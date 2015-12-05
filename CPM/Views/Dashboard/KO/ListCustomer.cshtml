@@ -4,10 +4,10 @@
 @{  object routeValues = new { qData = Request["qData"] };
     string reload = "return false;";
     bool isCustomer = _Session.IsOnlyCustomer;       }
-<div style="width:99%; text-align:center" data-bind="visible:filteredRecords().length < 1">No records found</div>
+<div style="width: 99%; text-align: center" data-bind="visible:filteredRecords().length < 1">No records found</div>
 <table width="100%" class="thinBorder" data-bind="visible:filteredRecords().length > 0">
     <thead class="header">
-    @*NOTE: DO NOT change column order without updating the Group logic variables below*@
+        @*NOTE: DO NOT change column order without updating the Group logic variables below*@
         <tr>
             <th nowrap="nowrap" data-bind="click: function(data,event){$root.sortData(data, event,'CNo')}">           
             @Html.Raw(HttpUtility.HtmlDecode(Html.SortableColumn("Claim #", "CNo", reload, routeValues, true, false))) </th>
@@ -28,10 +28,12 @@
         </tr>
     </thead>
     <tbody data-bind="foreach: pagedRows">@* Claims *@
-    <tr>
-        <td align="center">            
-                <u><div title="Click to view this claim" style="height: 99%; cursor: pointer;" data-bind="text:$data.CNo, 
-                click:function(data,event){ gotoClaim($data.ID);return false;}"></div></u>            
+        <tr>
+            <td align="center">
+                @*<u><div title="Click to view this claim" style="height: 99%; cursor: pointer;" data-bind="text:$data.ClaimNo, 
+                click:function(data,event){ gotoClaim($data.ID);return false;}"></div></u> *@
+                <a title="Click to view this claim" data-bind="text:$data.CNo, 
+                attr:{href:'@HttpUtility.UrlDecode(Url.Action("Manage?", "Claim", new { ClaimId = -99 }))'.replace('-99', $data.CNo)}"></a>
         </td>
         <td align="center" data-bind="text:CDtTxt"></td>
         <td align="center" data-bind="text:CustRef"></td>
@@ -49,22 +51,21 @@
             <input type="image" src="@Url.Content("~/Content/Images/Print.png")" alt="Print Claim" title="Print Claim"
             data-bind="click: function(data,event){openPrintDialog($data.ID);return false;}" />
         </td>*@
-    </tr>
-      </tbody>
+        </tr>
+    </tbody>
     <tfoot>
         <tr>
             <td colspan="7" align="center">
-                <table cellpadding="0" cellspacing="0" class="pager noborder" style="width:100%" border="0">
+                <table cellpadding="0" cellspacing="0" class="pager noborder" style="width: 100%" border="0">
                     <tr>
-                        <td nowrap="nowrap" id="usrCount">
-                            &nbsp;Records : <span data-bind="text:filteredRecords().length"></span>, Page : <span data-bind="text:pageIndex()+1"></span>
+                        <td nowrap="nowrap" id="usrCount">&nbsp;Records : <span data-bind="text:filteredRecords().length"></span>, Page : <span data-bind="text:pageIndex()+1"></span>
                         </td>
-                        <td>
-                           
-                        </td>
+                        <td></td>
                         <td align="right" width="98%" nowrap="nowrap">
-                        <div class="dDialog uline" data-bind="click: previousPage, visible: pageIndex() > 0">« prev</div> &nbsp;&nbsp;
-                        <div class="dDialog uline" data-bind="click: nextPage, visible: pageIndex() < maxPageIndex()">next »</div> &nbsp;
+                            <div class="dDialog uline" data-bind="click: previousPage, visible: pageIndex() > 0">« prev</div>
+                            &nbsp;&nbsp;
+                        <div class="dDialog uline" data-bind="click: nextPage, visible: pageIndex() < maxPageIndex()">next »</div>
+                            &nbsp;
 
                         @*<div class="dDialog uline" data-bind="click: function(data,event){return page(data,0);}">« prev</div> &nbsp;&nbsp;
                         <div class="dDialog uline" data-bind="click: function(data,event){return page(data,1);}">next »</div> &nbsp; *@
@@ -75,5 +76,5 @@
         </tr>
     </tfoot>
 </table>
-@{ Html.RenderPartial("KO/ListInternalKOscript",
-       new ViewDataDictionary { { "gridPageSize", ViewData["gridPageSize"] } }); }
+@*{ Html.RenderPartial("KO/ListInternalKOscript",
+       new ViewDataDictionary { { "gridPageSize", ViewData["gridPageSize"] } }); }*@

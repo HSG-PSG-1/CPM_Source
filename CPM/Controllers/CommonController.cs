@@ -4,9 +4,10 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Security.Principal;
 using System.Web;
+using System.Web.Security;
 using System.Web.Mvc;
 using System.Web.Routing;
-using System.Web.Security;
+using System.Text;
 using CPM.Models;
 using CPM.Services;
 using CPM.Helper;
@@ -21,10 +22,12 @@ namespace CPM.Controllers
 
         [AcceptVerbs(HttpVerbs.Get | HttpVerbs.Head)] /* For future generic capturing of HEAD - SO: 8329101 */
         //[ValidateInput(false)] // SO: 2673850/validaterequest-false-doesnt-work-in-asp-net-4
-        public ActionResult Login(string from)
+        public ActionResult Login(string from, string email, string pwd, bool remember = false)
         {
             if ((from ?? "").ToLower() == "logoff") LogOff();// Special Case: using an action named logoff creates complexity
             
+            if (remember)
+                SetCookie(new LogInModel() { Email = email, Password = Crypto.EncodeStr(pwd, false), RememberMe = remember });
             HttpCookie authCookie = Request.Cookies[Defaults.cookieName];
             LogInModel loginM = new LogInModel();
 
@@ -35,7 +38,7 @@ namespace CPM.Controllers
                 try
                 {// Set data as per cookie
                     //authCookie = HttpSecureCookie.Decode(authCookie, CookieProtection.Encryption);//HT: decode the encoded cookie
-                    authCookie = new HttpCookie(Defaults.cookieName, Crypto.EncodeStr(authCookie.Value, false));
+                    authCookie = new HttpCookie(Defaults.cookieName, Crypto.EncodeStr(authCookie.Value, false)); 
                     loginM.Email = authCookie.Values[Defaults.emailCookie];
                     loginM.Password = Crypto.EncodeStr(authCookie.Values[Defaults.passwordCookie], false);
                     loginM.RememberMe = true;
@@ -92,7 +95,11 @@ namespace CPM.Controllers
                         return RedirectToAction("List", "Dashboard");
                 }
                 else // Login failed
-                    ModelState.AddModelError("", "The email and/or password provided is incorrect.");
+                {
+                    ModelState.AddModelError("", Defaults.InvalidEmailPWD);
+                    ViewData["oprSuccess"] = false;
+                    ViewData["err"] = Defaults.InvalidEmailPWD;                        
+                }
             }
 
             LogOff();// To make sure no session is set until Login (or it'll go in Login HttpGet instead of Post)
@@ -115,8 +122,10 @@ namespace CPM.Controllers
                 bool oprSuccess = !string.IsNullOrEmpty(Pwd);
                 
                 ViewData["oprSuccess"] = oprSuccess;//Err msg handled in View
-                if(oprSuccess)//Send email
-                    MailManager.ForgotPwdMail(Email,Pwd, new SettingService().GetContactEmail());
+                if (oprSuccess)//Send email
+                    MailManager.ForgotPwdMail(Email, Pwd, new SettingService().GetContactEmail());
+                else
+                    ViewData["err"] = Defaults.ForgotPWDInvalidEmail;
             }
             #endregion
 

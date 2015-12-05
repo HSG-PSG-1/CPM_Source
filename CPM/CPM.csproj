@@ -31,6 +31,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -40,6 +41,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Elmah, Version=1.2.14706.0, Culture=neutral, processorArchitecture=MSIL">
@@ -51,8 +53,9 @@
       <Private>True</Private>
       <HintPath>..\packages\Microsoft.Web.Infrastructure.1.0.0.0\lib\net40\Microsoft.Web.Infrastructure.dll</HintPath>
     </Reference>
-    <Reference Include="MiniProfiler">
-      <HintPath>..\packages\MiniProfiler.2.0.2\lib\net40\MiniProfiler.dll</HintPath>
+    <Reference Include="MiniProfiler, Version=3.1.1.139, Culture=neutral, PublicKeyToken=b44f9351044011a3, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\MiniProfiler.3.1.1.139\lib\net40\MiniProfiler.dll</HintPath>
     </Reference>
     <Reference Include="MvcPager, Version=1.4.0.0, Culture=neutral, PublicKeyToken=f6872c5a09aed72c, processorArchitecture=MSIL" />
     <Reference Include="protobuf-net, Version=2.0.0.431, Culture=neutral, PublicKeyToken=257b51d87d2e4d67, processorArchitecture=MSIL" />
@@ -79,15 +82,14 @@
     <Reference Include="System.Web.Services" />
     <Reference Include="System.EnterpriseServices" />
     <Reference Include="System.Web.Mobile" />
-    <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Web.WebPages" />
     <Reference Include="System.Web.Helpers" />
+    <Reference Include="System.Xml.Linq" />
     <Reference Include="WebActivator">
       <HintPath>..\packages\WebActivator.1.4.4\lib\net40\WebActivator.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="App_Start\MiniProfiler.cs" />
     <Compile Include="Code\CPM.cs">
       <DependentUpon>CPM.dbml</DependentUpon>
     </Compile>
@@ -180,60 +182,36 @@
     <Content Include="Content\Images\cancel.png" />
     <Content Include="Content\Images\reset.png" />
     <Content Include="Content\Images\search.gif" />
-    <Content Include="Content\jQUI\min\jquery-1.9.1.min.js" />
-    <Content Include="Content\jQUI\min\jquery-2.1.4.min.js" />
-    <Content Include="Content\jQUI\min\jquery-migrate-1.1.0.min.js" />
-    <Content Include="Content\jQUI\min\jquery-migrate-1.1.1.min.js" />
-    <Content Include="Content\jQUI\min\jquery-ui-1.10.0.custom.js" />
-    <Content Include="Content\jQUI\min\jquery-ui-1.10.0.custom.min.js" />
-    <Content Include="Content\jQUI\min\jquery-ui.1.10.2.min.js" />
-    <Content Include="Content\jQUI\smoothness\images\animated-overlay.gif" />
-    <Content Include="Content\jQUI\smoothness\images\ui-bg_flat_0_aaaaaa_40x100.png" />
-    <Content Include="Content\jQUI\smoothness\images\ui-bg_flat_75_ffffff_40x100.png" />
-    <Content Include="Content\jQUI\smoothness\images\ui-bg_glass_55_fbf9ee_1x400.png" />
-    <Content Include="Content\jQUI\smoothness\images\ui-bg_glass_65_ffffff_1x400.png" />
-    <Content Include="Content\jQUI\smoothness\images\ui-bg_glass_75_dadada_1x400.png" />
-    <Content Include="Content\jQUI\smoothness\images\ui-bg_glass_75_e6e6e6_1x400.png" />
-    <Content Include="Content\jQUI\smoothness\images\ui-bg_glass_95_fef1ec_1x400.png" />
-    <Content Include="Content\jQUI\smoothness\images\ui-bg_highlight-soft_75_cccccc_1x100.png" />
-    <Content Include="Content\jQUI\smoothness\images\ui-icons_222222_256x240.png" />
-    <Content Include="Content\jQUI\smoothness\images\ui-icons_2e83ff_256x240.png" />
-    <Content Include="Content\jQUI\smoothness\images\ui-icons_454545_256x240.png" />
-    <Content Include="Content\jQUI\smoothness\images\ui-icons_888888_256x240.png" />
-    <Content Include="Content\jQUI\smoothness\images\ui-icons_cd0a0a_256x240.png" />
-    <Content Include="Content\jQUI\smoothness\jquery-ui.min.css" />
-    <Content Include="Content\jQUI\ui-lightness\images\animated-overlay.gif" />
-    <Content Include="Content\jQUI\ui-lightness\images\ui-bg_diagonals-thick_18_b81900_40x40.png" />
-    <Content Include="Content\jQUI\ui-lightness\images\ui-bg_diagonals-thick_20_666666_40x40.png" />
-    <Content Include="Content\jQUI\ui-lightness\images\ui-bg_flat_0_aaaaaa_40x100.png" />
-    <Content Include="Content\jQUI\ui-lightness\images\ui-bg_flat_10_000000_40x100.png" />
-    <Content Include="Content\jQUI\ui-lightness\images\ui-bg_flat_75_ffffff_40x100.png" />
-    <Content Include="Content\jQUI\ui-lightness\images\ui-bg_glass_100_f6f6f6_1x400.png" />
-    <Content Include="Content\jQUI\ui-lightness\images\ui-bg_glass_100_fdf5ce_1x400.png" />
-    <Content Include="Content\jQUI\ui-lightness\images\ui-bg_glass_55_fbf9ee_1x400.png" />
-    <Content Include="Content\jQUI\ui-lightness\images\ui-bg_glass_65_ffffff_1x400.png" />
-    <Content Include="Content\jQUI\ui-lightness\images\ui-bg_glass_75_dadada_1x400.png" />
-    <Content Include="Content\jQUI\ui-lightness\images\ui-bg_glass_75_e6e6e6_1x400.png" />
-    <Content Include="Content\jQUI\ui-lightness\images\ui-bg_glass_95_fef1ec_1x400.png" />
-    <Content Include="Content\jQUI\ui-lightness\images\ui-bg_gloss-wave_35_f6a828_500x100.png" />
-    <Content Include="Content\jQUI\ui-lightness\images\ui-bg_highlight-soft_100_eeeeee_1x100.png" />
-    <Content Include="Content\jQUI\ui-lightness\images\ui-bg_highlight-soft_75_cccccc_1x100.png" />
-    <Content Include="Content\jQUI\ui-lightness\images\ui-bg_highlight-soft_75_ffe45c_1x100.png" />
-    <Content Include="Content\jQUI\ui-lightness\images\ui-icons_222222_256x240.png" />
-    <Content Include="Content\jQUI\ui-lightness\images\ui-icons_228ef1_256x240.png" />
-    <Content Include="Content\jQUI\ui-lightness\images\ui-icons_2e83ff_256x240.png" />
-    <Content Include="Content\jQUI\ui-lightness\images\ui-icons_454545_256x240.png" />
-    <Content Include="Content\jQUI\ui-lightness\images\ui-icons_888888_256x240.png" />
-    <Content Include="Content\jQUI\ui-lightness\images\ui-icons_cd0a0a_256x240.png" />
-    <Content Include="Content\jQUI\ui-lightness\images\ui-icons_ef8c08_256x240.png" />
-    <Content Include="Content\jQUI\ui-lightness\images\ui-icons_ffd27a_256x240.png" />
-    <Content Include="Content\jQUI\ui-lightness\images\ui-icons_ffffff_256x240.png" />
-    <Content Include="Content\jQUI\ui-lightness\jquery-ui-1.10.0.custom.css" />
-    <Content Include="Content\jQUI\ui-lightness\jquery-ui-1.10.0.custom.min.css" />
+    <Content Include="Content\jQUI\css\images\animated-overlay.gif" />
+    <Content Include="Content\jQUI\css\images\ui-bg_flat_0_aaaaaa_40x100.png" />
+    <Content Include="Content\jQUI\css\images\ui-bg_flat_75_ffffff_40x100.png" />
+    <Content Include="Content\jQUI\css\images\ui-bg_glass_55_fbf9ee_1x400.png" />
+    <Content Include="Content\jQUI\css\images\ui-bg_glass_65_ffffff_1x400.png" />
+    <Content Include="Content\jQUI\css\images\ui-bg_glass_75_dadada_1x400.png" />
+    <Content Include="Content\jQUI\css\images\ui-bg_glass_75_e6e6e6_1x400.png" />
+    <Content Include="Content\jQUI\css\images\ui-bg_glass_95_fef1ec_1x400.png" />
+    <Content Include="Content\jQUI\css\images\ui-bg_highlight-soft_75_cccccc_1x100.png" />
+    <Content Include="Content\jQUI\css\images\ui-icons_222222_256x240.png" />
+    <Content Include="Content\jQUI\css\images\ui-icons_2e83ff_256x240.png" />
+    <Content Include="Content\jQUI\css\images\ui-icons_454545_256x240.png" />
+    <Content Include="Content\jQUI\css\images\ui-icons_888888_256x240.png" />
+    <Content Include="Content\jQUI\css\images\ui-icons_cd0a0a_256x240.png" />
+    <Content Include="Content\jQUI\css\jquery-ui.css" />
+    <Content Include="Content\jQUI\css\jquery-ui.min.old.css" />
+    <Content Include="Content\jQUI\min\jquery-1.11.1.min.js" />
+    <Content Include="Content\jQUI\min\jquery-2.1.1.min.js" />
+    <Content Include="Content\jQUI\min\jquery-migrate-1.2.1.min.js" />
+    <Content Include="Content\jQUI\min\jquery-ui.1.11.0.min.js" />
+    <Content Include="Content\jQUI\min\jquery-ui.1.11.4.min.js" />
+    <Content Include="Content\Scripts\jquery.validate.1.14.0.js" />
+    <Content Include="Content\Scripts\jquery.table.nav.1.0.js" />
     <Content Include="Content\Scripts\jquery.blockUI.js" />
     <Content Include="Content\Scripts\jquery.hint.js" />
+    <Content Include="Content\Scripts\jquery.noty.packaged.v222.js" />
     <Content Include="Content\Scripts\jquery.validate.1.11.0.min.js" />
     <Content Include="Content\Scripts\json2.js" />
+    <Content Include="Content\Scripts\KOVM\ItemsKOscript.js" />
+    <Content Include="Content\Scripts\KOVM\DashboardKOscript.js" />
     <Content Include="Content\Scripts\KO\jquery.tmpl.js" />
     <Content Include="Content\Scripts\KO\knockout-2.2.0.js" />
     <Content Include="Content\Scripts\KO\knockout.mapping-latest.js" />
@@ -241,6 +219,13 @@
     <Content Include="Content\Scripts\KO\KoGrid.css" />
     <Content Include="Content\Scripts\KO\KoGrid.debug.js" />
     <Content Include="Content\Scripts\KO\perpetuum.knockout.js" />
+    <Content Include="Content\Scripts\KO\underscore-ko-1.6.0.js" />
+    <Content Include="Content\Scripts\KO\underscore.js" />
+    <Content Include="Content\uploadify\jquery.uploadify.js" />
+    <Content Include="Content\uploadify\jquery.uploadify.min.js" />
+    <Content Include="Content\uploadify\uploadify-cancel.png" />
+    <Content Include="Content\uploadify\uploadify.css" />
+    <Content Include="Content\uploadify\uploadify.swf" />
     <Content Include="Global.asax" />
     <Content Include="Content\Scripts\common.js" />
     <Content Include="Web.config">
@@ -287,31 +272,32 @@
     <Content Include="Views\Common\Navigate.cshtml" />
     <Content Include="Views\User\ListKOGrid.cshtml" />
     <Content Include="Views\User\KO\UserList.cshtml" />
-    <Content Include="Views\Claim\KO\CommentsKOscript.cshtml" />
+    <Content Include="Content\Scripts\KOVM\CommentsFilesKOscript.js" />
     <Content Include="Views\Claim\Files.cshtml" />
-    <Content Include="Views\Claim\KO\FilesKOscript.cshtml" />
     <Content Include="Views\Claim\FilesDetail.cshtml" />
     <Content Include="Views\Claim\KO\FileDetailsKOscript.cshtml" />
     <Content Include="Views\Claim\Items.cshtml" />
-    <Content Include="Views\Claim\KO\ItemsKOscript.cshtml" />
     <Content Include="Views\Claim\Manage.cshtml" />
     <Content Include="Views\Claim\Archived.cshtml" />
     <Content Include="Views\Claim\FilesDetailArchived.cshtml" />
     <Content Include="packages.config" />
-    <Content Include="Views\Shared\_MINIPROFILER UPDATED Layout.cshtml" />
     <Content Include="Views\Dashboard\KO\ListInternal.cshtml" />
     <Content Include="Views\Dashboard\List.cshtml" />
-    <Content Include="Views\Dashboard\KO\ListInternalKOscript.cshtml" />
     <Content Include="Views\User\KO\UserListKOscript.cshtml" />
     <Content Include="Views\Master\Manage.cshtml" />
-    <Content Include="Views\Master\KO\MasterGrid.cshtml" />
-    <Content Include="Views\Master\KO\MasterGridKOscript.cshtml" />
+    <Content Include="Views\Master\MasterGrid.cshtml" />
+    <Content Include="Content\Scripts\KOVM\MasterGridKOscript.js" />
     <Content Include="Views\Role\Manage.cshtml" />
-    <Content Include="Views\Role\KO\RoleGridKOscript.cshtml" />
-    <Content Include="Views\Role\KO\RoleGrid.cshtml" />
+    <Content Include="Content\Scripts\KOVM\RoleGridKOscript.js" />
+    <Content Include="Views\Role\RoleGrid.cshtml" />
     <Content Include="Views\Dashboard\ClaimWithDetails.cshtml" />
-    <Content Include="Content\jQUI\min\jquery-1.11.3.min.map" />
+    <Content Include="Content\Scripts\KOVM\ItemsKOscriptOLD.js" />
     <None Include="Properties\PublishProfiles\Profile1.pubxml" />
+    <Content Include="Views\Claim\ItemsNew.cshtml" />
+    <Content Include="Views\Dashboard\GCPdemo.cshtml" />
+    <Content Include="Views\Dashboard\GCPstats.cshtml" />
+    <Content Include="Views\Dashboard\GCPcrf.cshtml" />
+    <Content Include="Views\Dashboard\GCPYearlyStatus.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Service Include="{3259AA49-8AA1-44D3-9025-A0B520596A8C}" />
@@ -333,18 +319,10 @@
     <Content Include="Content\Images\list.gif" />
     <Content Include="Content\Images\loading.gif" />
     <Content Include="Content\Images\spacer.gif" />
-    <Content Include="Content\Menu\ddsmoothmenu-v.css" />
-    <Content Include="Content\Menu\ddsmoothmenu.css" />
-    <Content Include="Content\Menu\ddsmoothmenu.js" />
-    <Content Include="Content\Menu\ddsmoothmenu2.js" />
-    <Content Include="Content\Menu\down.gif" />
-    <Content Include="Content\Menu\right.gif" />
     <Content Include="Content\Scripts\jquery.dataTables.min.js" />
     <Content Include="Content\Scripts\jquery.numeric.js" />
     <Content Include="Content\Scripts\jquery.taconite.js" />
-    <Content Include="Content\Scripts\ori_jquery.tablesorter.min.js" />
     <Content Include="Content\Scripts\jquery.tablesorter.pager.js" />
-    <Content Include="Content\Scripts\jquery.validate.1.9.0.min.js" />
     <Content Include="Content\Scripts\jquery.tablesorter.min.js" />
     <Content Include="Content\Scripts\jquery.tablesorter.filter.js" />
     <Content Include="EmailTemplates\ApplicationError.xml" />
@@ -355,7 +333,9 @@
     <Content Include="Views\Web.config" />
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="App_Start\" />
     <Folder Include="Code\Global\" />
+    <Folder Include="Content\img\" />
     <Folder Include="Files\" />
   </ItemGroup>
   <ItemGroup>

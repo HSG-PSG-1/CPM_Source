@@ -158,7 +158,7 @@ namespace CPM.Helper
 
             CPM.Models.Master mObj = (CPM.Models.Master)value;
 
-            if (mObj.IsDeleted || !(mObj.IsAdded || mObj.IsUpdated))
+            if (mObj._Deleted || !(mObj._Added || mObj._Updated))
             {
                 return true;//Record will NOT be processed
             }
@@ -306,8 +306,9 @@ namespace CPM.Helper
             {// check if session is supported
                 if (ctx.Session != null)
                 {
-                    int ClaimId = (int)filterContext.ActionParameters[ClaimIdName];
-                    goAhead = IsClaimAccessible(ClaimId);                        
+                    int ClaimId;
+                    if(int.TryParse((filterContext.ActionParameters[ClaimIdName]??"").ToString(),out ClaimId))
+                    goAhead = IsClaimAccessible(ClaimId);
                 }
             }
             if (goAhead)

@@ -1,0 +1,84 @@
+﻿@using CPM.Helper
+<div id="divRecords">
+    <table data-bind="visible:allRecords().length > 0" id="sortable" class="thinBorder"
+        width="100%" title="Drag the table rows to reorder the entries.">
+        <thead class="header">
+            <tr>
+                <th class="sqz"></th>
+                <th>Role</th>
+                <th style="display: none">Sort Order</th>
+                @* IMP: DO not reposition without changing the sortable plugin code / user control *@
+                <th>&nbsp;&nbsp;&nbsp;Org Type&nbsp;&nbsp;&nbsp;</th>
+                <th>Manage<br />Role</th>
+                <th>Manage<br />Master</th>
+                <th>Manage<br />User</th>
+                <th>Claim<br />Delete</th>
+                <th>View<br />Activity</th>
+                <th>Manage<br />Setting</th>
+                <th>Archive<br />Claim&nbsp;</th>
+                <th class="sqz">Last<br />&nbsp;Modified&nbsp;&nbsp;&nbsp;<br />By</th>
+                <th class="sqz">Last<br />Modified<br />Date</th>
+                <th align="left" nowrap="nowrap" style="display: none; width: 3%">
+                    id &nbsp;&nbsp; A &nbsp;&nbsp; E &nbsp;&nbsp; D
+                </th>
+            </tr>
+        </thead>
+        <tbody data-bind="foreach: allRecords()">
+            <tr data-bind="css:{deletedTR:_Deleted()}">
+                <td nowrap="nowrap">
+                    <div class="dDialog" onclick="doEditable(this);" data-bind="visible:!_Deleted(), click:$parent.setEdited">@Html.Raw(@Defaults.editImg)</div>
+                    &nbsp;
+                    <div class="dDialog" data-bind="visible:!_Deleted() && CanDelete(), click:$parent.removeSelected">@Html.Raw(@Defaults.delImgForObj("record"))</div>
+                    &nbsp;
+                    <div class="dDialog" data-bind="visible:_Deleted(), click:$parent.unRemoveSelected">@Html.Raw(@Defaults.cancelImgOnly)
+                        &nbsp; &nbsp;
+                    </div>
+                </td>
+                <td title="click to edit">
+                    <input class="editableTX" data-bind="value:Title, event:{change:$parent.setEditedFlag}"
+                        type="text" maxlength="50" title="click to edit" />
+                </td>
+                <td style="display: none">
+                    <input type="text" data-bind="value:SortOrder, event:{change:$parent.setEdited}" /><span data-bind="html:SortOrder" />
+                </td>
+                <td>
+                    <select id="FileType" name="OrgTypeId" class="dropbox" data-bind="options: $parent.OrgTypes, value:RoleData.OrgTypeId, optionsText: 'value', optionsValue:'id'" style="width: 100%"></select>
+                </td>
+                <td align="center">
+                    <input type="checkbox" data-bind="checked:RoleData.ManageRole" class="editableTX" style="width: 40%" />
+                </td>
+                <td align="center">
+                    <input type="checkbox" data-bind="checked:RoleData.ManageMaster" class="editableTX" style="width: 40%" />
+                </td>
+                <td align="center">
+                    <input type="checkbox" data-bind="checked:RoleData.ManageUser" class="editableTX" style="width: 40%" />
+                </td>
+                <td align="center">
+                    <input type="checkbox" data-bind="checked:RoleData.DeleteClaim" class="editableTX" style="width: 40%" />
+                </td>
+                <td align="center">
+                    <input type="checkbox" data-bind="checked:RoleData.ViewActivity" class="editableTX" style="width: 40%" />
+                </td>
+                <td align="center">
+                    <input type="checkbox" data-bind="checked:RoleData.ManageSetting" class="editableTX" style="width: 40%" />
+                </td>
+                <td align="center">
+                    <input type="checkbox" data-bind="checked:RoleData.ArchiveClaim" class="editableTX" style="width: 40%" />
+                </td>
+                <td data-bind="text:LastModifiedByVal">
+                </td>
+                @*<td data-bind="text:new Date(parseInt(PostedOn.substr(6)))"></td>*@
+                <td data-bind="date: LastModifiedDate()">
+                </td>@*http://forums.asp.net/t/1651593.aspx/1*@
+                <td nowrap="nowrap" style="display: none">
+                    <span data-bind='text:ID'></span>
+                    <input type="checkbox" data-bind="checked:_Added" />
+                    <input type="checkbox" data-bind="checked:_Updated" />
+                    <input type="checkbox" data-bind="checked:_Deleted() && CanDelete()" />
+                </td>
+            </tr>
+        </tbody>
+        <tfoot>
+        </tfoot>
+    </table>
+</div>

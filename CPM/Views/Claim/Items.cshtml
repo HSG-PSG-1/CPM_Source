@@ -1,7 +1,7 @@
 ﻿@using CPM.Helper
 
 @{string showToInternal = !_Session.IsOnlyCustomer ? "" : "style='display:none'";}
-<script language="javascript" type="text/javascript">
+<script type="text/javascript">
         //function to init auto-complete based on a brand selected.
         function fillItemsForBrand(BrandID, reset) {
             //try
@@ -66,16 +66,18 @@
             }
         }
 
-        function autoCalc(txt) {
-            if (txt != null) setDefaultIfEmpty(txt, '0.00');
+        function autoCalc(txt) {            
+            if (txt != null) {
+                txt = $(txt); txt.val(txt.val().Ufloat()).trigger("change");
+            }
 
-            var TDRemaining = $("#TDRemaining").val();
-            var TDOriginal = $("#TDOriginal").val();
+            var TDRemaining = $("#TDRemaining").val().Ufloat();
+            var TDOriginal = $("#TDOriginal").val().Ufloat();
 
-            var CurrentPrice = $("#CurrentPrice").val(); $("#CurrentPrice").val(parseFloat(CurrentPrice).toFixed(2));
-            var CurrentCost = $("#CurrentCost").val(); $("#CurrentCost").val(parseFloat(CurrentCost).toFixed(2));
+            var CurrentPrice = $("#CurrentPrice").val().Ufloat(); //$("#CurrentPrice").val(CurrentPrice.toFixed(2));
+            var CurrentCost = $("#CurrentCost").val().Ufloat(); //$("#CurrentCost").val(CurrentCost.toFixed(2));
 
-            if (parseFloat(TDRemaining) > parseFloat(TDOriginal)) {
+            if (TDRemaining > TDOriginal) {
                 $("#TDRemaining").val(TDOriginal).trigger("change"); //reset
                 $("#TDRemaining").focus(); //HT: Won't focus in FF http://stackoverflow.com/questions/1695715
                 TDRemaining = TDOriginal;
@@ -89,7 +91,7 @@
             $("#InvoiceAmt1").val(parseFloat(InvoiceAmt).toFixed(2)).trigger("change").effect('highlight', {}, 2000);
         }
     </script>
-<script language="javascript" src="@Url.Content("~/Content/Scripts/jquery.numeric.js")" type="text/javascript"></script>
+<script src="@Url.Content("~/Content/Scripts/jquery.numeric.js")" type="text/javascript"></script>
     <div id="divItems">
         @*<div style="text-align: right"><input type="button" data-bind="click:saveToServer" class="button" value="Submit to Server" /></div>*@
         <table style="width: 100%" border="0">
@@ -139,9 +141,9 @@
                                                     </td>
                                                     <td colspan="3">
                                                         <select id="ddlDefect" class="dropbox" data-bind="options: $parent.Defects, value:NatureOfDefect, optionsText: 'value', optionsValue:'id'"
-                                                            onchange='javascript:$(this).parent().children("input:first").val($(this).children("option").filter(":selected").text());$(this).parent().children("input:first").trigger("change");'>
+                                                            onchange="setDDLtext(this, 'defectText');">
                                                         </select>
-                                                        <input type="hidden" data-bind="value:Defect" />
+                                                        <input id="defectText" type="hidden" data-bind="value:Defect" />
                                                     </td>
                                                 </tr>
                                                 <tr>
@@ -149,7 +151,7 @@
                                                         Remaining TD(32nds)
                                                     </td>
                                                     <td nowrap="nowrap" valign="top">
-                                                        <input id="TDRemaining" name="TDRemaining" data-bind="value:TDRemaining" class="textBox" onblur="autoCalc(this)" />
+                                                        <input id="TDRemaining" name="TDRemaining" data-bind="value:TDRemaining" class="textBox" onblur="autoCalc(this);" />
                                                     </td>
                                                     <td align="right" nowrap="nowrap" @Html.Raw(showToInternal) valign="top">
                                                         Original TD(32nds)
@@ -323,7 +325,7 @@
                             </tr>
                         </thead>
                         <tbody data-bind="foreach: allItems()">
-                            <tr data-bind="css:{deletedTR:_Deleted(),deletedTR_NO:!_Deleted()}" style="height: 25px">
+                            <tr data-bind="css:{deletedTR:_Deleted()}" style="height: 25px">
                                 <td nowrap="nowrap" style="display:none;width:1%">
                                     <span data-bind='text:ID'></span>
                                     <input type="checkbox" data-bind="checked:_Added" />
@@ -343,14 +345,12 @@
                                 <td data-bind="text:ItemCode" width="3%">
                                 </td>
                                 <td width="40%" title="click to edit">
-                                    <input class="noBorder" data-bind="value:Description, event:{change:$parent.setEditedFlag}"
-                                        style="border: none; width: 99%" type="text" onclick="editable(this, true);"
-                                        onblur="if(trimTextAreaMaxLen(this))editable(this, false);" maxlength="250" />                                         
+                                    <input class="editableTX" data-bind="value:Description, event:{change:$parent.setEditedFlag}"
+                                        type="text" onblur="trimTextAreaMaxLen(this)" maxlength="250" />                                         
                                 </td>
                                 <td nowrap="nowrap" width="45%" title="click to edit">
                                     <div style="overflow: hidden">
-                                        <select class="dropbox noBorder" style="width: 110%; overflow: hidden;" onclick="editable(this, true);"
-                                            onblur="editable(this, false);" data-bind="options: $parent.Defects, value:NatureOfDefect,
+                                        <select class="editableTX" data-bind="options: $parent.Defects, value:NatureOfDefect,
                                          optionsText: 'value', optionsValue:'id', event:{change:$parent.setEditedFlag}">
                                         </select>
                                     </div>
@@ -390,8 +390,8 @@
             </tr>
         </table>
     </div>
-@{ Html.RenderPartial("KO/ItemsKOscript"); }
-<script type="text/javascript" language="javascript">
+@*{ Html.RenderPartial("KO/ItemsKOscript"); }*@
+<script type="text/javascript">
     var autoCompMinLen = 2;
     var txtBox = "#ItemCode", idBox = "#ItemID";
     
@@ -405,7 +405,7 @@
            // $("#TDOriginal").numeric();
            // $("#CurrentPrice").numeric();
            // $("#CurrentCost").numeric(); *@
-        } catch (err) { alert(err); }
+        } catch (err) { alert(err.message); }
     }    
 
     function callDocReadyComments(){

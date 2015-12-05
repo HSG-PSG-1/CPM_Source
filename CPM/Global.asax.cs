@@ -18,8 +18,11 @@ namespace CPM
         {
             // Routes to ignore
             routes.IgnoreRoute("{resource}.axd/{*pathInfo}");
-            routes.IgnoreRoute("favicon.ico");
+            routes.IgnoreRoute("{*favicon}", new { favicon = @"(.*/)?favicon.ico(/.*)?" }); //routes.IgnoreRoute("favicon.ico");
             routes.IgnoreRoute("elmah.axd");
+            // Unnecessary requests by the uploadify plugin - BUT below doesn't work (trys to search an swf file!)
+            //routes.IgnoreRoute("*uploadify.swf*"); // SO : 15380770/ignoring-a-route-in-asp-net-mvc // preventswfcaching*
+            //routes.IgnoreRoute("{*uploadify}", new { uploadify = @"(.*/)?uploadify.swf(/.*)?" }); */
 
             #region Routes to Map
             
@@ -30,7 +33,10 @@ namespace CPM
             );
 
             routes.MapRoute("User", "Users/{action}", new { controller = "User", action = "List" });
+
+            routes.MapRoute("uploadify", "Claim/{ClaimID}/uploadify.swf", new { controller = "Common", action = "NoAccess" }); 
             routes.MapRoute("Claim_Default", "Claim/{ClaimID}/{action}", new { controller = "Claim", ClaimID = -1, action = "Manage" });// (default action? because we dpn't want to hide it)
+
             routes.MapRoute("Role", "Roles/{action}", new { controller = "Role", action = "Manage" });
             routes.MapRoute("Master_Default", "Master/Manage/{masterTbl}", new { controller = "Master", action = "Manage"});
             routes.MapRoute("Home", "Dashboard/{action}", new { controller = "Dashboard", action = "List" });
@@ -186,12 +192,64 @@ namespace CPM
             // http://dotnetslackers.com/articles/aspnet/ErrorLoggingModulesAndHandlers.aspx
         }
 
-        #region For MiniProfiler
+        #region For MiniProfiler & Multi file upload SESSION cookie issue with FF
 
         protected void Application_BeginRequest()
         {
             //if (Request.IsLocal)
             //{ MiniProfiler.Start(); } //or any number of other checks, up to you 
+            /* we guess at this point session is not already retrieved by application so we recreate cookie with the session id... */
+
+            #region SO : 1729179/uploadify-session-and-authentication-with-asp-net-mvc
+            try
+            {
+                string session_param_name = "ASPSESSID";
+                string session_cookie_name = "ASP.NET_SessionId";
+
+                if (HttpContext.Current.Request.Form[session_param_name] != null)
+                {
+                    UpdateCookie(session_cookie_name, HttpContext.Current.Request.Form[session_param_name]);
+                }
+                else if (HttpContext.Current.Request.QueryString[session_param_name] != null)
+                {
+                    UpdateCookie(session_cookie_name, HttpContext.Current.Request.QueryString[session_param_name]);
+                }
+            }
+            catch
+            {
+            }
+
+            try
+            {
+                string auth_param_name = "AUTHID";
+                string auth_cookie_name = System.Web.Security.FormsAuthentication.FormsCookieName;
+
+                if (HttpContext.Current.Request.Form[auth_param_name] != null)
+                {
+                    UpdateCookie(auth_cookie_name, HttpContext.Current.Request.Form[auth_param_name]);
+                }
+                else if (HttpContext.Current.Request.QueryString[auth_param_name] != null)
+                {
+                    UpdateCookie(auth_cookie_name, HttpContext.Current.Request.QueryString[auth_param_name]);
+                }
+
+            }
+            catch
+            {
+            }
+
+            #endregion
+        }
+
+        private void UpdateCookie(string cookie_name, string cookie_value)
+        {
+            HttpCookie cookie = HttpContext.Current.Request.Cookies.Get(cookie_name);
+            if (null == cookie)
+            {
+                cookie = new HttpCookie(cookie_name);
+            }
+            cookie.Value = cookie_value;
+            HttpContext.Current.Request.Cookies.Set(cookie);
         }
 
         protected void Application_EndRequest()

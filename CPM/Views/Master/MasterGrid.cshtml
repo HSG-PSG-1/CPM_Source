@@ -1,0 +1,61 @@
+﻿@using CPM.Helper
+<div id="divRecords">
+    <table data-bind="visible:allRecords().length > 0" id="sortable"
+        class="thinBorder" width="100%" title="Drag the table rows to reorder the entries.">
+        <thead class="header">
+            <tr>
+                <th width="3%">
+                </th>
+                <th nowrap="nowrap">
+                    Title
+                </th>
+                <th nowrap="nowrap" style="display:none">
+                    Sort Order
+                </th>
+                <th>
+                    Last Modified By
+                </th>
+                <th width="30%">
+                    Last Modified Date
+                </th>
+                <th align="left" nowrap="nowrap" style="display: none; width: 3%">
+                    id &nbsp;&nbsp; A &nbsp;&nbsp; E &nbsp;&nbsp; D
+                </th>
+                
+            </tr>
+        </thead>
+        <tbody data-bind="foreach: allRecords()">
+            <tr data-bind="css:{deletedTR:_Deleted(),nope:!_Deleted()}">
+                <td nowrap="nowrap">
+                    <div class="dDialog" onclick="doEditable(this);" data-bind="visible:!_Deleted(), click:$parent.setEdited">@Html.Raw(@Defaults.editImg)</div>
+                    &nbsp;
+                    <div class="dDialog" data-bind="visible:!_Deleted() && CanDelete(), click:$parent.removeSelected">@Html.Raw(@Defaults.delImgForObj("record"))</div>
+                    &nbsp;
+                    <div class="dDialog" data-bind="visible:_Deleted(), click:$parent.unRemoveSelected">@Html.Raw(@Defaults.cancelImgOnly)
+                        &nbsp; &nbsp;
+                    </div>                    
+                </td>
+                <td title="click to edit">
+                    <input type="text" data-bind="value:Title, event:{change:$parent.setEditedFlag}" class="editableTX"
+                        @* style="border: none; width: 99%" type="text" onfocus="editable(this, true);" onblur ="editable(this, false);" *@
+                        maxlength="50" title="click to edit" />
+                </td>
+                <td style="display:none">
+                    <input type="text" data-bind="value:SortOrder, event:{change:$parent.setEdited}" /><span data-bind="html:SortOrder" />
+                </td>
+                <td data-bind="text:LastModifiedByVal">
+                </td>
+                <td data-bind="date: LastModifiedDate()">
+                </td>@*http://forums.asp.net/t/1651593.aspx/1*@
+                <td nowrap="nowrap" style="display: none">                    
+                    <span data-bind='text:ID'></span>
+                    <input type="checkbox" data-bind="checked:_Added" />
+                    <input type="checkbox" data-bind="checked:_Updated" />
+                    <input type="checkbox" data-bind="checked:_Deleted() && CanDelete()" />
+                </td>
+            </tr>
+        </tbody>
+        <tfoot>
+        </tfoot>
+    </table>
+</div>

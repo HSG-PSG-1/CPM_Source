@@ -14,14 +14,14 @@ For now, we only need Dropdown or textbox *@
        case SettingService.settings.Error_Detail_Level:
         
         @(Html.DropDownList("val", new SelectList((IEnumerable)ViewData[Model.setting], "id", "value", Model.val),
-            new { @class = "dropDown w100" }))
+            new { @class = "dropDown w100", @style="width:100%" }))
         
         break;
        case SettingService.settings.Remember_Me_Hours:
        case SettingService.settings.Dashboard_Page_Size:
        case SettingService.settings.User_List_Page_Size:
        case SettingService.settings.Contact_Email:
-       @Html.TextBoxFor(model => model.val,new { @class = "textbox w100" })
+       @Html.TextBoxFor(model => model.val,new { @class = "textbox w100" , @style="width:99%" })
          break;
    }}
    @*Finally we do need a validation message*@

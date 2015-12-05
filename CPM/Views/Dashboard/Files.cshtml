@@ -21,9 +21,10 @@
             <td>@item.UploadedOn.ToString(Defaults.dtFormat, Defaults.ci)</td>
             <td>
                @if (!string.IsNullOrEmpty(item.FileName) && item.ClaimID > 0){
-                   string codeStr = FileIO.getFileDownloadCode(item.FileName, item.ClaimGUID);
+                   string codeStr = FileIO.getFileDownloadCode(item.FileName, item.ClaimID, item.ClaimGUID);
                    string clipImgLink = string.Format(Defaults.clipImgLink,
-                       HttpUtility.UrlDecode(Url.Action("GetFile?" + codeStr, "Claim", new { ClaimID = item.ClaimID }))
+                       //HttpUtility.UrlDecode(Url.Action("GetFile?" + codeStr, "Claim", new { ClaimID = item.ClaimID }))
+                       Url.Action("GetFile", "Claim") + "?" + item.CodeStr
                        );
                         @Html.Raw(clipImgLink)                        
                }            

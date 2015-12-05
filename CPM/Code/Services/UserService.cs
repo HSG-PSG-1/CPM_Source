@@ -19,7 +19,9 @@ namespace CPM.Services
         public readonly Users emptyUsr = new Users() { ID = Defaults.Integer, 
             UserLocations = new EntitySet<UserLocation>() };//Make sure UserLocations is reset
         public const string sortOn = "UserName ASC", sortOn1 = "UserName ASC"; // Default for secondary sort
-        
+
+        public const string orgTypeJS = "if(user.OrgTypeId() == 1)user.OrgType(\"Internal\"); else if(user.OrgTypeId() == 2)user.OrgType(\"Vendor\");";
+
         #endregion
 
         #region Login related
@@ -73,9 +75,9 @@ namespace CPM.Services
             }
         }
 
-        public List<vw_Users_Role_Org> SearchKO(string orderBy, int? pgIndex, int pageSize, vw_Users_Role_Org usr, bool fetchAll)
+        public List<vw_Users_Role_Org> SearchKO(vw_Users_Role_Org usr)//string orderBy, int? pgIndex, int pageSize, vw_Users_Role_Org usr, bool fetchAll)
         {
-            orderBy = string.IsNullOrEmpty(orderBy) ? sortOn : orderBy;
+            //orderBy = string.IsNullOrEmpty(orderBy) ? sortOn : orderBy;
 
             using (dbc)
             {
@@ -83,12 +85,12 @@ namespace CPM.Services
                 //Get filters - if any
                 userQuery = PrepareQuery(userQuery, usr);
                 // Apply Sorting
-                userQuery = userQuery.OrderBy(orderBy);
+                userQuery = userQuery.OrderBy(sortOn);
                 // Apply pagination and return
-                if (fetchAll)
+                //if (fetchAll)
                     return userQuery.ToList<vw_Users_Role_Org>();
-                else
-                    return userQuery.Skip(pgIndex.Value).Take(pageSize).ToList<vw_Users_Role_Org>();
+                //else
+                //    return userQuery.Skip(pgIndex.Value).Take(pageSize).ToList<vw_Users_Role_Org>();
             }
         }
 
@@ -197,6 +199,21 @@ namespace CPM.Services
             BulkAddDelLocations(userObj.ID, LinkedLoc, UnlinkedLoc, true, userObj.OrgIdChanged);
 
             return userObj.ID; // Return the 'newly inserted id'
+        }
+
+        public static Users GetObjFromVW(vw_Users_Role_Org usr)
+        {
+            return new Users()
+            {
+                ID = usr.ID,
+                RoleID = usr.RoleID,
+                OrgID = usr.OrgID,
+                Name = usr.UserName,
+                Email = usr.Email,
+                Password = usr.Password,
+                LastModifiedBy = usr.LastModifiedBy,
+                LastModifiedDate = DateTime.Now
+            };
         }
 
         public int AddEdit(Users userObj, string LinkedLoc, string UnlinkedLoc)
@@ -397,7 +414,12 @@ namespace CPM.Services
 
         public bool IsUserEmailDuplicate(string userEmail)
         {
-            return (dbc.Users.Where(u => u.Email.ToUpper() == userEmail.ToUpper()).Count() > 0);
+            return (UserEmailCount(userEmail) > 0);
+        }
+
+        public int UserEmailCount(string userEmail)
+        {
+            return dbc.Users.Where(u => u.Email.ToUpper() == userEmail.ToUpper()).Count();
         }
 
         #endregion        

@@ -15,29 +15,10 @@ namespace CPM.Controllers
     //[IsAuthorize(IsAuthorizeAttribute.Rights.NONE)]//Special case for some dirty session-abandoned pages and hacks
     public partial class ClaimController : BaseController
     {
-        bool IsAsync
-        {
-            get { return true; }
-            /* until we upgrade code in future for Sync mode where changes will take place on the go instead of waiting until final commit */
-            set { ;}
-        }
-
-        FileIO.mode HeaderFM { get { return (IsAsync ? FileIO.mode.asyncHeader : FileIO.mode.header); } }
-        FileIO.mode DetailFM { get { return (IsAsync ? FileIO.mode.asyncDetail : FileIO.mode.detail); } }
-
         #region File Header Actions
-
-        //Files List (Claim\1\Files) & Edit (Claim\1\Files\2)
+                
         [CacheControl(HttpCacheability.NoCache), HttpGet]
-        public ActionResult Files(int ClaimID, string ClaimGUID) // PartialViewResultViewResultBase 
-        {
-            ViewData["Archived"] = false;
-            ViewData["ClaimGUID"] = ClaimGUID;
-            return View();
-        }
-
-        [CacheControl(HttpCacheability.NoCache), HttpGet]
-        public JsonResult FilesKOVM(int ClaimID, string ClaimGUID, int? FileID)
+        public FileKOModel GetFileKOModel(int ClaimID, string ClaimGUID)
         {
             //Set File object
             FileHeader newObj = new FileHeader() { ID = -1, _Added = true, ClaimID = ClaimID, ClaimGUID = ClaimGUID,
@@ -45,7 +26,7 @@ namespace CPM.Controllers
                 UserID = _SessionUsr.ID, Archived = false, FileName="", FileNameNEW="" };
 
             List<FileHeader> files = new List<FileHeader>();
-            DAL.FileKOModel vm = new FileKOModel()
+            FileKOModel vm = new FileKOModel()
             {
                 FileToAdd = newObj, EmptyFileHeader = newObj,
                 AllFiles = (new FileHeaderService().Search(ClaimID, null))
@@ -53,12 +34,12 @@ namespace CPM.Controllers
             // Lookup data
             vm.FileTypes = new LookupService().GetLookup(LookupService.Source.FileHeader);
 
-            return Json(vm, JsonRequestBehavior.AllowGet);
+            return vm;
         }
                 
         [HttpPost]
         [OutputCache(NoStore = true, Duration = 0, VaryByParam = "*")] //SO: 2570051/error-returning-ajax-in-ie7
-        public ActionResult FilePostKO(int ClaimID, string ClaimGUID, FileHeader FileHdrObj)
+        public ActionResult FilePostKO(int ClaimID, /* string ClaimGUID */ FileHeader FileHdrObj)
         { 
             HttpPostedFileBase hpFile = Request.Files["FileNameNEW"];
             bool success = true;
@@ -67,9 +48,7 @@ namespace CPM.Controllers
             #region New file upload
 
             if ((FileHdrObj.FileNameNEW ?? FileHdrObj.FileName) != null)
-            {//HT Delete old\existing file? For Async need to wait until final commit
-                //HT:IMP: Set Async so that now the file maps to Async file-path
-                FileHdrObj.IsAsync = true;
+            {
                 //FileHdrObj.ClaimGUID = _Session.Claim.ClaimGUID; // to be used further
                 #region Old code (make sure the function 'ChkAndSaveClaimFile' does all of it)
                 //string docName = string.Empty;
@@ -81,7 +60,8 @@ namespace CPM.Controllers
                 //    else
                 //        ModelState.AddModelError("FileName", "Unable to upload file");
                 #endregion
-                FileHdrObj.FileName = ChkAndSaveClaimFile("FileNameNEW", ClaimID, HeaderFM, FileHdrObj.ClaimGUID);
+                FileHdrObj.FileName = System.IO.Path.GetFileName(FileHdrObj.FileName); // Ensure its file name and not path!
+                ChkAndSaveClaimFile("FileNameNEW", ClaimID, FileHdrObj.ClaimGUID);
                 success = (ModelState["FileName"].Errors.Count() < 1);
             }
 
@@ -101,28 +81,50 @@ namespace CPM.Controllers
         {//Call this ONLY when you need to actually delete the file
             bool proceed = false;
             if (delFH != null)
-            {
-                #region Delete File
-
-                //If its Async - we can delete the TEMP file, if its sync the file is not present in TEMP folder so delete is not effective
-                // HT: infer: send async because the file resides in the temp folder
-                if (FileIO.DeleteClaimFile(delFH.FileName, ClaimGUID, null, FileIO.mode.asyncHeader))
-                {
-                    //HT: INFER: Delete file for Async, Sync and (existing for Async - 
-                    //the above delete will cause no effect coz path is diff)
-                    //new CAWFile(IsAsync).Delete(new FileHeader() { ID = FileHeaderID, ClaimGUID = ClaimGUID });
-                    proceed = true;
-                }
-                else
-                    proceed = false;
-
-                #endregion
-            }
+                proceed = FileIO.DeleteClaimFile(ClaimID, ClaimGUID, delFH.FileName);
+            
             //Taconite XML
-            return this.Content(Defaults.getTaconite(proceed,
+            return this.Content(Defaults.getTaconiteRemoveTR(proceed,
                 Defaults.getOprResult(proceed, "Unable to delete file"), "fileOprMsg"), "text/xml");
         }
 
+        [SkipModelValidation]
+        [HttpPost]
+        public ActionResult Upload(int ClaimID, HttpPostedFileBase file, [FromJson] FileHeader FileHdrObj)
+        {
+            //string savePath = Server.MapPath(@"~\Content\" + fileUp.FileName); fileUp.SaveAs(savePath);
+
+            //HttpPostedFileBase fileUp = Request.Files["FileNameNEW"];
+            bool success = true;
+            string result = "";// "Uploaded " + hpFile.FileName + "(" + hpFile.ContentLength + ")";
+
+            #region New file upload
+
+            if ((FileHdrObj.FileNameNEW ?? FileHdrObj.FileName) != null)
+            {
+                //FileHdrObj.ClaimGUID = _Session.Claim.ClaimGUID; // to be used further
+                #region Old code (make sure the function 'ChkAndSaveClaimFile' does all of it)
+                //string docName = string.Empty;
+                //FileIO.result uploadResult = SaveClaimFile(Request.Files["FileNameNEW"], ref docName, ClaimID, true);
+
+                //if (uploadResult != FileIO.result.successful)
+                //    if (uploadResult == FileIO.result.duplicate)
+                //        ModelState.AddModelError("FileName", "Duplicate file found");
+                //    else
+                //        ModelState.AddModelError("FileName", "Unable to upload file");
+                #endregion
+                FileHdrObj.FileName = System.IO.Path.GetFileName(FileHdrObj.FileName); // Ensure its file name and not path!
+                ChkAndSaveClaimFile("FileNameNEW", ClaimID, FileHdrObj.ClaimGUID);
+                success = ((ModelState["FileName"]?? new ModelState()).Errors.Count() < 1); // We won't have (initially) - ModelState["FileName"]
+            }
+
+            #endregion
+            result = !success ? ("Unable to upload file - " + ModelState["FileName"].Errors[0].ErrorMessage) : "";
+
+            string sepr = "~~~";
+            return Content((success ? "1" : "0") + sepr + Defaults.getOprResult(success, result) + sepr + FileHdrObj.ID + sepr + FileHdrObj.CodeStr); 
+            //Url.Content(@"~\Content\" + fileUp.FileName));
+        }
         #endregion
 
         #region File Detail Actions
@@ -201,11 +203,8 @@ namespace CPM.Controllers
             #region New file upload
 
             if ((FileDetailObj.FileNameNEW ?? FileDetailObj.FileName) != null)
-            {//HT Delete old\existing file? For Async need to wait until final commit
-                //HT:IMP: Set Async so that now the file maps to Async file-path
-                FileDetailObj.IsAsync = true;
-                //FileDetailObj.ClaimGUID = _Session.Claim.ClaimGUID; // to be used further
-                FileDetailObj.FileName = ChkAndSaveClaimFile("FileDetailNameNEW", ClaimID, DetailFM, FileDetailObj.ClaimGUID, ClaimDetailD);
+            {//HT Delete old\existing file? For Async need to wait until final commit                                
+                ChkAndSaveClaimFile("FileDetailNameNEW", ClaimID, ClaimGUID, ClaimDetailD);
                 success = (ModelState["FileName"].Errors.Count() < 1);
             }
 
@@ -231,7 +230,7 @@ namespace CPM.Controllers
 
                 //If its Async - we can delete the TEMP file, if its sync the file is not present in TEMP folder so delete is not effective
                 // HT: infer: send async because the file resides in the temp folder
-                if (FileIO.DeleteClaimFile(delFD.FileName, ClaimGUID, delFD.ClaimDetailID, FileIO.mode.asyncDetail))
+                if (FileIO.DeleteClaimFile(ClaimID, ClaimGUID, delFD.FileName, delFD.ClaimDetailID))
                 {
                     //HT: INFER: Delete file for Async, Sync and (existing for Async - 
                     //the above delete will cause no effect coz path is diff)
@@ -244,7 +243,7 @@ namespace CPM.Controllers
                 #endregion
             }
             //Taconite XML
-            return this.Content(Defaults.getTaconite(proceed,
+            return this.Content(Defaults.getTaconiteRemoveTR(proceed,
                 Defaults.getOprResult(proceed, "Unable to delete file"), "fileDetailOprMsg"), "text/xml");
         }
         
@@ -260,12 +259,11 @@ namespace CPM.Controllers
         /// <param name="ClaimDetailId">Claim Detail Id</param>
         /// <param name="upMode">FileIO.mode (Async or Sync & Header  or Detail)</param>
         /// <returns>File upload name</returns>
-        string ChkAndSaveClaimFile(string hpFileKey, int ClaimId, FileIO.mode upMode, string ClaimGUID, int? ClaimDetailId = null)
+        void ChkAndSaveClaimFile(string hpFileKey, int ClaimId, string ClaimGUID, int? ClaimDetailId = null)
         {
             HttpPostedFileBase hpFile = Request.Files[hpFileKey];
 
-            string docName = string.Empty;
-            FileIO.result uploadResult = FileIO.UploadAndSave(hpFile, ref docName, ClaimGUID, ClaimDetailId, upMode);
+            FileIO.result uploadResult = FileIO.UploadAndSave(hpFile, ClaimId, ClaimGUID, ClaimDetailId);
 
             #region Add error in case of an Upload issue
 
@@ -283,8 +281,6 @@ namespace CPM.Controllers
             }
 
             #endregion
-
-            return docName;
         }
 
         //Get Header File
@@ -296,7 +292,7 @@ namespace CPM.Controllers
                 string code = "";
                 try { code = Request.QueryString.ToString(); }
                 catch (HttpRequestValidationException httpEx)
-                { code = Request.RawUrl.Split(new char[] { '?' })[1]; }//SPECIAL CASE for some odd codes!
+                { code = Request.RawUrl.Split(new string[] { "GetFile?" }, StringSplitOptions.RemoveEmptyEntries)[1]; }//SPECIAL CASE for some odd codes!
 
                 string[] data = DecodeQSforFile(code);
                 string filename = data[0];
@@ -309,20 +305,25 @@ namespace CPM.Controllers
                     filename = data[0];
                 }
                 #endregion
-                string ClaimId = data[1];
-                bool Async = bool.Parse(data[2]);//This must parse correctly
+                int ClaimID = int.Parse(data[1]);
+                string ClaimGUID = (ClaimID > 0 && data.Length < 3)? "" : data[2];//This must parse correctly (if ID > 0 means existingso no need for GUID)
+                
                 //Send file stream for download
-                return SendFile(ClaimId, null, (Async ? FileIO.mode.asyncHeader : FileIO.mode.header), filename);
+                return SendFile(ClaimID,ClaimGUID, filename);
             }
             catch (Exception ex) { ViewData["Message"] = "File not found"; return View("DataNotFound"); }
         }
         //Get Detail File
         [ValidateInput(false)] // SO: 2673850/validaterequest-false-doesnt-work-in-asp-net-4
-        public ActionResult GetFileD()
+        public ActionResult GetFileD(int ClaimID)
         {
             try
             {
-                string code = Request.QueryString.ToString();
+                string code = "";
+                try { code = Request.QueryString.ToString(); }
+                catch (HttpRequestValidationException httpEx)
+                { code = Request.RawUrl.Split(new string[] { "GetFileD?" }, StringSplitOptions.RemoveEmptyEntries)[1]; }//SPECIAL CASE for some odd codes!
+
                 string[] data = DecodeQSforFile(code);
                 string filename = data[0];
 
@@ -334,24 +335,24 @@ namespace CPM.Controllers
                     filename = data[0];
                 }
                 #endregion
-                string ClaimId = data[1]; int ClaimDetailId = int.Parse(data[2]);
-                bool Async = bool.Parse(data[3]);//This must parse correctly
+                int ClaimDetailID = int.Parse(data[1]);//int ClaimID = int.Parse(data[1]); 
+                string ClaimGUID = (ClaimID > 0 && data.Length < 3)? "" : data[2];//This must parse correctly (if ID > 0 means existingso no need for GUID)
 
                 //Send file stream for download
-                return SendFile(ClaimId, ClaimDetailId, (Async ? FileIO.mode.asyncDetail : FileIO.mode.detail), filename);
+                return SendFile(ClaimID,ClaimGUID, filename, ClaimDetailID);
             }
             catch (Exception ex) { return View(); }
         }
         // Send file stream for download
-        private ActionResult SendFile(string ClaimGUID, int? claimDetailId, FileIO.mode fMode, string filename)
+        private ActionResult SendFile(int claimID, string claimGUID, string filename, int? claimDetailId = null)
         {
             try
             {
-                string filePath = FileIO.GetClaimFilePath(ClaimGUID, claimDetailId, fMode, filename, true);
+                string filePath = FileIO.GetClaimFilePath(claimID, claimGUID, filename, claimDetailId, false);
 
-                if (System.IO.File.Exists(AppDomain.CurrentDomain.BaseDirectory + filePath))
-                    /*System.IO.Path.GetFileName(filePath)*/
-                    return File("~/" + filePath, "Content-Disposition: attachment;", filename);
+                if (System.IO.File.Exists(filePath))//AppDomain.CurrentDomain.BaseDirectory 
+                    /*System.IO.Path.GetFileName(filePath)//return File("~/" + filePath, "Content-Disposition: attachment;", filename);*/
+                    return File(filePath, "Content-Disposition: attachment;", filename);
                 else/*Invalid or deleted file (from Log)*/
                 { ViewData["Message"] = "File not found"; return View("DataNotFound"); }
 
@@ -367,8 +368,7 @@ namespace CPM.Controllers
         private string[] DecodeQSforFile(string code)
         {
             if (string.IsNullOrEmpty(code)) return new string[] { };
-
-            //code = HttpUtility.UrlDecode(HttpUtility.UrlDecode(code)); // decode URL (first is done by us and second by browser
+            // IMP: Make sure to encode & decode URL otherwise browser will try to do it and might parse wrong
             code = HttpUtility.UrlDecode(code); // Decoding twice creates issue for certain codes
             return Crypto.EncodeStr(code, false).Split(new char[] { FileHeader.sep[0] });
         }

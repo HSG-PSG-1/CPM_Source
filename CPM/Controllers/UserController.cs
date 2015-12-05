@@ -6,6 +6,7 @@ using System.Web.Mvc;
 using CPM.DAL;
 using CPM.Services;
 using CPM.Helper;
+using System.Collections;
 
 namespace CPM.Controllers
 {
@@ -18,9 +19,8 @@ namespace CPM.Controllers
 
         #region List Grid
 
-        public ActionResult List(int? index, string qData, bool? success, string source)
+        public ActionResult List()
         {
-            index = index ?? 0;
             ViewData["oprSuccess"] = base.operationSuccess;//oprSuccess will be reset after this
             //base.SetSearchOpts(index.Value);
             searchOpts = _Session.Search[Filters.list.User];
@@ -43,7 +43,7 @@ namespace CPM.Controllers
         [CacheControl(HttpCacheability.NoCache)]//Don't mention GET or post as this is required for both!
         public JsonResult UserList(int? index, string qData, bool? fetchAll)
         {
-            base.SetTempDataSort(ref index);// Set TempDate, Sort & index
+            //base.SetTempDataSort(ref index);// Set TempDate, Sort & index
             //Make sure searchOpts is assigned to set ViewState
             vw_Users_Role_Org oldSearchOpts = (vw_Users_Role_Org)searchOpts;
             searchOpts = new vw_Users_Role_Org();
@@ -51,7 +51,7 @@ namespace CPM.Controllers
 
             index = (index > 0) ? index + 1 : index; // paging starts with 2
 
-            var result = from vw_u in new UserService().SearchKO(sortExpr, index, gridPageSize * 2, (vw_Users_Role_Org)searchOpts, fetchAll ?? false)
+            var result = from vw_u in new UserService().SearchKO((vw_Users_Role_Org)searchOpts) //sortExpr, index, gridPageSize * 2, (vw_Users_Role_Org)searchOpts, fetchAll ?? false)
                          select new
                          {
                              ID = vw_u.ID,
@@ -66,14 +66,12 @@ namespace CPM.Controllers
                              UserName = vw_u.UserName
                          };
 
-            //var result = new UserService().SearchKO(sortExpr, index, gridPageSize * 2, (vw_Users_Role_Org)searchOpts, fetchAll ?? false);
-
             return Json(new { records = result, search = oldSearchOpts }, JsonRequestBehavior.AllowGet);
         }
 
         [HttpPost]
         [SkipModelValidation]//HT: Use with CAUTION only meant for POSTBACK search Action        
-        public JsonResult UserList(vw_Users_Role_Org searchObj, string doReset, string qData)
+        public JsonResult UserList(vw_Users_Role_Org searchObj, string doReset)
         {
             searchOpts = (doReset == "on") ? new vw_Users_Role_Org() : searchObj; // Set or Reset Search-options
             populateData(false);// Populate ddl Viewdata
@@ -83,7 +81,7 @@ namespace CPM.Controllers
 
         [HttpPost]
         [SkipModelValidation]
-        public ActionResult SetSearchOpts(vw_Claim_Dashboard searchObj)
+        public ActionResult SetSearchOpts(vw_Users_Role_Org searchObj)
         {
             if (searchObj != null)
             {//Called only to set filter via ajax
@@ -92,6 +90,33 @@ namespace CPM.Controllers
             }
             return Json(false);
         }
+
+        [CacheControl(HttpCacheability.NoCache), HttpGet]
+        public ActionResult UsersKOVM(vw_Users_Role_Org searchObj, string doReset)
+        {
+            //Set Item object
+            vw_Users_Role_Org newObj = new vw_Users_Role_Org() { ID = 0, LastModifiedBy = _SessionUsr.ID, LastModifiedByName = _SessionUsr.UserName, LastModifiedDate = DateTime.Now, Editing = true, Edited = true };
+
+            //Make sure searchOpts is assigned to set ViewState
+            vw_Users_Role_Org oldSearchOpts = (vw_Users_Role_Org)searchOpts;
+            searchOpts = new vw_Users_Role_Org();
+
+            populateData(false);// Populate ddl Viewdata
+
+            DAL.UserKOModel vm = new UserKOModel()
+            {
+                NewRecord = newObj,
+                AllUsers = new UserService().SearchKO((vw_Users_Role_Org)searchOpts),
+                Search = oldSearchOpts,
+                Roles = new SecurityService().GetRolesCached()
+            };
+
+            // Lookup data
+            vm.Roles = new SecurityService().GetRolesCached();
+
+            vm.showGrid = true;
+            return Json(vm, JsonRequestBehavior.AllowGet);
+        }        
 
         #endregion
 
@@ -111,14 +136,15 @@ namespace CPM.Controllers
 
             if (proceed) // NOT deleted because testing
             {//Delete & Log Activity
-                //new UserService().Delete(uObj);
-                //new ActivityLogService(ActivityLogService.Activity.UserDelete).Add();
+                new UserService().Delete(uObj);
+                new ActivityLogService(ActivityLogService.Activity.UserDelete).Add();
             }
             //base.operationSuccess = proceed; HT: DON'T
-            return this.Content(Defaults.getTaconite(proceed,
-                Defaults.getOprResult(proceed, err) + (proceed ? "(NOT DELETED just testing)" : ""), null, true), "text/xml");
+            return this.Content(Defaults.getTaconiteResult(proceed,
+                Defaults.getOprResult(proceed, err), null, "removeUser()"), "text/xml");
 
-            //return this.Content(Defaults.getTaconite(true, Defaults.getOprResult(true, ""), "cmtOprMsg"), "text/xml");            
+            /*return this.Content(Defaults.getTaconite(proceed,
+                Defaults.getOprResult(proceed, err), null, true), "text/xml");*/
         }
 
         #endregion
@@ -173,6 +199,24 @@ namespace CPM.Controllers
             TempData["oprSuccess"] = true;
             return RedirectToAction("List");
         }
+        [HttpPost]
+        public ActionResult AddEditKO([FromJson] vw_Users_Role_Org usr,string LinkedLoc, string UnlinkedLoc)
+        {
+            if (!ModelState.IsValid)    return Json(false, JsonRequestBehavior.AllowGet);
+            
+            int UserEmailCount = new UserService().UserEmailCount(usr.Email);
+            bool isEdit = usr.ID > 0;
+            if((isEdit && UserEmailCount > 1) || (!isEdit && UserEmailCount > 0))
+                return Json(false, JsonRequestBehavior.AllowGet);            
+            Users objUsr = UserService.GetObjFromVW(usr);
+            int result = new UserService().AddEdit(objUsr, LinkedLoc, UnlinkedLoc);
+            new ActivityLogService(isEdit ? ActivityLogService.Activity.UserEdit : ActivityLogService.Activity.UserAdd).Add();
+            usr.ID = objUsr.ID; usr.LastModifiedDate = objUsr.LastModifiedDate; 
+            usr.LastModifiedBy = objUsr.LastModifiedBy; usr.LastModifiedByName = objUsr.LastModifiedByVal;
+            usr.Edited = true; usr.Editing = false;
+            
+            return Json(usr, JsonRequestBehavior.AllowGet);
+        }
         
         [HttpPost]
         public ActionResult DeleteTaco(int? UserId)
@@ -194,7 +238,7 @@ namespace CPM.Controllers
                 new ActivityLogService(ActivityLogService.Activity.UserDelete).Add();
             }
             //base.operationSuccess = proceed; HT: DON'T
-            return this.Content(Defaults.getTaconite(proceed,
+            return this.Content(Defaults.getTaconiteRemoveTR(proceed,
                 Defaults.getOprResult(proceed, err), null, true), "text/xml");
         }
 
@@ -240,5 +284,18 @@ namespace CPM.Controllers
         }
 
         #endregion
+
+
+    }
+}
+namespace CPM.DAL
+{
+    public class UserKOModel
+    {
+        public vw_Users_Role_Org NewRecord { get; set; }
+        public vw_Users_Role_Org Search { get; set; }
+        public List<vw_Users_Role_Org> AllUsers { get; set; }
+        public IEnumerable Roles { get; set; }
+        public bool showGrid { get; set; }
     }
 }

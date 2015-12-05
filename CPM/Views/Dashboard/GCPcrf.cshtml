@@ -1,0 +1,138 @@
+﻿@* Ref: https://developers.google.com/chart/interactive/docs/quick_start *@
+<!--Load the AJAX API-->
+<script type="text/javascript" src="https://www.google.com/jsapi"></script>
+<script type="text/javascript" src="@Url.Content("~/Content/Scripts/KO/underscore.js")"></script>
+<script type="text/javascript" src="@Url.Content("~/Content/Scripts/KO/underscore-ko-1.6.0.js")"></script>
+<script type="text/javascript" defer="defer">
+    // Load the Visualization API and the piechart package.
+    google.load('visualization', '1.0', { 'packages': ['corechart','controls'] });   
+
+        // Callback that creates and populates a data table,
+        // instantiates the pie chart, passes in the data and
+        // draws it.
+    function initChart(vm_Data) {
+        vm_Data = vm_Data != null? vm_Data.filteredRecords:null;
+        if (vm_Data == null || vm_Data().length < 1) 
+        {
+            return;
+        }
+
+        showDlg(true);
+
+        drawChart('Bar', 'Orgwise Claim count', 'OrgwiseClaim', 'CustOrg', vm_Data());
+        @*drawChart('Pie', 'Statuswise Claim count', 'StatuswiseClaim','Status', vm_Data());
+        drawChart('Pie', 'Brandwise Claim count', 'BrandwiseClaim','Brand', vm_Data());
+
+        drawChart('Pie', 'Ship to Location wise Claim count', 'ShipTowiseClaim','ShpLocCode', vm_Data());
+        drawChart('Column', 'Assign to wise Claim count', 'AssignwiseClaim','AsgnTo', vm_Data());
+        drawChart('Column', 'SP wise Claim count', 'SPwiseClaim','SP', vm_Data());
+        *@
+        showDlg(false);
+    }
+
+    function drawChart(typ, title, divID, field, vm_Data, chartOptions) {
+       //Ref : https://developers.google.com/chart/interactive/docs/gallery/controls
+       var dashboard = new google.visualization.Dashboard(document.getElementById(divID));
+
+        divID = 'div' + divID;
+
+        // Create a range slider, passing some options
+        var rangeSlidr = new google.visualization.ControlWrapper({
+          'controlType': 'ChartRangeFilter', // NumberRangeFilter
+          'containerId': divID + 'Slider'
+          ,'options': { 'filterColumnIndex': 1 }
+          ,'ui': { 'chartType': 'LineChart', 'chartOptions': { 'chartArea': {'width': '90%', 'height':'20%'},
+                 'hAxis': {'baselineColor': 'none'}}
+                 } // https://google-developers.appspot.com/chart/interactive/docs/gallery/controls_7dcd9ad26c87999882301982374971ec.frame?hl=en&redesign=true
+            ,'state': {'range': {'start': 15, 'end': 45}}
+            //http://code.google.com/p/google-caja/source/browse/trunk/tests/com/google/caja/apitaming/visualization/chart-range-filter.html?spec=svn5462&r=5462
+
+        });
+
+        // Set chart options
+        if(chartOptions == null)    
+            chartOptions = { 'title': title, 'width': 450, 'height': 450, 'legend': 'right' 
+            , 'chartArea': { width: '70%', height: '80%' }                
+            }; // SO : 9661456
+        
+        // Instantiate and draw our chart, passing in some options.
+        @*var chart;
+        switch(typ)
+        {
+            case "pie": chart = new google.visualization.PieChart(document.getElementById(divID)); break;
+            case "bar": chart = new google.visualization.BarChart(document.getElementById(divID)); break;
+            case "col": chart = new google.visualization.ColumnChart(document.getElementById(divID)); break;
+            
+            default : chart = new google.visualization.PieChart(document.getElementById(divID));
+        }*@
+        
+        var chartWrappr = new google.visualization.ChartWrapper({ 'chartType': typ+'Chart',
+                            'containerId': divID ,'options': chartOptions
+        });     
+
+        dashboard.bind(rangeSlidr, chartWrappr);
+        //Ref : https: //developers.google.com/chart/interactive/docs/reference#arraytodatatable
+        var chartData = new google.visualization.arrayToDataTable(getFieldwiseClaim(vm_Data, field), true);
+        dashboard.draw(chartData);//chart.draw(dataChart, options);
+    }
+    
+    function getFieldwiseClaim(vmData, groupField)//'Status'
+    {
+        var data = _.countBy(vmData, groupField);// vm_Data.filteredRecords()
+        data = _.map(data,
+                function (value, key) { return [key, value]; }//{ Status: key, count: value}
+                );
+        // _.sortBy(_.map(_.countBy(vm_D.fields(), "Status"), function (value, key) { return [key, value]; }), function(rec){return rec[1];})
+        return _.sortBy(data,function(rec){return rec[1]*-1;}); // add -1 for descending
+    }
+
+    @*function getBrandwiseClaim(vm_D) {
+        var data = _.countBy(vm_D.filteredRecords(), 'Brand');
+        data = _.map(data,
+                function (value, key) { return [key, value]; }//{ Brand: key, count: value}
+                );
+        return data;
+    }*@
+</script>
+<table>
+    <tr>
+        <td>
+            <div id="OrgwiseClaim">
+                <div id="divOrgwiseClaim"></div>
+                <div id="divOrgwiseClaimSlider" style="height:90px;"></div>
+            </div>
+        </td>
+        <td>
+            <div id="StatuswiseClaim">
+                <div id="divStatuswiseClaim"></div>
+                <div id="divStatuswiseClaimSlider"></div>
+            </div>
+        </td>
+        <td>
+            <div id="BrandwiseClaim">
+                <div id="divBrandwiseClaim"></div>
+                <div id="divBrandwiseClaimSlider"></div>
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <div id="ShipTowiseClaim">
+                <div id="divShipTowiseClaim"></div>
+                <div id="divShipTowiseClaimSlider"></div>
+            </div>
+        </td>
+        <td>
+            <div id="AssignwiseClaim">
+                <div id="divAssignwiseClaim"></div>
+                <div id="divAssignwiseClaimSlider"></div>
+            </div>
+        </td>
+        <td>
+            <div id="SPwiseClaim">
+                <div id="divSPwiseClaim"></div>
+                <div id="divSPwiseClaimSlider"></div>
+            </div>
+        </td>
+    </tr>
+</table>

@@ -27,8 +27,9 @@
     <tbody data-bind="foreach: pagedRows">
         <tr>
             <td nowrap="nowrap" data-bind="click: function(data,event){return doUserDelPost('UserId',data.ID);}">
-                <a data-bind="attr : { href: '@Html.Raw(Url.Action("AddEdit"))'+'/'+ ID } ">@Html.Raw(Defaults.editImg)</a>
-                &nbsp;@Html.Raw(Defaults.delPOSTImgTACO("UserId", -999))                
+                @*<a data-bind="attr : { href: '@Html.Raw(Url.Action("AddEdit"))'+'/'+ ID } ">@Html.Raw(Defaults.editImg)</a>*@
+                <a href="#" data-bind="click : $parent.setEditing ">@Html.Raw(Defaults.editImg)</a>
+                &nbsp;@Html.Raw(Defaults.delImgForObjKO("user")) @*Html.Raw(Defaults.delPOSTImgTACO("UserId", -999))*@
             </td>
             <td data-bind="text:OrgType">
             </td>
@@ -48,7 +49,7 @@
                         @*<td nowrap="nowrap">
                             &nbsp;Record count (<span data-bind="text:pageIndex()"></span>):
                         </td>
-                        <td id="usrCount" data-bind="text:fields().length">
+                        <td id="usrCount" data-bind="text:AllUsers().length">
                         </td>*@
                         <td nowrap="nowrap" id="usrCount">
                             &nbsp;Records : <span data-bind="text:filteredRecords().length"></span>, Page : <span data-bind="text:pageIndex()+1"></span>

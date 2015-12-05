@@ -23,37 +23,21 @@ namespace CPM.Controllers
             return View();            
         }
 
-        [CacheControl(HttpCacheability.NoCache), HttpGet]
-        public JsonResult CommentsKOVM(int ClaimID, string ClaimGUID, int AssignedTo) // PartialViewResultViewResultBase 
-        {
-            if (_Session.IsOnlyCustomer) 
-                return Json(null);//Customer doesn't have access to Comments
-
+        public CommentKOModel GetCommentKOModel(int ClaimID, string ClaimGUID, int AssignedTo)
+        {        
             //Set Comment object
             Comment newObj = new Comment() { ID = -1, _Added = true, ClaimID = ClaimID, ClaimGUID = ClaimGUID, CommentBy = _SessionUsr.Email, LastModifiedBy = _SessionUsr.ID, LastModifiedDate = DateTime.Now, PostedOn = DateTime.Now, UserID = _SessionUsr.ID, Archived = false };
-
-            #region Kept for testing
-            /*
-            List<Comment> comments = new List<Comment>();
-            try { comments = ((List<Comment>)Session["Comments_Demo"]); }
-            catch (Exception ex) { comments = null; }
-            bool sendResult = (comments != null && comments.Count() > 0);
-            if (sendResult) 
-                Session.Remove("Comments_Demo");
-            */
-            #endregion
 
             DAL.CommentKOModel vm = new CommentKOModel()
             {
                 CommentToAdd = newObj, EmptyComment = newObj, 
-                //AllComments = (sendResult? comments : new CAWcomment(false).Search(ClaimID, null, ClaimGUID)),
-                AllComments = new CommentService().Search(ClaimID, null),//(new CAWcomment(false).Search(ClaimID, null, ClaimGUID)),
+                AllComments = new CommentService().Search(ClaimID, null),
                 AssignedTo = AssignedTo
             };
 
             vm.Users = new LookupService().GetLookup(LookupService.Source.User);
 
-            return Json(vm, JsonRequestBehavior.AllowGet);
+            return vm;
         }
 
         [HttpPost]
@@ -92,23 +76,20 @@ namespace CPM.Controllers
         [HttpPost]
         public JsonResult CommentsKOEmail(int ClaimID, string ClaimGUID, int AssignedTo, int ClaimNo, [FromJson] Comment CommentObj)
         //int AssignedToOLD,
-        {   /*         
+        {            
             bool sendMail = (ClaimID > Defaults.Integer && AssignedTo != _SessionUsr.ID);// No need to send mail if its current user
+            string msg = sendMail ? "Email queued for new comment" : "Self notification : No email queued";
             try
             {
                 #region Check and send email
                 if (sendMail)
                 {// No need to send mail if its current user
                     string UserEmail = new UserService().GetUserEmailByID(AssignedTo);
-                    MailManager.AssignToMail(ClaimNo.ToString(), CommentObj.Comment1, ClaimID, UserEmail, (_SessionUsr.UserName), true);
+                    sendMail = MailManager.AssignToMail(ClaimNo.ToString(), CommentObj.Comment1, ClaimID, UserEmail, (_SessionUsr.UserName), true);
                 }
                 #endregion
             }
-            catch (Exception ex) { sendMail = false; }
-            return Json(sendMail, JsonRequestBehavior.AllowGet); ;// RedirectToAction("Comments");//new CommentKOModel()
-            */
-            string msg = "Email queued for new comment";
-            bool sendMail = CommentService.SendEmail(ClaimID, AssignedTo, ClaimNo.ToString(), CommentObj, ref msg);
+            catch (Exception ex) { sendMail = false; msg = ex.Message; }
             HttpContext.Response.Clear(); // to avoid debug email content from rendering !
             return Json(new { sendMail, msg }, JsonRequestBehavior.AllowGet);
         }        

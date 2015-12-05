@@ -9,11 +9,6 @@
    if(_Session.MasterTbl.HasValue) {MasterTbl = (int)_Session.MasterTbl;}
    string title = MasterService.formatTitle(_Session.MasterTbl.ToString());
  }
-@section HeadContent {
-    <script src="@Url.Content("~/Content/Scripts/KO/knockout-2.2.0.js")" type="text/javascript"></script>
-    <script src="@Url.Content("~/Content/Scripts/KO/knockout.mapping-latest.js")" type="text/javascript"></script>
-    <script src="@Url.Content("~/Content/Scripts/KO/KoExtra.js")" type="text/javascript"></script>   
-}  
 
     @using (Html.BeginForm("Manage", "Master", FormMethod.Post, new { id = formID, style = "display:inline", @onsubmit = "$('#btnSubmit').prop('disabled', true);" }))
     {            
@@ -26,15 +21,10 @@
         <tr>
         <td class="sqz"> Master data for : @(Html.DropDownList("ddlMaster", 
         ExtensionMethods.GetEnumSelectList<MasterService.Table>(MasterTbl),
-        new { @class = "dropDown", @onchange = "changeMaster(this, this.value);" }))
+new { @class = "dropDown", @onchange = "changeMaster(this, this.value);", @autofocus = "autofocus" }))
         </td>
         <td align="center">
-        @* For debug<%= Html.ValidationSummary(true)%>*@        
-        @{bool? oprSuccess = ((bool?)ViewData["oprSuccess"]);
-          string oprResult = (!oprSuccess.HasValue)?"":
-                             Defaults.getOprResult(oprSuccess.Value, (ViewData["err"] ?? "").ToString());}
-            @if (oprSuccess.HasValue)
-            { <span>@Html.Raw(oprResult) </span> }        
+        &nbsp;
         </td>
             <td align="right"  class="sqz">
         <input type="button" value="Add New" data-bind="click:addNewRecord" id="btnAddNew" />        
@@ -44,18 +34,19 @@
         </tr>
         <tr>
             <td colspan="3">
-                @{ Html.RenderPartial("KO/MasterGrid"); }
+                @{ Html.RenderPartial("MasterGrid"); }
             </td>
         </tr>
         <tr>
-            <td colspan="3" align="right"><i class="small">NOTE: Drag a row to change the sort order</i></td>
+            <td colspan="3" align="right">
+                <i class="small">NOTE: Drag a row to change the sort order</i>
+            </td>
         </tr>
     </table>
         <span></span>
-    @*  For Debug: <textarea id="tx1" name="tx1" cols="50" rows="10"></textarea><textarea id="tx2" name="tx2" cols="50" rows="10"></textarea>*@
      }  
-    <script type="text/javascript" defer="defer">setFocus("ddlMaster");</script>
-	<script type="text/javascript">
+    <script type="text/javascript">
+    var manageKOVMURL = "@Html.Raw(Url.Action("ManageKOVM", "Master"))";
 	    function changeMaster(ddl, val) { window.location.replace(ddl.options[ddl.selectedIndex].text); }
 	    //.disableSelection();	WON'T allow to edit inputs or else follow: http://stackoverflow.com/questions/4027158
 	    $(document).ready(function () {
@@ -91,3 +82,4 @@
             }
         });
 	</script>
+<script src="@Url.Content("~/Content/Scripts/KOVM/MasterGridKOscript.js")" type="text/javascript"></script>

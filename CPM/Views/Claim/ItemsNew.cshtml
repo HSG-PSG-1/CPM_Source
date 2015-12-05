@@ -1,0 +1,347 @@
+﻿@using CPM.Helper
+@{string showToInternal = !_Session.IsOnlyCustomer ? "" : "style='display:none'";}
+<script type="text/javascript">
+    var itemListurl = '@Defaults.commonRoot/Lookup?id=Item1&extras=';    
+    //function to init auto-complete based on a brand selected.
+    function fillItemsForBrand(BrandID, reset) {
+        //try
+        {//Proceed only if jQuery is defined - to avoid issues with the file upload
+            if (BrandID == null) {
+                BrandID = $('#BrandID');
+                BrandID = (BrandID != null) ? BrandID.val() : "";
+            }
+
+            $.getJSON(itemListurl + BrandID, { }, // SO : 10667945
+                        function (data) {// We DON'T need filtering because there can be duplicate entries                            
+                           // SO : 18441716, 3399139 - refresh data dynamically
+                           $(txtBox).autocomplete('option', 'source', 
+                               function (request, response) {
+                               // delegate back to autocomplete, but extract the last term
+                               if($.trim(request.term).length > 0)
+                                    response($.ui.autocomplete.filter(data, extractLast(request.term)));
+                               else // special case for dropdown and search / show all
+                               response(data);
+                               }
+                           );
+                        });
+
+            if (reset)//Reset the id & txtbox
+            { $(txtBox).val('').trigger("change"); $(idBox).val('').trigger("change"); }
+
+            
+            } //);
+            @*//catch (err) { } /* Avoid disturbance because of obsolete error http://jqueryui.com/demos/autocomplete/#custom-data *@
+    }
+
+    function split(val) { return val.split(/,\s*/); }
+    function extractLast(term) { return split(term).pop(); }
+
+    function setItem(item) {
+        /*$(txtBox).val(item ? item.value : '').trigger("change");
+        $(idBox).val(item ? item.id : '').trigger("change");
+        $("#Description").val(item ? item.descr : '').trigger("change").effect('highlight', {}, 2000);
+        $("#TDOriginal").val(item ? parseInt(item.tdo) : 0).trigger("change").effect('highlight', {}, 2000);
+        $("#CurrentCost").val(item ? parseFloat(item.cc) : 0.00).trigger("change").effect('highlight', {}, 2000);
+        $("#CurrentPrice").val(item ? parseFloat(item.cp) : 0.00).trigger("change").effect('highlight', {}, 2000);
+        //$("#data").html(ui.item.descr);//$( "#project-icon" ).attr( "src", "images/" + ui.item.icon );//return false;
+        autoCalc(null); //Auto calculate after new values being populated
+        //What about Size   Ply Type?*/
+        viewModelItems.itemToAdd(cloneObservable(viewModelItems.emptyItem));
+        var itmToAdd = viewModelItems.itemToAdd();
+        
+        itmToAdd.ID = NextNewItemID;
+        itmToAdd.ItemID = item.id;
+        /* DO NOT forget the above fields */
+        itmToAdd.ItemCode = item.value;
+        itmToAdd.Description = item.descr;
+        itmToAdd.TDOriginal = item ? parseInt(item.tdo) : 0;
+        itmToAdd.TDRemaining = item ? parseInt(item.tdo) : 0;
+        itmToAdd.CurrentCost = item ? parseInt(item.cc) : 0;
+        itmToAdd.CurrentPrice = item ? parseInt(item.cp) : 0;
+
+        viewModelItems.allItems.push(ko.mapping.fromJS(cloneObservable(viewModelItems.itemToAdd())));
+        NextNewItemID = NextNewItemID - 1;
+
+        var tRow = $('#tblItems tbody>tr:last');
+        tRow.effect('highlight', {}, 2000); // SO : 7871143 use .prev("tr") for second last
+        
+        autoCalc($(tRow.find("input[id='TDR']"))); // need toocalculate Cr & Inv amt
+
+        $("#tblItems").tableNav(); // for newly created TR
+    }
+    
+    function autoCalc(txt) {
+        if (txt != null) {
+            txt = $(txt); txt.val(txt.val().Ufloat()).trigger("change");
+        }
+        var tRow = txt.parent().parent();
+        var TDR = $(tRow.find("input[id='TDR']")); var TDRemaining = TDR.val().Ufloat();
+        var TD = $(tRow.find("input[id='TD']")); var TDOriginal = TD.val().Ufloat();
+
+        var CP = $(tRow.find("input[id='CP']")); var CurrentPrice = CP.val().Ufloat();
+        var CC = $(tRow.find("input[id='CC']")); var CurrentCost = CC.val().Ufloat();
+
+        if (TDRemaining > TDOriginal) {
+            TDR.val(TDOriginal).trigger("change"); //reset
+            TDR.focus(); //HT: Won't focus in FF http://stackoverflow.com/questions/1695715
+            TDRemaining = TDOriginal;
+        }
+        var RemainingTread = TDRemaining * 100 / ((TDOriginal > 0) ? TDOriginal : 1);
+        var CreditAmt = roundNumber((RemainingTread * CurrentPrice / 100), 2); //.toFixed(2);
+        var InvoiceAmt = roundNumber((RemainingTread * CurrentCost / 100), 2); //.toFixed(2);
+        //http://stackoverflow.com/questions/6134039/format-number-to-always-show-2-decimal-places
+
+        $(tRow.find("input[id='CrAmt']")).val(parseFloat(CreditAmt).toFixed(2)).trigger("change").effect('highlight', {}, 2000); // $("#CreditAmt1")
+        $(tRow.find("input[id='InvAmt']")).val(parseFloat(InvoiceAmt).toFixed(2)).trigger("change").effect('highlight', {}, 2000); // $("#InvoiceAmt1")
+    }
+</script>
+<script src="@Url.Content("~/Content/Scripts/jquery.numeric.js")" type="text/javascript"></script>
+<div id="divItems">
+    @*<div style="text-align: right"><input type="button" data-bind="click:saveToServer" class="button" value="Submit to Server" /></div>*@
+    <table style="width: 100%" border="0">
+        <tr>
+            <td>
+                Quick add (multiple):
+                <input id="ItemCode" type="text" onfocus1="$(this).val('');" style="width: 336px;" />&nbsp;@Html.Raw(string.Format(Defaults.lookupImgBtn, "ItemCode"))&nbsp;
+                <input id="ItemID" type="hidden" />
+                &nbsp;
+                <input type="reset" onclick="$('#ItemCode').val(''); return false;" value="Reset" />
+            </td>
+            <td nowrap="nowrap">
+                @*<div style="padding-bottom: 3px">
+                    <div class="dDialog uline" style="text-align: right; width: 5%;"
+                        data-bind="click:showAddNew">
+                        Add New
+                    </div>
+                </div>*@
+            </td>
+        </tr>
+        <tr data-bind1="visible:showGrid">
+            <td>
+                @* Items : START *@
+                <table class="thinBorder" width="100%" id="tblItems" style="font-size:11px">
+                    <thead class="header">
+                        <tr>
+                            <th align="left" nowrap="nowrap" style="display: none;" width="0%">
+                                id &nbsp;&nbsp; A &nbsp;&nbsp; E &nbsp;&nbsp; D
+                            </th>
+                            <th width="2%">
+                            </th>
+                            <th width="1%">
+                                #
+                            </th>
+                            <th width="5%" nowrap="nowrap">
+                                Item
+                            </th>
+                            <th width1="40%">
+                                Description
+                            </th>
+                            <th width="22%">
+                                Defect
+                            </th>                            
+                            <th width="2%" nowrap="nowrap" @Html.Raw(showToInternal)>
+                                32nds&nbsp;<br />
+                                TD
+                            </th>
+                            <th width="2%" nowrap="nowrap">
+                                32nds&nbsp;<br />
+                                TDR
+                            </th>
+                            <th width="6%" nowrap="nowrap">
+                                Serial #
+                            </th>
+                            <th width="6%" nowrap="nowrap">
+                                DOT #
+                            </th>
+                            <th width="2%" nowrap="nowrap" @Html.Raw(showToInternal)>
+                                Current<br />
+                                Price
+                            </th>
+                            <th width="2%" nowrap="nowrap" @Html.Raw(showToInternal)>
+                                Current<br />
+                                Cost
+                            </th>
+                            <th width="2%" nowrap="nowrap">
+                                Credit<br />
+                                Amt
+                            </th>
+                            @if (!_Session.IsOnlyCustomer)
+                            { <th nowrap="nowrap" width="2%">
+                                Invoice<br />
+                                Amt
+                            </th>}
+                            <th width="12%" nowrap="nowrap">
+                                Internal Note
+                            </th>
+                            <th width="2%">
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody data-bind="foreach: { data : allItems()@*, afterRender: createTableNav*@ }" title="click to edit">
+                        <tr data-bind="css:{deletedTR:_Deleted()}, event:{click:$parent.setEditedFlag}"
+                            style="height: 20px">
+                            <td nowrap="nowrap" style="display: none;">
+                                <span data-bind='text:ID' class="small"></span>
+                                <input type="checkbox" data-bind="checked:_Added" />
+                                <input type="checkbox" data-bind="checked:_Edited" />
+                                <input type="checkbox" data-bind="checked:_Deleted" />
+                            </td>
+                            <td nowrap="nowrap">
+                                <div class="dDialog" data-bind="visible:!_Deleted(), click:$parent.setEdited" onclick="doEditable(this);">@Html.Raw(@Defaults.editImg)</div>
+                                &nbsp;
+                                <div class="dDialog" data-bind="visible:!_Deleted(), click:$parent.removeSelected">@Html.Raw(@Defaults.delImgForObj("item"))</div>
+                                &nbsp;
+                                <div class="dDialog" data-bind="visible:_Deleted(), click:$parent.unRemoveSelected">@Html.Raw(@Defaults.cancelImgOnly)
+                                    &nbsp; &nbsp;
+                                </div>
+                                @*@Html.Raw(Defaults.delPOSTImgTACO("ItemID", -1, "doCmtDelPost"))*@
+                            </td>
+                            <td align="center" data-bind="text:$index()+1">
+                            </td>
+                            <td data-bind="text:ItemCode">
+                            </td>
+                            <td>
+                                <textarea class="editableTX" data-bind="value:Description, event:{change:$parent.setEditedFlag}"
+                                        @*style="border: none; width: 99%" type="text" onclick="editable(this, true);"*@
+                                        onblur="trimTextAreaMaxLen(this);"
+                                        maxlength="250" rows="2" style="text-align:center; height:36px;"></textarea>
+                            </td>
+                            <td nowrap="nowrap">
+                                <div style="overflow: hidden">
+                                    <select class="dropbox editableTX" @* style="width: 110%; overflow: hidden;" onclick="editable(this, true);" onblur="editable(this, false);" *@
+                                        data-bind="options: $parent.Defects, value:NatureOfDefect,
+                                         optionsText: 'value', optionsValue:'id'">
+                                    </select>
+                                </div>
+                            </td>
+                            <td @Html.Raw(showToInternal)>
+                                <input id="TD" data-bind="value:TDOriginal" class="textBox editableTX rt" type="text"
+                                    onblur="autoCalc(this);" />
+                            </td>
+                            <td>
+                                <input id="TDR" data-bind="value:TDRemaining" class="editableTX rt" type="text" onblur="autoCalc(this);" />
+                            </td>                            
+                            <td>
+                                <input data-bind="value:Serial" class="editableTX" type="text" />
+                            </td>
+                            <td>
+                                <input data-bind="value:DOT" class="editableTX" type="text" />
+                            </td>
+                            <td @Html.Raw(showToInternal)>
+                                <input id="CP" data-bind="value:CurrentPrice" class="editableTX rt" onblur="autoCalc(this)"
+                                    type="text" />
+                            </td>
+                            <td @Html.Raw(showToInternal)>
+                                <input id="CC" data-bind="value:CurrentCost" class="editableTX rt" onblur="autoCalc(this)"
+                                    type="text" />
+                            </td>
+                            <td>
+                                <input id="CrAmt" data-bind="value:CreditAmt1" class="noBorder" readonly="readonly"
+                                    style="width: 99%; text-align: right; border: none;" />
+                            </td>
+                            @if (!_Session.IsOnlyCustomer)
+                            { <td>
+                                <input id="InvAmt" data-bind="value:InvoiceAmt1" class="noBorder" readonly="readonly"
+                                    style="width: 99%; text-align: right; border: none;" />
+                            </td> }
+                            <td class="small">
+                                @if (_Session.IsOnlyCustomer)
+                                {<span data-bind="text:(Note=='')?Note:'(empty)'"></span>}
+                                else
+                                {
+                                    <textarea data-bind="value:Note, event:{change:$parent.setEditedFlag}"
+                                     maxlength="250" @*style="border: none; width: 99%" onclick="editable(this, true);"*@
+                                        onblur="trimTextAreaMaxLen(this);" class="editableTX" rows="2" style="height:36px;"></textarea>
+                                }
+                            </td>
+                            <td>
+                                <div class="dDialog uline small" data-bind="visible: !_Deleted(), click:$parent.openAttachFilesDetailDirect">
+                                    Files</div>
+                            </td>
+                        </tr>
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <td colspan="11" align="right">
+                                Total:
+                            </td>
+                            <td data-bind="text:CreditAmtTotal" align="right">
+                            </td>
+                            @if (!_Session.IsOnlyCustomer)
+                            { <td data-bind="text:InvoiceAmtTotal" align="right">
+                            </td>   }
+                            <td colspan="2">
+                            </td>
+                        </tr>
+                    </tfoot>
+                </table>
+                @* Items : END *@
+            </td>
+        </tr>
+    </table>
+</div>
+@*{ Html.RenderPartial("KO/ItemsKOscript"); }*@
+<script type="text/javascript">
+    var autoCompMinLen = 2;
+    var txtBox = "#ItemCode", idBox = "#ItemID";
+
+    function initItemsAutocomplete(){
+           try{
+           var url = itemListurl + $('#BrandID').val(); //$('#BrandID', window.parent.document).val();
+            @*//renderAutoComplete('@Defaults.commonRoot/Lookup?id=Item', '#ItemID', '#ItemCode');*@
+            $(txtBox).autocomplete({
+                 /* @* source: function (request, response) {
+                   $.getJSON(url, { term: extractLast(request.term) }, // SO : 10667945
+                        function (data) {
+                            // We DON'T need tis because there can be duplicate entries
+                            // delegate back to autocomplete, but extract the last term
+                            //response($.ui.autocomplete.filter(data, extractLast(request.term)));
+                            response(data);
+                        });
+                },      *@ */
+                select: function (event, ui) {
+                    if (ui.item == null || ui.item.id == null) event.preventDefault();
+                    else { setItem(ui.item); }
+                    // https://jqueryui.com/resources/demos/autocomplete/multiple.html
+                    var terms = split(this.value);
+                    terms.pop(); // remove the current input                        
+                    terms.push(ui.item.value); // add the selected item                        
+                    terms.push(""); // add placeholder to get the comma-and-space at the end
+                    this.value = terms.join(", ");
+                    return false;
+                }
+                , focus: function (event, ui) { if (ui.item == null || ui.item.id == null) event.preventDefault(); }
+                , minLength: autoCompMinLen
+                /*, search: function() { // set custom minLength
+                var term = extractLast(this.value);
+                if (term.length < autoCompMinLen) { return false; }
+            },*/
+            }).data("ui-autocomplete")._renderItem = function (ul, item) { //HT: Format the items : http://jqueryui.com/demos/autocomplete/#custom-data
+                    return $("<li></li>")
+                    //.data("item.autocomplete", item)
+                    .append("<a>" + item.value + ((item.descr != null) ? " (" + item.descr + ")</a>" : ""))
+                    .appendTo(ul);
+                };
+
+            //Attach onblur event to empty ID field
+            //$(txtBox).blur(function () { checkReq(txtBox, idBox); });            
+            //Set initial value (null if it was defaulted to 0) and set tooltip
+            //var val = $(idBox).val(); $(idBox).val((val == "0") ? "" : val); //"#ItemID"
+            
+            $(txtBox).attr('title', 'Start typing to search or type space twice to view all. Select item to add it below.');
+            
+            fillItemsForBrand(null,true);
+
+            setFocus("ItemCode"); @*Set focus after the code textbox has been autocompleted - above *@
+            } catch (err) { alert(err.message); }
+    }
+
+    function callDocReadyComments() {
+        createItemsKO();
+        setFocus("ItemCode");   
+    }
+
+    function brandHasItems() {
+        return ($("#BrandID option:selected").text().indexOf("(0)") == -1);
+    }
+</script>

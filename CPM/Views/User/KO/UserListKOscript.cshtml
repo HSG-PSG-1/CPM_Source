@@ -1,6 +1,6 @@
 ﻿@using CPM.Services
 @using CPM.Helper
-<script language="javascript" type="text/javascript" defer="defer">
+<script type="text/javascript">
 var loading = '<div style="text-align:center;display:block;"><img src=" @Url.Content("~/Content/Images/loading.gif")" title="" alt="Loading" /></div>';
        
 function gotoUser(ClaimId)
@@ -16,32 +16,151 @@ function updatePagedRows(vm)
     showDlg(true);
     $.getJSON(ListURL, function (data) {
             showDlg(false);
-            //viewModel.Claims = ko.observableArray(data); // Initial items
-            //ko.applyBindings(viewModel);
+            //vmUser.Claims = ko.observableArray(data); // Initial items
+            //ko.applyBindings(vmUser);
             if(data != null)
             ko.utils.arrayForEach(data, function (item) {
-                vm_U.fields.push(item);
+                vm_U.AllUsers.push(item);
             });
             else
                 vm_U.pageIndex(0);//reset            
         });
 }
 
-var viewModel = function(){        
+var vmUser = function(){        
         var self = this;
-        self.fields =  ko.observableArray();//jsondata
+        self.AllUsers =  ko.observableArray();//jsondata
         self.pageSize = ko.observable(@ViewData["gridPageSize"]);
         self.pageIndex = ko.observable(0);
         self.cachedPagesTill = ko.observable(0);
         self.sortField = ko.observable("ClaimNo");
         self.sortOrderNxtAsc = ko.observable(true);
         self.search = ko.observable();
+        self.showGrid = ko.observable(true);
         self.invokeSearch = ko.observable(2);        
+        self.invokeEditRec = ko.observable(6);
+        self.roles =  ko.observableArray();//jsondata
+        self.hasbeenSalesperson = ko.observable(false);
         
-        self.removeSelected = function (user) {
-            if (user != null) // Prevent blanks and duplicates
-                self.fields.remove(user);
+        self.addNew = function () {       
+            self.AllUsers.push(ko.mapping.fromJS(self.newRecord()));//cloneObservable
+            self.invokeEditRec(1);
+            self.showGrid(false);  $("#usrAddEditDialog").dialog("open");
+            fillOrgs(false); //setup Org dropdown and sp
+            setFocus("Name");
+            oldEmail = "";
+            //return true;
         };
+        self.setEditing = function (user) {
+        //cache for undo
+        undoCache = cloneObservable(user);
+        for (var i = 0; i < self.AllUsers().length; i++) {
+        var rec = self.AllUsers()[i];
+            if (rec.ID() == user.ID()){
+                rec.Editing(true);
+                var result = (rec.RoleID() == @Html.Raw(((int)SecurityService.Roles.Sales).ToString()));
+                self.hasbeenSalesperson(result);
+             }
+            else
+                self.AllUsers()[i].Editing(false);
+            }
+            user.LastModifiedDate(Date111);
+            self.invokeEditRec(4);
+            self.showGrid(false);   $("#usrAddEditDialog").dialog("open");
+            fillOrgs(false); //setup Org dropdown and sp
+            setFocus("Name");
+            oldEmail = user.Email();
+        };
+        self.saveEdit = function (user) {
+            // HT: Won't work for KO dialog need to trigger email validation explicitly
+            if(!$("#frmUsr").valid())//$('#btnSubmit').prop('disabled', true);            
+                return;
+
+            if (user.UserName == null || user.UserName() == "")   alert("Name is a required field");
+            else if (user.RoleID() == null)   alert("Role is a required field");
+            else if (user.OrgID() == null)   alert("Organization is a required field");
+            else if (user.Email == null || user.Email() == "")   alert("Email is a required field");
+            else if (user.Password == null || user.Password() == "")   alert("Password is a required field");
+            else {
+                // trigger AJAX save by POST and get back the inserted \ updated user record
+                // show loading dialog
+                // successful return then reset edited
+                // if success show message else if error then show message
+                // stop loading
+                $("#OrgName").trigger("change");
+                var IsEdit = user.ID() > 0;
+                showDlg(true);
+                
+                var LinkedLocations = $("#LinkedLoc").val();
+                var UnlinkedLocations = $("#UnlinkedLoc").val();
+                $.post('@Url.Action("AddEditKO", "User")', { usr: ko.mapping.toJSON(user), LinkedLoc:LinkedLocations, UnlinkedLoc:UnlinkedLocations},  
+                    function (usr) {      
+                    showDlg(false);                     
+                        if(usr == false) {alert("Invalid data or duplicate email."); return;}
+                        @* SQL does it as - CASE o.OrgTypeId WHEN 1 THEN 'Internal' WHEN 2 THEN 'Vendor' END *@
+                        @Html.Raw(UserService.orgTypeJS)
+                        //if(user.OrgTypeId() == 1)user.OrgType("Internal"); else if(user.OrgTypeId() == 2)user.OrgType("Vendor");
+                        //setDDLtext("#ddlRoles", "RoleName"); // shud trigger the change instead of user.RoleName("Admin")
+                        usr.OrgType = user.OrgType();
+                        usr.RoleName = $('#ddlRoles option:selected').text(); // SO: 10289721
+                        var old;    var usrID = IsEdit ? usr.ID : self.newRecord().ID;                        
+                        old = ko.utils.arrayFirst(self.AllUsers(), function (usrObj) {return usrObj.ID() == usrID; });                                 
+                        //user.Editing(false); user.Edited(true); Handled in the server action AddEditKO
+                        self.AllUsers.replace(old, ko.mapping.fromJS(usr));
+                        self.invokeEditRec(1);
+                        self.showGrid(true);    $("#usrAddEditDialog").dialog("close");
+                        undoCache = null;   oldEmail = "";
+                    });       
+            }
+            var s = self.invokeSearch();self.invokeSearch(0);
+        };
+        self.removeSelected = function (user) {
+            /*if (user != null) // Prevent blanks and duplicates
+                self.AllUsers.remove(user); */
+
+            if (user == null || user.ID < 1) // NOT ID()
+            { showNOTY("Invalid data or operation", false); return; } // Prevent blanks and duplicates
+
+            var data = {}; data["UserId"] = user.ID;
+            showDlg(true);
+            $.post('@Url.Action("UserKODelete", "User", new { ID = "" })', data,
+                    function (result) {
+                        showDlg(false);
+                        if (deleteSuccess) {
+                            self.AllUsers.remove(user);
+                            deleteSuccess = false;
+                        }
+                        //alert(result); HT: we can notify user if a succesful email was sent
+                    }
+            );
+        };
+        self.cancelEdit = function (user) {
+            user.Editing(false); user.Edited(false);
+            if (user.ID() != null && user.ID() < 1) 
+                self.AllUsers.pop();
+            else 
+            {                
+                //undoCache = cloneObservable(user);
+                self.AllUsers.replace(user, ko.mapping.fromJS(undoCache)); // cloneObservable
+                undoCache = null;
+            }
+            self.showGrid(true);    $("#usrAddEditDialog").dialog("close");
+            self.invokeEditRec(2);
+            oldEmail = "";
+        };
+        self.editRecord = ko.computed(function() {
+            var e = self.invokeEditRec();self.invokeEditRec(3);
+            return ko.utils.arrayFilter(self.AllUsers(), function(rec) {           
+                return (rec.Editing() != null && rec.Editing());
+                });
+        });        
+        self.opr = ko.computed(function() {
+            var e = self.invokeEditRec();self.invokeEditRec(5); // To refresh it when property change
+            if(self.editRecord() != null && self.editRecord().length > 0)
+                return self.editRecord()[0].ID() > 0?"Edit" : "Add";
+            else
+                return "";
+        });
 
         self.previousPage = function() {
             self.pageIndex(self.pageIndex() - 1);
@@ -68,12 +187,12 @@ var viewModel = function(){
             
             self.pageIndex(0);
                         
-            return ko.utils.arrayFilter(self.fields(), function(rec) {                                
+            return ko.utils.arrayFilter(self.AllUsers(), function(rec) {                                
                 return (
-                    (OrgType == null || rec.OrgType.toLowerCase().indexOf(OrgType) > -1) &&
-                    (UserName == null || rec.UserName.toLowerCase().indexOf(UserName) > -1) &&                    
-                    (Email == null || rec.Email.toLowerCase().indexOf(Email) > -1) &&                    
-                    (RoleID < 1 || rec.RoleID == RoleID)
+                    (OrgType == null || rec.OrgType().toLowerCase().indexOf(OrgType) > -1) &&
+                    (UserName == null || rec.UserName().toLowerCase().indexOf(UserName) > -1) &&                    
+                    (Email == null || rec.Email().toLowerCase().indexOf(Email) > -1) &&                    
+                    (RoleID < 1 || rec.RoleID() == RoleID)
                 );
             });                        
         });
@@ -98,20 +217,20 @@ var viewModel = function(){
             
             var sortOrder = self.sortOrderNxtAsc()? -1 : 1; // Asc : Desc
 
-            @*"click: function(data,event){fields.sort(function (l, r) { return l.Status > r.Status ? 1 : -1 })}"*@
+            @*"click: function(data,event){AllUsers.sort(function (l, r) { return l.Status > r.Status ? 1 : -1 })}"*@
             switch (sort)
             {
             case "OrgType":
-                 self.fields.sort(function (l, r) { return l.OrgType > r.OrgType ? 1*sortOrder : -1*sortOrder });                
+                 self.AllUsers.sort(function (l, r) { return l.OrgType() > r.OrgType() ? 1*sortOrder : -1*sortOrder });                
                  break;
             case "RoleName": // Need to convert into string while comparison
-                self.fields.sort(function (l, r) { return l.RoleName + "" > r.RoleName + "" ? 1*sortOrder : -1*sortOrder });                
+                self.AllUsers.sort(function (l, r) { return l.RoleName() + "" > r.RoleName() + "" ? 1*sortOrder : -1*sortOrder });                
                 break;
             case "UserName":
-                self.fields.sort(function (l, r) { return l.UserName > r.UserName ? 1*sortOrder : -1*sortOrder });                
+                self.AllUsers.sort(function (l, r) { return l.UserName() > r.UserName() ? 1*sortOrder : -1*sortOrder });                
                 break;
             case "Email":
-                  self.fields.sort(function (l, r) { return l.Email > r.Email ? 1*sortOrder : -1*sortOrder });                  
+                  self.AllUsers.sort(function (l, r) { return l.Email() > r.Email() ? 1*sortOrder : -1*sortOrder });                  
                   break;            
             }  
             
@@ -127,7 +246,7 @@ var viewModel = function(){
             self.pageIndex(0);  self.cachedPagesTill(0);
         }
     };
-    var delID=-1;var isDel = false;
+    var delID = -1; var isDel = false; var usrIDToDel = "";
         function doUserDelPost(txtId, txtVal) {
             if(!isDel){@*alert("doUserDelPost:" + txtVal);*@ return true;}
             else isDel = false;
@@ -135,9 +254,14 @@ var viewModel = function(){
             var data = {}; data[txtId] = txtVal;
             var url = '@Url.Action("UserKODelete", "User", new { ID = "" })';
             $.post(url, data);
+
+            usrIDToDel = txtVal;
+
             return false; // prevent any postback
         }
         function doDelPost(txtId, txtVal) {
             isDel = true;
         }
+        var deleteSuccess = false;
+        function removeUser() { deleteSuccess = true; }//doFurtherProcessing
 </script>

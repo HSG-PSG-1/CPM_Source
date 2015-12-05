@@ -5,7 +5,12 @@
 @using System.Collections
 @{ ViewBag.Title = "Add / Edit"; Layout = Defaults.masterLayout;}
 @section HeadContent {
-    <style>.ui-autocomplete-loading{background: white url('http://jqueryui.com/demos/autocomplete/images/ui-anim_basic_16x16.gif') right center no-repeat;}</style>        
+    <style>
+        .ui-autocomplete-loading
+        {
+            background: white url('http://jqueryui.com/demos/autocomplete/images/ui-anim_basic_16x16.gif') right center no-repeat;
+        }
+    </style>
     <script type="text/javascript">
         var validator;
         function setupValidation() {//http://docs.jquery.com/Plugins/Validation/validate#options
@@ -45,140 +50,145 @@
         function checkAndSubmit() {
             document.getElementById('chkDone').checked = true;//For debug - alert('e:' + $("#frmUsr").validate().numberOfInvalids()); //validator.defaultShowErrors();
             return true;
-        }
+        }        
     </script>
-
 }
-    
-    @{ bool IsEditMode = bool.Parse(ViewData["IsEditMode"].ToString());
-       string opr = IsEditMode ? "Edit" : "Add New";
-       bool hasbeenSalesperson = (Model.RoleID == (int)SecurityService.Roles.Sales || !string.IsNullOrEmpty(Model.SalespersonCode));
-    } 
-       
-    @using (Html.BeginForm("AddEdit", "Users", new { id = Model.ID }, FormMethod.Post, new { @id = "frmUsr", @name = "frmUsr", @onsubmit = "$('#btnSubmit').prop('disabled', true);" }))
-    {
-    <table width="100%"><tr><td>
-    <b class="smallHeading">@opr User</b>
-    <div style="padding:1px;text-align:right;">
-        <input type="submit" id="btnSubmit" value="Save" class="button" onclick="return checkAndSubmit();" /><input type="checkbox" id="chkDone" name="chkDone" style="display: none" />
-        &nbsp;<input type="reset" value="Cancel" class="button" onclick="window.location.href='@Url.Action("List")'" />
-        @*Loc Link \ Unlink data*@
-        <input style="display:none" id="UnlinkedLoc" name="UnlinkedLoc" type="text" value="@(ViewData["UnlinkedLoc"] ?? "").ToString()" />
-        <input style="display:none" id="LinkedLoc" name="LinkedLoc" type="text" value="@(ViewData["LinkedLoc"] ?? "").ToString()" />
-        @*Loc Link \ Unlink data*@
-             </div>@Html.ValidationSummary(true)
-     </td></tr><tr><td>   
-        <div id="tabs">
-            <ul>
-                <li><a href="#Details"><span>Details</span></a></li>
-                <li><a href="#Locations"><span>Locations</span></a></li>
-            </ul>
-            <div id="Details">
-            <table cellpadding="2" cellspacing="2" style="width:50%">
-            <tr>
-                <td class = "rtsqz">
-                    @Html.LabelFor(model => model.Name)
-                </td>
-                <td colspan="3">
-                    @Html.CustomTextBoxFor(model => model.Name, new { })
-                    @Html.ValidationMessageFor(model => model.Name)
-                </td>
-            </tr>
-            <tr>
-                <td class = "rtsqz">
-                    @Html.LabelFor(model => model.RoleID)
-                </td>
-                <td>
-                    @(Html.DropDownListFor(model => model.RoleID, new SelectList((IEnumerable)ViewData["Roles"], "ID", "TEXT", Model.RoleID), new
+@{ bool IsEditMode = bool.Parse(ViewData["IsEditMode"].ToString());
+   string opr = IsEditMode ? "Edit" : "Add New";
+   bool hasbeenSalesperson = (Model.RoleID == (int)SecurityService.Roles.Sales || !string.IsNullOrEmpty(Model.SalespersonCode));
+}
+@using (Html.BeginForm("AddEdit", "Users", new { id = Model.ID }, FormMethod.Post, new { @id = "frmUsr", @name = "frmUsr" }))
+{
+    <table width="100%">
+        <tr>
+            <td>
+                <b class="smallHeading">@opr User</b>
+                <div style="padding: 1px; text-align: right;">
+                    <input type="submit" id="btnSubmit" value="Save" class="button" onclick="return checkAndSubmit();" /><input
+                        type="checkbox" id="chkDone" name="chkDone" style="display: none" />
+                    &nbsp;<input type="reset" value="Cancel" class="button" onclick="window.location.href='@Url.Action("List")'" />
+                    @*Loc Link \ Unlink data*@
+                    <input style="display:none" id="UnlinkedLoc" name="UnlinkedLoc" type="text" value="@(ViewData["UnlinkedLoc"] ?? "").ToString()" />
+                    <input style="display:none" id="LinkedLoc" name="LinkedLoc" type="text" value="@(ViewData["LinkedLoc"] ?? "").ToString()" />
+                    @*Loc Link \ Unlink data*@
+                </div>@Html.ValidationSummary(true)
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <div id="tabs">
+                    <ul>
+                        <li><a href="#Details"><span>Details</span></a></li>
+                        <li><a href="#Locations"><span>Locations</span></a></li>
+                    </ul>
+                    <div id="Details">
+                        <table cellpadding="2" cellspacing="2" style="width: 50%" id="tblUsrAddEdit">
+                            <tr>
+                                <td class="rtsqz">
+                                    @Html.LabelFor(model => model.Name)
+                                </td>
+                                <td colspan="3">
+                                    @Html.CustomTextBoxFor(model => model.Name, new { @autofocus = "autofocus" })
+                                    @Html.ValidationMessageFor(model => model.Name)
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="rtsqz">
+                                    @Html.LabelFor(model => model.RoleID)
+                                </td>
+                                <td>
+                                    @(Html.DropDownListFor(model => model.RoleID, new SelectList((IEnumerable)ViewData["Roles"], "ID", "TEXT", Model.RoleID), new
                 {
                     @class = "dropDown required",
-                    @onchange = "fillOrgs(true);"
+                    @onmouseup = "fillOrgs(true);" // alert(this.selectedIndex + ':' + $(this).attr('oldindex'));
                 }))
-                    @Html.ValidationMessageFor(model => model.RoleID)
-                    @Html.HiddenFor(model => model.OrgType, new { @class = "ignore" })
-                </td>
-                <td align="right" class="tdSalesperson">
-                    @Html.LabelFor(model => model.SalespersonCode)
-                </td>
-                <td class="tdSalesperson">
-                @if (hasbeenSalesperson)
-                {//Make it readonly for existing SPSN
-                    @*Html.Raw("&nbsp;<i>" + Model.SalespersonCode + "</i>");*@
-                    @Html.TextBoxFor(u => u.SalespersonCode, new { @disabled = "disabled" })
-                    @Html.HiddenFor(u => u.SalespersonCode)
-                }
-                else
-                {
-                    @Html.CustomTextBoxFor(model => model.SalespersonCode, new { })
-                }
-                    @Html.ValidationMessageFor(model => model.SalespersonCode)                     
-                </td>
-            </tr>
-            <tr>
-                <td class = "rtsqz">
-                    @Html.LabelFor(model => model.OrgID)
-                </td>
-                <td colspan="3">                    
-                    @Html.TextBox("OrgName", Model.OrgName, new { @class = "required", @style = "width:200px", @onblur = "showHideLocations(true);" })&nbsp;@Html.Raw(string.Format(Defaults.lookupImgBtn, "OrgName"))@Html.HiddenFor(model => model.OrgID)@Html.HiddenFor(model => model.OriOrgId)@Html.ValidationMessageFor(model => model.OrgID)
-                </td>
-            </tr>
-            <tr>
-                <td class = "rtsqz">
-                    @Html.LabelFor(model => model.Email)
-                </td>
-                <td colspan="3">
-                    @Html.CustomTextBoxFor(model => model.Email, new { @class = "email", @style = "width:200px" })
-                    @Html.ValidationMessageFor(model => model.Email)
-                    @Html.TextBoxFor(model => model.EmailOLD, new { @style = "display:none;" })
-                </td>
-            </tr>
-            <tr>
-                <td class = "rtsqz">
-                    @Html.LabelFor(model => model.Password)
-                </td>
-                <td colspan="3">
-                    @Html.CustomTextBoxFor(model => model.Password, new { })
-                    @Html.ValidationMessageFor(model => model.Password)
-                </td>
-            </tr>
-            @if (IsEditMode)
-            { 
-            <tr>
-                <td colspan="4" nowrap="nowrap">
-                    <img src="@Url.Content("~/Content/Images/spacer.gif")" height="1px" width="700px" /><br />
-                    [<i>@Html.LabelFor(model => model.LastModifiedBy)
-                        :
-                        @Model.LastModifiedByVal
-                        @Html.HiddenFor(model => model.LastModifiedByVal, new { @class = "ignore" })
-                        &nbsp;&nbsp;&nbsp;
-                        @Html.LabelFor(model => model.LastModifiedDate)
-                        :
-                        @Model.LastModifiedDate.ToString(Defaults.dtFormat, Defaults.ci)
-                        @Html.Hidden("LastModifiedDate", Model.LastModifiedDate.ToString("dd-MMM-yyyy hh:mm:ss"),
+                                    @Html.ValidationMessageFor(model => model.RoleID)
+                                    @Html.HiddenFor(model => model.OrgType, new { @class = "ignore" })
+                                </td>
+                                <td align="right" class="tdSalesperson">
+                                    @Html.LabelFor(model => model.SalespersonCode)
+                                </td>
+                                <td class="tdSalesperson">
+                                    @if (hasbeenSalesperson)
+                                    {//Make it readonly for existing SPSN
+@*Html.Raw("&nbsp;<i>" + Model.SalespersonCode + "</i>");*@
+                                        @Html.TextBoxFor(u => u.SalespersonCode, new { @disabled = "disabled" })
+                                        @Html.HiddenFor(u => u.SalespersonCode)
+                                    }
+                                    else
+                                    {
+                                        @Html.CustomTextBoxFor(model => model.SalespersonCode, new { })
+                                    }
+                                    @Html.ValidationMessageFor(model => model.SalespersonCode)
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="rtsqz">
+                                    @Html.LabelFor(model => model.OrgID)
+                                </td>
+                                <td colspan="3">
+                                    @Html.TextBox("OrgName", Model.OrgName, new { @class = "required", @style = "width:200px", @onblur = "showHideLocations(true);" })&nbsp;@Html.Raw(string.Format(Defaults.lookupImgBtn, "OrgName"))@Html.HiddenFor(model => model.OrgID)@Html.HiddenFor(model => model.OriOrgId)@Html.ValidationMessageFor(model => model.OrgID)
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="rtsqz">
+                                    @Html.LabelFor(model => model.Email)
+                                </td>
+                                <td colspan="3">
+                                    @Html.CustomTextBoxFor(model => model.Email, new { @class = "email", @style = "width:200px" })
+                                    @Html.ValidationMessageFor(model => model.Email)
+                                    @Html.TextBoxFor(model => model.EmailOLD, new { @style = "display:none;" })
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="rtsqz">
+                                    @Html.LabelFor(model => model.Password)
+                                </td>
+                                <td colspan="3">
+                                    @Html.CustomTextBoxFor(model => model.Password, new { })
+                                    @Html.ValidationMessageFor(model => model.Password)
+                                </td>
+                            </tr>
+                            @if (IsEditMode)
+                            { 
+                                <tr>
+                                    <td colspan="4" nowrap="nowrap">
+                                        <img src="@Url.Content("~/Content/Images/spacer.gif")" height="1px" width="700px" /><br />
+                                        [<i>@Html.LabelFor(model => model.LastModifiedBy)
+                                            :
+                                            @Model.LastModifiedByVal
+                                            @Html.HiddenFor(model => model.LastModifiedByVal, new { @class = "ignore" })
+                                            &nbsp;&nbsp;&nbsp;
+                                            @Html.LabelFor(model => model.LastModifiedDate)
+                                            :
+                                            @Model.LastModifiedDate.ToString(Defaults.dtFormat, Defaults.ci)
+                                            @Html.Hidden("LastModifiedDate", Model.LastModifiedDate.ToString("dd-MMM-yyyy hh:mm:ss"),
                         new { @class = "ignore" })
-                    </i>]                    
-                </td>
-            </tr>
-            }             
-        </table>
-            </div>
-            <div id="Locations" style="height:350px;overflow:auto">
-            <div id="tbLocations">
-            @*Try- http://weblogs.asp.net/nmarun/archive/2010/03/13/asp-net-mvc-2-model-binding-for-a-collection.aspx
+                                        </i>]
+                                    </td>
+                                </tr>
+                            }
+                        </table>
+                    </div>
+                    <div id="Locations" style="height: 350px; overflow: auto">
+                        <div id="tbLocations">
+                            @*Try- http://weblogs.asp.net/nmarun/archive/2010/03/13/asp-net-mvc-2-model-binding-for-a-collection.aspx
                         Not working? SO: 3843209/why-isnt-mvc-binding-my-nested-collection
-                        @Html.EditorFor(model => model.UserLocations, "UserLocation")   *@
-@*WORKING: SO: 5436639/asp-mvc-how-to-create-editor-for-model-which-have-children-elements -@Html.RenderPartial("UserLocation", Model.UserLocations);*@
-             </div>
-             </div>
-        </div>       
-    </td></tr></table>
-    }     
-    <script language="javascript" type="text/javascript" defer="defer">        setFocus("Name");
+                        @Html.EditorFor(model => model.UserLocations, "UserLocation")   *@ @*WORKING: SO: 5436639/asp-mvc-how-to-create-editor-for-model-which-have-children-elements -@Html.RenderPartial("UserLocation", Model.UserLocations);*@
+                        </div>
+                    </div>
+                </div>
+            </td>
+        </tr>
+    </table>
+}
+<script type="text/javascript">
         function checkReq1(ctrl, impactCtrl) { if (!(ctrl.value.length > 0)) $("#" + impactCtrl).val(''); }
 
         function fillOrgs(reset) {
             var ddl = document.getElementById("RoleID");
             var pos = (ddl.selectedIndex > 0)?ddl.selectedIndex:0;
+            //if(this.selectedIndex != $(this).attr('oldindex'))
             doOrgsDDL(ddl.options[pos].value, reset);//refresh Orgs dll
             showSalesperson();//show or hide sp row
         }
@@ -199,7 +209,8 @@
         }
         
         //Caching: http://developwithstyle.com/articles/2010/05/14/jquery-ui-autocomplete-is-it-any-good.html
-        $().ready(function() {            
+        $().ready(function() {
+            $("#tblUsrAddEdit").tableNav();
             $("#tabs").tabs({ 
             /*cache: true, spinner: 'Loading...', ajaxOptions: { cache: false },
             http://jqueryui.com/upgrade-guide/1.9/#deprecated-ajaxoptions-and-cache-options-added-beforeload-event */
@@ -211,7 +222,7 @@
 
             activate: function(event, ui) { setFocus1(event, ui) },
             beforeActivate: function(e, ui) { return showHideLocations(true); }
-            });            
+            });
             setupValidation(); //setup validation           
             fillOrgs(false); //setup Org dropdown and sp
             //Enable/Disable tab if orgtype is NOT customer
@@ -280,4 +291,9 @@
         //Empty the other textbox
         $(txt2).val($(txt2).val().replace("," + chk.value,""));
         }
-    </script>
+
+        $('#frmUsr').submit(function () {            
+            if($(this).valid())
+            { try{DisableSubmitButtons(true);@*$.blockUI();*@}catch(e){}}
+        });
+</script>

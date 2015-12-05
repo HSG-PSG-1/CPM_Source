@@ -92,4 +92,13 @@ namespace CPM.DAL
         [DisplayName("Last Modified Date")]
         public DateTime LastModifiedDate { get; set; }
     }
+
+    [Serializable]
+    public partial class vw_Users_Role_Org
+    {
+        public bool Editing { get; set; }
+        public bool Edited { get; set; }
+
+        public string LastModifiedDateTxt { get { return LastModifiedDate.ToString(Defaults.dtTFormat, Defaults.ci); } }
+    }
 }

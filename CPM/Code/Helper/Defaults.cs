@@ -31,6 +31,7 @@ namespace CPM.Helper
         public const string passwordCookie = "CPMCookiePWD";
         //Validation i.e. Email, regex, etc...
         public const string EmailRegEx = @"^(([A-Za-z0-9]+_+)|([A-Za-z0-9]+\-+)|([A-Za-z0-9]+\.+)|([A-Za-z0-9]+\++))*[A-Za-z0-9]+@((\w+\-+)|(\w+\.))*\w{1,63}\.[a-zA-Z]{2,6}$";
+        public const string InvalidEmailPWD = "The email and/or password provided is incorrect.";
         public const string ForgotPWDInvalidEmail = "Email address does not exist.";
         public const string MaxLengthMsg = "Maximum length {1}.";
         public const string InvalidEmailMsg = "Invalid Email.";
@@ -68,7 +69,7 @@ namespace CPM.Helper
         public static string lookupImgBtn ="<span class='lookup' >" +
         string.Format(lookupList, " onclick=\"$('#{0}').autocomplete('search',getStuffedAutoCompVal('#{0}')); \" ") + //$('#{0}').val()
         string.Format(lookupDown, " onclick=\"$('#{0}').autocomplete('close');\" style='display:none' ") + "</span>";
-        
+
         #endregion
 
         #region Edit, Cancel & Clip img
@@ -90,6 +91,11 @@ namespace CPM.Helper
         public static string delImgOnly = @"<img {0} " + delImgPathTitle + " style='cursor: pointer' />";
         public static string delImg = "<img " + delImgPathTitle + " border='0' onclick='return confirmDelete(event);' />";
         public static string delImgForObj(string obj) { return "<img " + delImgPathTitle + " border='0' onclick='return confirmDeleteM(event,\"Are you sure you want to delete this "+ obj + "?\");' />"; }
+        public static string delImgForObjKO(string obj)
+        {
+            return "<img " + delImgPathTitle + " border='0' class='dDialog' " +
+                "data-bind='click:function(data,event){if(confirmDeleteM(event,\"Are you sure you want to delete this " + obj + "?\")) $parent.removeSelected($data); return false;}' />";
+        }
         public static string delPOSTImg = "<input type='image' " + delImgPathTitle + 
             " border='0' onclick='return confirmDelete(event);' />";
         public static string delImgLink = "<img " + delImgPathTitle + 
@@ -105,33 +111,33 @@ namespace CPM.Helper
         #endregion
 
         #region Operation result variables & functions
-        
+
         const string oprMsg =
         "<span id='oprResult'>{0}<span class='error'>{1}</span></span><script>$().ready(function() {{showOprResult('#oprResult',{2});}});</script>";
-        
+        //const string oprMsgNOTY = "<eval><![CDATA[<script>$().ready(function() {{showNOTY('{0}{1}',{2});}});</script>]]></eval>";
+        const string oprMsgNOTY = "showNOTY('{0}{1}',{2});";
+
         public static string getOprResult(bool result, string msg)
         {//Two in one function - displays Opr success else displays opr unsuccessful a well as its err msg (sent as the second arg)
-            return string.Format(oprMsg,
-                result ? "Operation was successful" : "Operation was NOT successful",
+            return string.Format(oprMsgNOTY,
+                result ? "Operation was successful" : "<u>ERROR</u> : ",
                 result ? "" : (msg.Length > 0 ? "<br/>" + msg : ""),
-                result?"1":"0");
+                result ? "true" : "false");//result?"1":"0");
         }
 
-        public static string getTaconite(bool success, string msg, string msgContainer = "msg", bool doCallback = false)
+        public static string getTaconiteRemoveTR(bool success, string msg, string msgContainer = "msg", bool doCallback = false)
         {
-            string callback = doCallback?",function(){doFurtherProcessing(true);}":"";
+            string callback = doCallback ? ",function(){doFurtherProcessing();}" : "";
             string hide = success ? (".toggle(500" + callback + ")") : "";
-            return string.Format(
-     "<taconite><replaceContent select=\"#{0}\">{1}</replaceContent>" +//<slideDown select=\"#{0}\" value=\"1000\" />
-     "<eval><![CDATA[ try{{$(delTR).effect('highlight',{{}},1000){2};delTR = '';}}catch(e){{;}} ]]> </eval></taconite>", 
-     msgContainer?? "msg", msg , hide);
+            return string.Format(//"<taconite><replaceContent select=\"#{0}\">{1}</replaceContent>" +//<slideDown select=\"#{0}\" value=\"1000\" />
+     "<taconite><eval><![CDATA[ try{{{1} $(delTR).effect('highlight',{{}},1000){2};delTR = '';}}catch(e){{;}} ]]> </eval></taconite>",
+     msgContainer ?? "msg", msg, hide);
         }
 
         public static string getTaconiteResult(bool success, string msg, string msgContainer, string callback)
         {
-            callback = success ? "<eval><![CDATA[ " + callback + "; ]]> </eval>" : "";
-            return string.Format("<taconite><replaceContent select=\"#{0}\">{1}</replaceContent>" + callback
-                 + "</taconite>", msgContainer ?? "msg", msg);
+            //return string.Format("<taconite><replaceContent select=\"#{0}\">{1}</replaceContent>" + callback + "</taconite>", msgContainer ?? "msg", msg);
+            return string.Format("<taconite><eval><![CDATA[ {0} {1}; ]]> </eval></taconite>", msg, success ? callback : "");
         }
 
         #endregion

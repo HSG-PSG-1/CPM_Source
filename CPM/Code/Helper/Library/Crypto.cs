@@ -17,7 +17,7 @@ namespace CPM.Helper
         {
             if (string.IsNullOrEmpty(textVal)) //return if empty
                 return string.Empty;
-            
+
             int incr = (doEncrypt? 1: -1);
             int seedTrim = 9;//the added byte value shud not be > 9
             int seed = textVal.Length % seedTrim * incr;
@@ -51,7 +51,7 @@ namespace CPM.Helper
                 return string.Empty;
 
             return (doEncode? HttpUtility.HtmlEncode(textVal).Replace('&', '$').Replace(';', '!'): 
-                HttpUtility.HtmlEncode(textVal).Replace("$", "&").Replace("!", ";"));
+                HttpUtility.HtmlDecode(textVal).Replace("$", "&").Replace("!", ";"));
         }
     }
 }

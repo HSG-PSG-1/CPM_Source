@@ -1,0 +1,111 @@
+﻿@* Ref: https://developers.google.com/chart/interactive/docs/quick_start *@
+<!--Load the AJAX API-->
+<script type="text/javascript" src="https://www.google.com/jsapi"></script>
+<script type="text/javascript" src="@Url.Content("~/Content/Scripts/KO/underscore.js")"></script>
+<script type="text/javascript" src="@Url.Content("~/Content/Scripts/KO/underscore-ko-1.6.0.js")"></script>
+<script type="text/javascript" defer="defer">
+    // Load the Visualization API and the piechart package.
+    google.load('visualization', '1.0', { 'packages': ['corechart','controls'] });   
+
+        // Callback that creates and populates a data table,
+        // instantiates the pie chart, passes in the data and
+        // draws it.
+    function initChart(vm_Data) {
+        vm_Data = vm_Data != null? vm_Data.filteredRecords:null;
+        if (vm_Data == null || vm_Data().length < 1) 
+        {
+            return;
+        }
+
+        showDlg(true);
+
+        dspData('Claim count Organization', 'OrgwiseClaim', 'CustOrg', vm_Data());
+        dspData('Status count', 'StatuswiseClaim','Status', vm_Data());
+        dspData('Brand count', 'BrandwiseClaim','Brand', vm_Data());
+
+        dspData('Ship to Location Claim count', 'ShipTowiseClaim','ShpLocCode', vm_Data());
+        dspData('Assign to Claim count', 'AssignwiseClaim','AsgnTo', vm_Data());
+        dspData('SP Claim count', 'SPwiseClaim','SP', vm_Data());
+        
+        showDlg(false);
+    }
+
+    function dspData(title, divID, field, vmData) {
+        
+        divID = 'div' + divID;
+      var data = _.countBy(vmData, field);
+        data = _.map(data,
+                function (value, key) { return [key, value]; }
+                );
+        // _.sortBy(_.map(_.countBy(vm_D.fields(), "Status"), function (value, key) { return [key, value]; }), function(rec){return rec[1];})
+        data = _.sortBy(data,function(rec){return rec[1];}); // add -1 for descending
+
+        $('#' + divID).html(
+        "<h3 class='thinBorder' style='width:300px'>&nbsp;" + title + "</h3>" + 
+        "<span style='color:red'>Min (" + data[0][1] + ") : <b>"+ data[0][0] +"</b></span> <br/><br/>" + 
+        "<span style='color:blue'>Max (" + data[data.length-1][1] + ") : <b>"+ data[data.length-1][0] +"</b></span>"
+        );
+    }
+
+    @*function getBrandwiseClaim(vm_D) {
+        var data = _.countBy(vm_D.filteredRecords(), 'Brand');
+        data = _.map(data,
+                function (value, key) { return [key, value]; }//{ Brand: key, count: value}
+                );
+        return data;
+    }*@
+</script>
+<table>
+    <tr>
+        <td>
+            <div id="OrgwiseClaim">
+                <div id="divOrgwiseClaim">
+                </div>
+                <div id="divOrgwiseClaimSlider" style1="height:90px;">
+                </div>
+            </div>
+        </td>
+        <td>
+            <div id="StatuswiseClaim">
+                <div id="divStatuswiseClaim">
+                </div>
+                <div id="divStatuswiseClaimSlider">
+                </div>
+            </div>
+        </td>
+        <td>
+            <div id="BrandwiseClaim">
+                <div id="divBrandwiseClaim">
+                </div>
+                <div id="divBrandwiseClaimSlider">
+                </div>
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <div id="ShipTowiseClaim">
+                <div id="divShipTowiseClaim">
+                </div>
+                <div id="divShipTowiseClaimSlider">
+                </div>
+            </div>
+        </td>
+        <td>
+            <div id="AssignwiseClaim">
+                <div id="divAssignwiseClaim">
+                </div>
+                <div id="divAssignwiseClaimSlider">
+                </div>
+            </div>
+        </td>
+        <td>
+            <div id="SPwiseClaim">
+                <div id="divSPwiseClaim">
+                </div>
+                <div id="divSPwiseClaimSlider">
+                </div>
+            </div>
+        </td>
+    </tr>
+</table>

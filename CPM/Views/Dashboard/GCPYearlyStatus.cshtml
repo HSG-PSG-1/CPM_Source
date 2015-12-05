@@ -1,0 +1,204 @@
+﻿@* Ref: https://developers.google.com/chart/interactive/docs/quick_start *@
+<!--Load the AJAX API-->
+<script type="text/javascript" src="https://www.google.com/jsapi"></script>
+<script type="text/javascript" src="@Url.Content("~/Content/Scripts/KO/underscore.js")"></script>
+<script type="text/javascript" src="@Url.Content("~/Content/Scripts/KO/underscore-ko-1.6.0.js")"></script>
+<script type="text/javascript" defer="defer">
+    // Load the Visualization API and the piechart package.
+    google.load('visualization', '1.0', { 'packages': ['corechart', 'controls'] });
+
+    // Callback that creates and populates a data table,
+    // instantiates the pie chart, passes in the data and
+    // draws it.
+    function initChart(vm_Data) {
+        vm_Data = vm_Data != null ? vm_Data.filteredRecords : null;
+        if (vm_Data == null || vm_Data().length < 1) {
+            return;
+        }
+
+        showDlg(true);
+
+        //drawChart('Line', 'Yearly Orgwise Claim count', 'OrgwiseClaim', getYearlyCount(vm_Data(), 'CustOrg'));
+        var groupField = 'AsgnTo'; // Status//Brand
+        var chartOptions = {
+            'title': 'Yearly '+ groupField + 'wise Claim count', 'width': 900, 'height': 450, 'legend': 'right'
+            , 'chartArea': { width: '60%', height: '70%' }//, isStacked: 'percent'
+            @* // Won't work when the source is data view - https://github.com/google/google-visualization-issues/issues/1876
+            , 'animation': {
+                startup: true, duration: 1000, easing: 'out'
+            }*@
+        };
+        
+        drawChart('Column', 'Yearly '+ groupField + 'wise Claim count', 'YearlyStatus', getYearlyStatusCount(vm_Data(), groupField), groupField, true, chartOptions);
+        
+        showDlg(false);
+    }
+    var catgStatusFilter;
+    var chartStatusYearly;
+    var columnsTable;
+
+    function drawChart(typ, title, divID, data, groupField, dataHasHeader, chartOptions) {
+        //Ref : https://developers.google.com/chart/interactive/docs/gallery/controls
+        var dashboard = new google.visualization.Dashboard(document.getElementById(divID));
+
+        divID = 'div' + divID;
+
+        var chartBaseData = new google.visualization.arrayToDataTable(data, !dataHasHeader);
+
+        // Instantiate and draw our chart, passing in some options.
+        chartStatusYearly = new google.visualization.ChartWrapper({
+            'chartType': typ + 'Chart',
+            dataTable: chartBaseData,
+            'containerId': divID, 'options': chartOptions
+        });        
+
+        var statData = getStatusDataFilter(chartBaseData);
+
+        catgStatusFilter = new google.visualization.ControlWrapper({
+            'controlType': 'CategoryFilter',
+            'containerId': 'divYearlyStatusCategory',
+            dataTable: columnsTable, //statusData.statusFields,
+            'options': {
+                filterColumnLabel: 'colLabel',
+                //filterColumnIndex: 1,
+                ui: {
+                        label: groupField,//'Status'
+                        allowTyping: false,
+                        allowMultiple: true,
+                        allowNone: false,
+                        selectedValuesLayout: 'belowStacked'
+                    }
+            },
+            state: statData //statusData.initialData // 'state': { 'selectedValues': ['CPU', 'Memory'] }
+        });
+
+        // DON'T coz it'll set Year filter ! dashboard.bind(catgStatusFilter, chartStatusYearly);
+        //var chartData = new google.visualization.arrayToDataTable(data, !dataHasHeader);
+        //dashboard.draw(chartData);//chart.draw(dataChart, options);
+
+        google.visualization.events.addListener(catgStatusFilter, 'statechange', setChartView);
+    
+        setChartView();
+        catgStatusFilter.draw();
+    }    
+    
+    function getStatusDataFilter(data) // http://jsfiddle.net/asgallant/WaUu2/
+    {
+        columnsTable = new google.visualization.DataTable();
+        columnsTable.addColumn('number', 'colIndex');
+        columnsTable.addColumn('string', 'colLabel');
+        var initState= {selectedValues: []};
+        // put the columns into this data table (skip column 0)
+        // if datatable is available - 
+        for (var i = 1; i < data.getNumberOfColumns(); i++) {
+            columnsTable.addRow([i, data.getColumnLabel(i)]);
+            // you can comment out this next line if you want to have a default selection other than the whole list
+            initState.selectedValues.push(data.getColumnLabel(i));
+        }
+        @*
+        var i = 0;
+         $('#StatusID option').each(function() 
+            {
+                // Start with 2nd position because first one is empty which is not allowed!
+                if($(this).val().length > 0) 
+                {
+                    columnsTable.addRow([i++, $(this).text()]);
+                    // you can comment out this next line if you want to have a default selection other than the whole list
+                    initState.selectedValues.push($(this).text());                
+                }
+            });
+        *@
+        //return {'statusFields' : columnsTable, 'initialData' : initState};
+        return initState;
+    }
+
+
+    function getYearlyCount(vmData, groupField) {
+        var data = _.groupBy(vmData, function (rec) { return new Date(rec.CDate).getFullYear() }); //data[2012]
+        data = _.map(data, function (yr, key) { return { 'Year': key, 'count': yr.length }; });
+        data = _.map(data, function (rec) { return [rec.Year, rec.count]; });
+
+        return _.sortBy(data, function (rec) { return rec[0]; });
+    }
+
+    function getYearlyStatusCount(vmData, groupField) {        
+        var hdr = [''];
+        //Does not work - $('#StatusID option').each(function() {opts.push($(this).text);});
+        // SO : (3923858) http://jsfiddle.net/FadHu/
+        var uniqueStatus = _.uniq(vmData, function(claim) { return eval('claim.' + groupField); }); // 
+        hdr = _.map(uniqueStatus, function(rec){return eval('rec.' + groupField)}); // hdr =$.map($('#Status')[0].options, function (elem) { return (elem.text); });
+        
+        // Group By Year then get Status count        
+        data = _.groupBy(vmData, function (rec) { return new Date(rec.CDate).getFullYear() }); //data[2012]
+        data = _.map(data, function (yr, key) {
+            var statusCounts = getCount(hdr, yr, groupField); // [stat1count, stat2count,...]
+            statusCounts.unshift(key); // [2012, stat1count, stat2count,...]
+            return statusCounts; //with Year prepanded
+        }); // SO : 8073673
+                
+        data = _.sortBy(data, function (rec) { return rec[0]; }); // sort the final data by year
+        hdr.unshift('Year') // Prepand Year to header row
+        data.unshift(hdr); // Add the header row
+
+        return data;
+    }
+
+    function getCount(statuses, arr, groupField) {
+        arr = _.countBy(arr, groupField);        
+        // Need to iterate thru each status and add its count (even if its not present - then we need to add 0)
+        var result = [];
+        $(statuses).each(function (idx,val) { // SO : 3923858
+            if (val != "")
+                result.push(+arr[val] || 0); // convert null to 0 SO : 7540397
+        });
+
+        return result;
+    }
+
+   function setChartView () { // Can't pass args - https://developers.google.com/chart/interactive/docs/events
+        var state = catgStatusFilter.getState();
+        var row;
+        var view = {
+            columns: [0]
+        };
+        for (var i = 0; i < state.selectedValues.length; i++) {
+            row = columnsTable.getFilteredRows([{column: 1, value: state.selectedValues[i]}])[0];
+            view.columns.push(columnsTable.getValue(row, 0));
+        }
+        // sort the indices into their original order
+        view.columns.sort(function (a, b) {
+            return (a - b);
+        });
+        chartStatusYearly.setView(view);
+        chartStatusYearly.draw();
+    }
+
+</script>
+<table>
+    <tr>
+        <td>
+            <div id="YearlyStatus" style="width: 81%">
+                <table>
+                    <tr>
+                        <td style="white-space:nowrap;width:150px;">
+                            <div id="divYearlyStatusCategory">
+                            </div>
+                        </td>
+                        <td>
+                            <div id="divYearlyStatus">
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                        </td>
+                        <td>
+                            <div id="divYearlyStatusSlider" style="height: 90px;">
+                            </div>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </td>
+    </tr>
+</table>

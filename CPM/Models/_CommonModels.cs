@@ -85,7 +85,5 @@ namespace CPM.DAL
     }
 
     [Serializable]
-    public partial class vw_Users_Role_Org { }
-    [Serializable]
     public partial class MasterRole { }
 }

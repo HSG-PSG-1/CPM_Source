@@ -114,7 +114,7 @@ namespace CPM.Services
             if (doSubmit) dbc.SubmitChanges();
         }
 
-        public void BulkAddEditDel(List<FileHeader> records, Claim claimObj, bool doSubmit, CPMmodel dbcContext)
+        public void BulkAddEditDel(List<FileHeader> records, Claim claimObj, bool doSubmit, CPMmodel dbcContext, bool isNewClaim)
         {
             //OLD: if (claimID <= Defaults.Integer) return; //Can't move forward if its a new Claim entry
             #region NOTE
@@ -155,23 +155,26 @@ namespace CPM.Services
             }
             if (doSubmit) dbc.SubmitChanges();//Make a FINAL submit instead of periodic updates
             //Move header files
-            ProcessFiles(records, claimObj.ID, claimObj.ClaimGUID);
+            if(isNewClaim)
+                FileIO.MoveFilesFolderNewClaimOrItem(claimObj.ID, claimObj.ClaimGUID);
+            else
+                ProcessFiles(records, claimObj.ID, claimObj.ClaimGUID);
         }
 
         #endregion
 
         #region Extra functions
 
-        void ProcessFiles(List<FileHeader> records, int claimID, string ClaimGUID)
+        void ProcessFiles(List<FileHeader> records, int claimID, string claimGUID)
         {
             if (records == null || records.Count < 1) return;
 
             foreach (FileHeader item in records)
-                if (item._Deleted)//Delete will always be for existing not Async (so use ClaimID)
-                    FileIO.DeleteClaimFile(item.FileName, item.ClaimID, null, FileIO.mode.header);
+                if (item._Deleted)//Delete will always be for existing not Async (so use ClaimID & not GUID)
+                    FileIO.DeleteClaimFile(claimID, "", item.FileName);
 
             if(records.Count > 0) //finally copy all the files from H_Temp to H
-            FileIO.MoveAsyncClaimFiles(claimID, ClaimGUID, null, null, true);
+            FileIO.StripGUIDFromClaimFileName(claimID, claimGUID);
         }
 
         #endregion

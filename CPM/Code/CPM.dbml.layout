@@ -44,10 +44,10 @@
         <elementListCompartment Id="120c3871-3560-4b07-badf-3bab2a30ff55" absoluteBounds="11.765, 16.46, 1.9700000000000002, 2.5570068359375" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
       </nestedChildShapes>
     </classShape>
-    <classShape Id="5d78d789-0aaf-4c3b-aae8-630fee96e376" absoluteBounds="0.75, 7, 2, 2.3478011067708326">
+    <classShape Id="5d78d789-0aaf-4c3b-aae8-630fee96e376" absoluteBounds="0.75, 5.625, 2, 2.3478011067708326">
       <DataClassMoniker Name="/CPMmodel/ERPUser" />
       <nestedChildShapes>
-        <elementListCompartment Id="80c21517-6211-4b7d-a2e2-b74f6c5e1a2b" absoluteBounds="0.765, 7.46, 1.9700000000000002, 1.7878011067708333" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
+        <elementListCompartment Id="80c21517-6211-4b7d-a2e2-b74f6c5e1a2b" absoluteBounds="0.765, 6.085, 1.9700000000000002, 1.7878011067708333" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
       </nestedChildShapes>
     </classShape>
     <classShape Id="76241458-e0ca-4161-a2ec-e13829e94f93" absoluteBounds="14.75, 3.375, 2, 2.7324039713541666">
@@ -123,7 +123,7 @@
         <classShapeMoniker Id="76241458-e0ca-4161-a2ec-e13829e94f93" />
       </nodes>
     </associationConnector>
-    <associationConnector edgePoints="[(11.25 : 4.73159912109375); (11.5416666666667 : 4.73159912109375 : JumpStart); (11.7083333333333 : 4.73159912109375 : JumpEnd); (12 : 4.73159912109375)]" fixedFrom="NotFixed" fixedTo="NotFixed">
+    <associationConnector edgePoints="[(11.25 : 4.73159912109375); (12 : 4.73159912109375)]" fixedFrom="NotFixed" fixedTo="NotFixed">
       <AssociationMoniker Name="/CPMmodel/MasterDefect/MasterDefect_ClaimDetail" />
       <nodes>
         <classShapeMoniker Id="eba78c49-cdfc-480f-b451-293841e28bf5" />
@@ -137,14 +137,14 @@
         <classShapeMoniker Id="76241458-e0ca-4161-a2ec-e13829e94f93" />
       </nodes>
     </associationConnector>
-    <associationConnector edgePoints="[(11.25 : 2.7131982421875); (11.625 : 3.0881982421875); (11.625 : 9.77005126953125); (12 : 9.77005126953125)]" fixedFrom="NotFixed" fixedTo="NotFixed">
+    <associationConnector edgePoints="[(11.25 : 2.7131982421875); (11.625 : 3.0881982421875); (11.625 : 9.4226981953125); (12 : 9.4226981953125)]" fixedFrom="NotFixed" fixedTo="NotFixed">
       <AssociationMoniker Name="/CPMmodel/MasterFileTypeHeader/MasterFileTypeHeader_FileHeader" />
       <nodes>
         <classShapeMoniker Id="0cd7bcd4-6eb4-471d-bc17-9531c611c532" />
         <classShapeMoniker Id="fa653457-417a-4bfc-aa82-c51fac47e045" />
       </nodes>
     </associationConnector>
-    <associationConnector edgePoints="[(8.25 : 6.2444482421875); (9.09375 : 6.2444482421875); (9.09375 : 7.75)]" fixedFrom="Algorithm" fixedTo="Algorithm">
+    <associationConnector edgePoints="[(8.25 : 6.2548242560029); (9.09375 : 6.2548242560029); (9.09375 : 7.75)]" fixedFrom="NotFixed" fixedTo="NotFixed">
       <AssociationMoniker Name="/CPMmodel/MasterClaimStatus/MasterClaimStatus_StatusHistory" />
       <nodes>
         <classShapeMoniker Id="a04ce202-29bb-4e39-bd77-37db9d3cf5c1" />
@@ -214,7 +214,7 @@
         <classShapeMoniker Id="ae906968-2965-4020-8e06-6f2f916f7855" />
       </nodes>
     </associationConnector>
-    <associationConnector edgePoints="[(2.75 : 11.7892976888021); (3.625 : 11.7892976888021)]" fixedFrom="NotFixed" fixedTo="NotFixed">
+    <associationConnector edgePoints="[(2.75 : 11.7892976888021); (3.625 : 11.7892976888021)]" fixedFrom="Algorithm" fixedTo="Algorithm">
       <AssociationMoniker Name="/CPMmodel/MasterOrgType/MasterOrgType_MasterOrg" />
       <nodes>
         <classShapeMoniker Id="defc9d27-a8eb-4bb6-8673-cd8caaff99de" />
@@ -259,10 +259,10 @@
         <classShapeMoniker Id="c7d7bffc-12e9-4135-b8ed-e95ce580a132" />
       </nodes>
     </associationConnector>
-    <classShape Id="14dc927c-83b3-47a0-8fb5-fd31cb7fc731" absoluteBounds="3.5, 4.625, 2, 2.3478011067708326">
+    <classShape Id="14dc927c-83b3-47a0-8fb5-fd31cb7fc731" absoluteBounds="3.75, 3.875, 2, 2.3478011067708326">
       <DataClassMoniker Name="/CPMmodel/vw_CustOrg_SalesUser" />
       <nestedChildShapes>
-        <elementListCompartment Id="1a8e5fc8-3e0c-486e-b322-7eac946a479d" absoluteBounds="3.515, 5.085, 1.9700000000000002, 1.7878011067708333" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
+        <elementListCompartment Id="1a8e5fc8-3e0c-486e-b322-7eac946a479d" absoluteBounds="3.765, 4.335, 1.9700000000000002, 1.7878011067708333" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
       </nestedChildShapes>
     </classShape>
     <classShape Id="dbabfb8f-4818-46a5-8c2a-9754c7c5bb03" absoluteBounds="6.375, 8.125, 2, 3.3093082682291666">
@@ -271,28 +271,28 @@
         <elementListCompartment Id="65cc497d-fa12-4508-82ec-a9b00fa5c202" absoluteBounds="6.39, 8.585, 1.9700000000000002, 2.7493082682291665" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
       </nestedChildShapes>
     </classShape>
-    <associationConnector edgePoints="[(8.375 : 9.77965413411458); (8.75 : 9.77965413411458); (8.75 : 7.5); (9.01041666666667 : 7.5 : JumpStart); (9.17708333333333 : 7.5 : JumpEnd); (11.5416666666667 : 7.5 : JumpStart); (11.7083333333333 : 7.5 : JumpEnd); (13 : 7.5); (13 : 7.03041829427083)]" fixedFrom="Algorithm" fixedTo="Algorithm">
+    <associationConnector edgePoints="[(8.375 : 9.53517375187793); (8.75 : 9.53517375187793); (8.75 : 7.5); (11.5416666666667 : 7.5 : JumpStart); (11.7083333333333 : 7.5 : JumpEnd); (13 : 7.5); (13 : 7.06016286720832)]" fixedFrom="NotFixed" fixedTo="NotFixed">
       <AssociationMoniker Name="/CPMmodel/Claim/Claim_ClaimDetail" />
       <nodes>
         <classShapeMoniker Id="dbabfb8f-4818-46a5-8c2a-9754c7c5bb03" />
         <classShapeMoniker Id="82d7d4a7-c79b-4ebc-bb31-0b674f725a37" />
       </nodes>
     </associationConnector>
-    <associationConnector edgePoints="[(8.34375 : 11.4343082682292); (8.34375 : 11.6859046341146); (9 : 11.6859046341146)]" fixedFrom="Algorithm" fixedTo="Algorithm">
+    <associationConnector edgePoints="[(7.375 : 11.4543685616056); (7.375 : 11.75); (8.5 : 11.75); (8.5 : 12.4586295784016); (9 : 12.4586295784016)]" fixedFrom="NotFixed" fixedTo="NotFixed">
       <AssociationMoniker Name="/CPMmodel/Claim/Claim_Comment" />
       <nodes>
         <classShapeMoniker Id="dbabfb8f-4818-46a5-8c2a-9754c7c5bb03" />
         <classShapeMoniker Id="14beb857-1ad5-4e96-a2aa-57f8f9c80f92" />
       </nodes>
     </associationConnector>
-    <associationConnector edgePoints="[(8.375 : 10.4723783365885); (12 : 10.4723783365885)]" fixedFrom="Algorithm" fixedTo="Algorithm">
+    <associationConnector edgePoints="[(8.375 : 10.4203516072035); (12 : 10.4203516072035)]" fixedFrom="NotFixed" fixedTo="NotFixed">
       <AssociationMoniker Name="/CPMmodel/Claim/Claim_FileHeader" />
       <nodes>
         <classShapeMoniker Id="dbabfb8f-4818-46a5-8c2a-9754c7c5bb03" />
         <classShapeMoniker Id="fa653457-417a-4bfc-aa82-c51fac47e045" />
       </nodes>
     </associationConnector>
-    <associationConnector edgePoints="[(8.375 : 8.91909912109375); (8.66666666666667 : 8.91909912109375 : JumpStart); (8.83333333333333 : 8.91909912109375 : JumpEnd); (9 : 8.91909912109375)]" fixedFrom="Algorithm" fixedTo="Algorithm">
+    <associationConnector edgePoints="[(8.375 : 8.76758687593897); (9 : 8.76758687593897)]" fixedFrom="NotFixed" fixedTo="NotFixed">
       <AssociationMoniker Name="/CPMmodel/Claim/Claim_StatusHistory" />
       <nodes>
         <classShapeMoniker Id="dbabfb8f-4818-46a5-8c2a-9754c7c5bb03" />
@@ -356,10 +356,10 @@
         <elementListCompartment Id="c301fc3e-1bbb-4b90-abf4-a256bf958b92" absoluteBounds="17.64, 12.46, 1.9700000000000002, 4.8646240234375" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
       </nestedChildShapes>
     </classShape>
-    <classShape Id="e73aa638-bccc-488b-b9c5-27586f468c06" absoluteBounds="3.5, 7.125, 2, 3.5016097005208326">
+    <classShape Id="81971c20-b40d-4f36-afc8-f63f7911a331" absoluteBounds="3.625, 6.375, 2, 3.5016097005208326">
       <DataClassMoniker Name="/CPMmodel/vw_ClaimWithItemDetail" />
       <nestedChildShapes>
-        <elementListCompartment Id="af8470b5-1d79-43de-a1f2-438570c326a3" absoluteBounds="3.5149999999999997, 7.585, 1.9700000000000002, 2.941609700520833" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
+        <elementListCompartment Id="76ad02e8-fa4a-499e-9698-a255e4dbba5b" absoluteBounds="3.64, 6.835, 1.9700000000000002, 2.941609700520833" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
       </nestedChildShapes>
     </classShape>
   </nestedChildShapes>
