@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Security.Principal;
-using AdamTibi.Web.Security;
 using System.Web;
 using System.Web.Mvc;
 using System.Web.Routing;
@@ -20,7 +19,7 @@ namespace CPM.Controllers
     {
         #region Login/off Send password
 
-        [HttpGet]
+        [AcceptVerbs(HttpVerbs.Get | HttpVerbs.Head)] /* For future generic capturing of HEAD - SO: 8329101 */
         //[ValidateInput(false)] // SO: 2673850/validaterequest-false-doesnt-work-in-asp-net-4
         public ActionResult Login(string from)
         {
@@ -35,7 +34,8 @@ namespace CPM.Controllers
             {
                 try
                 {// Set data as per cookie
-                    authCookie = HttpSecureCookie.Decode(authCookie);//HT: decode the encoded cookie
+                    //authCookie = HttpSecureCookie.Decode(authCookie, CookieProtection.Encryption);//HT: decode the encoded cookie
+                    authCookie = new HttpCookie(Defaults.cookieName, Crypto.EncodeStr(authCookie.Value, false));
                     loginM.Email = authCookie.Values[Defaults.emailCookie];
                     loginM.Password = Crypto.EncodeStr(authCookie.Values[Defaults.passwordCookie], false);
                     loginM.RememberMe = true;
@@ -75,30 +75,7 @@ namespace CPM.Controllers
 
                     #region Remember Me (add or remove cookie)
 
-                    if (model.RememberMe)//set cookie
-                    {
-                        #region Forms cookie - kept for future ref
-                        /* HttpCookie cookie = FormsAuthentication.GetAuthCookie(model.Email, true);
-                        cookie.Expires = DateTime.Now.Add(new TimeSpan(120, 0, 0, 0));
-                        Response.Cookies.Remove(cookie.Name);
-                        Response.Cookies.Add(cookie);*/
-                        #endregion
-
-                        //Set Cookie (double encryption - encrypted pwd & encrypted cookie)
-                        HttpCookie authRememberCookie = new HttpCookie(Defaults.cookieName);
-                        authRememberCookie.Values[Defaults.emailCookie] = model.Email;
-                        authRememberCookie.Values[Defaults.passwordCookie] = Crypto.EncodeStr(model.Password, true);
-                        authRememberCookie.Expires = DateTime.Now.AddHours(Config.RememberMeHours);
-                        Response.Cookies.Add(HttpSecureCookie.Encode(authRememberCookie));//HT: encode the cookie
-                    }
-                    else
-                    {// Can't remove so we add the same cookie as EXPIRED & empty values!
-                        HttpCookie authForgetCookie = new HttpCookie(Defaults.cookieName);
-                        authForgetCookie.Values[Defaults.emailCookie] = "";
-                        authForgetCookie.Values[Defaults.passwordCookie] = "";
-                        authForgetCookie.Expires = DateTime.Now.AddYears(-1);//to avoid any datetime diff
-                        Response.Cookies.Add(authForgetCookie);
-                    }
+                    SetCookie(model);
 
                     #endregion
 
@@ -150,7 +127,24 @@ namespace CPM.Controllers
         #endregion
 
         #region Functions & JSON result returning Actions
-        
+
+        //Remember Me (add or remove cookie)
+        void SetCookie(LogInModel model)
+        {
+            bool remember = model.RememberMe;
+
+            //Set Cookie (double encryption - encrypted pwd & encrypted cookie)
+            HttpCookie authRememberCookie = new HttpCookie(Defaults.cookieName);
+            authRememberCookie.Values[Defaults.emailCookie] = remember ? model.Email : "";
+            authRememberCookie.Values[Defaults.passwordCookie] = remember ? Crypto.EncodeStr(model.Password, true) : "";
+            authRememberCookie.Expires = remember ? DateTime.Now.AddHours(Config.RememberMeHours)
+                : DateTime.Now.AddYears(-1);//to avoid any datetime diff
+            /*HT: encode the cookie // Can't because of machine specific machine key - http://msdn.microsoft.com/en-us/library/ff649308.aspx#paght000007_webfarmdeploymentconsiderations
+            authRememberCookie.Value = Encoding.Unicode.GetString(MachineKey.Protect(Encoding.Unicode.GetBytes(authRememberCookie.Value)));*/
+            authRememberCookie.Value = Crypto.EncodeStr(authRememberCookie.Value, true);
+            Response.Cookies.Add(authRememberCookie);
+        }
+
         //[CacheControl(HttpCacheability.NoCache), HttpGet]
         [OutputCache(Duration=3600, VaryByParam="id;term;extras")]
         public JsonResult Lookup(string id, string term, string extras)
@@ -231,7 +225,7 @@ namespace CPM.Controllers
         public bool RedirectFromLogin(ref string ReturnUrl)
         {
             char[] slash = new char[] { '/' };
-            string[] obsoletURLtokens = new string[] { "login", "claimguid", "files", "filesdetail", "getfile" }; 
+            string[] obsoletURLtokens = new string[] { "login", "claimguid", "files", "filesdetail", "getfile", "excel" }; 
 
             //HT : CAUTION: if url contains "ClaimGUID" - DO NOT proceed with that url because it'll be INVALID
             if (string.IsNullOrEmpty(ReturnUrl) ||
@@ -323,7 +317,7 @@ namespace CPM.Controllers
             return View();// Will return the default view
         }
 
-        public ActionResult NotFound()
+        public ActionResult DataNotFound()
         {
             return View();// Will return the default view
         }

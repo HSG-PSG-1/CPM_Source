@@ -141,7 +141,7 @@ namespace CPM
                 switch (httpEx.GetHttpCode())
                 {
                     case 404:
-                        action = "NotFound";
+                        action = "DataNotFound";
                         break;
                     case 5001:
                         httpContext.Response.Write(string.Format("Request / Fileupload length cannot exceed {0}MB", Config.MaxFileSizMB));

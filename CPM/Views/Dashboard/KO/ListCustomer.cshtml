@@ -9,41 +9,41 @@
     <thead class="header">
     @*NOTE: DO NOT change column order without updating the Group logic variables below*@
         <tr>
-            <th nowrap="nowrap" data-bind="click: function(data,event){$root.sortData(data, event,'ClaimNo')}">           
-            @Html.Raw(HttpUtility.HtmlDecode(Html.SortableColumn("Claim #", "ClaimNo", reload, routeValues, true, false))) </th>
-            <th nowrap="nowrap" data-bind="click: function(data,event){$root.sortData(data, event,'ClaimDateOnly')}">
-            @Html.Raw(Html.SortableColumn("Claim Date", "ClaimDateOnly", reload, routeValues))            
+            <th nowrap="nowrap" data-bind="click: function(data,event){$root.sortData(data, event,'CNo')}">           
+            @Html.Raw(HttpUtility.HtmlDecode(Html.SortableColumn("Claim #", "CNo", reload, routeValues, true, false))) </th>
+            <th nowrap="nowrap" data-bind="click: function(data,event){$root.sortData(data, event,'CDate')}">
+            @Html.Raw(Html.SortableColumn("Claim Date", "CDate", reload, routeValues))            
             </th>
-            <th nowrap="nowrap" data-bind="click: function(data,event){$root.sortData(data, event,'CustRefNo')}">
-            @Html.Raw(HttpUtility.HtmlDecode(Html.SortableColumn("Customer<br/>Ref #", "CustRefNo", reload, routeValues)))
+            <th nowrap="nowrap" data-bind="click: function(data,event){$root.sortData(data, event,'CustRef')}">
+            @Html.Raw(HttpUtility.HtmlDecode(Html.SortableColumn("Customer<br/>Ref #", "CustRef", reload, routeValues)))
             @* For future: reload(this.href,'','#main');*@</th>
-            <th nowrap="nowrap" data-bind="click: function(data,event){$root.sortData(data, event,'ShipToLocAndCode')}">
-            @Html.Raw(HttpUtility.HtmlDecode(Html.SortableColumn("Location", "ShipToLocAndCode", reload, routeValues)))</th>
-            <th nowrap="nowrap" data-bind="click: function(data,event){$root.sortData(data, event,'BrandName')}">
-            @Html.Raw(Html.SortableColumn("Brand", "BrandName", reload, routeValues))</th>
+            <th nowrap="nowrap" data-bind="click: function(data,event){$root.sortData(data, event,'ShpLocCode')}">
+            @Html.Raw(HttpUtility.HtmlDecode(Html.SortableColumn("Location", "ShpLocCode", reload, routeValues)))</th>
+            <th nowrap="nowrap" data-bind="click: function(data,event){$root.sortData(data, event,'Brand')}">
+            @Html.Raw(Html.SortableColumn("Brand", "Brand", reload, routeValues))</th>
 <th nowrap="nowrap" data-bind="click: function(data,event){$root.sortData(data, event,'Status')}">
             @Html.Raw(Html.SortableColumn("Status", "Status", reload, routeValues))</th>
-            <th nowrap="nowrap"data-bind="click: function(data,event){$root.sortData(data, event,'FilesHExist')}">
-            @Html.Raw(Html.SortableColumn("File", "FilesHExist", reload, routeValues))</th>            
+            <th nowrap="nowrap"data-bind="click: function(data,event){$root.sortData(data, event,'Files')}">
+            @Html.Raw(Html.SortableColumn("File", "Files", reload, routeValues))</th>            
         </tr>
     </thead>
     <tbody data-bind="foreach: pagedRows">@* Claims *@
     <tr>
         <td align="center">            
-                <u><div title="Click to view this claim" style="height: 99%; cursor: pointer;" data-bind="text:$data.ClaimNo, 
+                <u><div title="Click to view this claim" style="height: 99%; cursor: pointer;" data-bind="text:$data.CNo, 
                 click:function(data,event){ gotoClaim($data.ID);return false;}"></div></u>            
         </td>
-        <td align="center" data-bind="text:ClaimDateTxt"></td>
-        <td align="center" data-bind="text:CustRefNo"></td>
-        <td align="center" data-bind="text:ShipToLocAndCode"></td>
-        <td align="center" data-bind="text:BrandName"></td>
+        <td align="center" data-bind="text:CDtTxt"></td>
+        <td align="center" data-bind="text:CustRef"></td>
+        <td align="center" data-bind="text:ShpLocCode"></td>
+        <td align="center" data-bind="text:Brand"></td>
         <td align="center">
             <div data-bind="attr: {id : 'dialog' + $data.ID}"></div>
-            <div class="dDialog uline" data-bind="click: function(data,event){showDialog('Status',$data.ID,$data.Archived);claimObj = this;},html:$data.Status, attr:{id:'statusDIV' + $data.ID}"></div>        
+            <div class="dDialog uline" data-bind="click: function(data,event){showDialog('Status',$data.ID,$data.Archvd);claimObj = this;},html:$data.Status, attr:{id:'statusDIV' + $data.ID}"></div>        
         </td>
         <td align="center">
         <input type="image" src="@Url.Content("~/Content/Images/files.gif")" alt="View Files" title="View Files"
-                data-bind="visible: FilesHExist,click: function(data,event){showDialog('Files',$data.ID,$data.Archived);return false;}"/>
+                data-bind="visible: Files,click: function(data,event){showDialog('Files',$data.ID,$data.Archvd);return false;}"/>
         </td>
         @*<td align="center">
             <input type="image" src="@Url.Content("~/Content/Images/Print.png")" alt="Print Claim" title="Print Claim"

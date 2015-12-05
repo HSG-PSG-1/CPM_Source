@@ -54,20 +54,20 @@ namespace CPM.Controllers
                          select new
                          {
                              ID = vw_u.ID,
-                             ClaimNo = vw_u.ClaimNo,
+                             CNo = vw_u.ClaimNo,
                              StatusID = vw_u.StatusID,
-                             AssignToName = vw_u.AssignToName,
-                             CustRefNo = vw_u.CustRefNo,
-                             BrandName = vw_u.BrandName,
+                             AsgnTo = vw_u.AssignToName,
+                             CustRef = vw_u.CustRefNo,
+                             Brand = vw_u.BrandName,
                              CustOrg = vw_u.CustOrg,
-                             Salesperson = vw_u.Salesperson,
-                             ClaimDateOnly = vw_u.ClaimDateOnly,
-                             Archived = vw_u.Archived,
+                             SP = vw_u.Salesperson,
+                             CDate = vw_u.ClaimDateOnly,
+                             Archvd = vw_u.Archived,
                              Status = vw_u.Status,
-                             CommentsExist = vw_u.CommentsExist,
-                             FilesHExist = vw_u.FilesHExist,
-                             ClaimDateTxt = vw_u.ClaimDateTxt,//ClaimDate.ToString(Defaults.dtFormat, Defaults.ci),
-                             ShipToLocAndCode = vw_u.ShipToLocAndCode,
+                             Cmts = vw_u.CommentsExist,
+                             Files = vw_u.FilesHExist,
+                             CDtTxt = vw_u.ClaimDateTxt,//ClaimDate.ToString(Defaults.dtFormat, Defaults.ci),
+                             ShpLocCode = vw_u.ShipToLocAndCode
                          };
 
             return Json(new { records = result, search = oldSearchOpts }, JsonRequestBehavior.AllowGet);
@@ -84,7 +84,7 @@ namespace CPM.Controllers
                 sortExpr, 0, gridPageSize * 2, searchOpts1, true, _Session.IsOnlyCustomer)
                          select new
                          {
-                             ID = vw_u.ID,
+                             /*ID = vw_u.ID,
                              ClaimNo = vw_u.ClaimNo,
                              StatusID = vw_u.StatusID,
                              AssignToName = vw_u.AssignToName,
@@ -98,7 +98,22 @@ namespace CPM.Controllers
                              CommentsExist = vw_u.CommentsExist,
                              FilesHExist = vw_u.FilesHExist,
                              ClaimDateTxt = vw_u.ClaimDateTxt,//ClaimDate.ToString(Defaults.dtFormat, Defaults.ci),
-                             ShipToLocAndCode = vw_u.ShipToLocAndCode,
+                             ShipToLocAndCode = vw_u.ShipToLocAndCode */
+                             ID = vw_u.ID,
+                             CNo = vw_u.ClaimNo,
+                             StatusID = vw_u.StatusID,
+                             AsgnTo = vw_u.AssignToName,
+                             CustRef = vw_u.CustRefNo,
+                             Brand = vw_u.BrandName,
+                             CustOrg = vw_u.CustOrg,
+                             SP = vw_u.Salesperson,
+                             CDate = vw_u.ClaimDateOnly,
+                             Archvd = vw_u.Archived,
+                             Status = vw_u.Status,
+                             Cmts = vw_u.CommentsExist,
+                             Files = vw_u.FilesHExist,
+                             CDtTxt = vw_u.ClaimDateTxt,//ClaimDate.ToString(Defaults.dtFormat, Defaults.ci),
+                             ShpLocCode = vw_u.ShipToLocAndCode
                          };
 
             //searchOpts1.Archived = oldSessionVal;//reset
@@ -155,6 +170,12 @@ namespace CPM.Controllers
             return View("Excel", result);
         }
 
+        [HttpGet]
+        public ActionResult Excel(string nothing1)
+        {//to handle session timeout while requesting excel
+            return RedirectToAction("List", "Dashboard");
+        }
+        
         public ActionResult ExcelPDF()
         {   
             populateData(false);

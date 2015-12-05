@@ -15,7 +15,7 @@ ko.bindingHandlers.date = {
         var value = new Date(); // today by default         
         //alert(value.toString());        
         if (jsonDate != null && jsonDate != Date111) {
-        try { value = new Date(parseInt(jsonDate.substr(6))); } catch (e) { alert(e); } //value = new Date();
+        try { value = new Date(parseInt(jsonDate.substr(6))); } catch (e) { alert(e.message); } //value = new Date();
         }
         */
         var ret = ParseJSONdate(jsonDate); //value.getMonth() + 1 + "/" + value.getDate() + "/" + value.getFullYear();
@@ -33,13 +33,13 @@ ko.bindingHandlers.date = {
         var value = new Date(); // today by default         
         //alert(value.toString());        
         if (jsonDate != null && jsonDate != Date111) {
-            try { value = new Date(parseInt(jsonDate.substr(6))); } catch (e) { alert(e); } //value = new Date();
+        try { value = new Date(parseInt(jsonDate.substr(6))); } catch (e) { alert(e.message); } //value = new Date();
         }
         */
         var ret = ParseJSONdate(jsonDate); //value.getMonth() + 1 + "/" + value.getDate() + "/" + value.getFullYear();
 
         if (element.value == null) element.innerHTML = ret;
-        else $(element).val(ret); //input element
+        else { $(element).val(ret);/*.trigger("change");*/ } //input element
     }
 };
 
@@ -51,8 +51,9 @@ function ParseJSONdate(jsonDate) {
     var value = new Date(); // today by default         
     //alert(value.toString());        
     if (jsonDate != null && jsonDate != Date111) {
-        try { value = new Date(parseInt(jsonDate.substr(6))); } catch (e) { alert(e); }
+        try { value = new Date(parseInt(jsonDate.substr(6))); } catch (e) { alert(e.message + ":" + jsonDate + "."); }
     }
+    value = makeDateTimezoneNeutral(value); // HT: DON'T forget
     return value.getMonth() + 1 + "/" + value.getDate() + "/" + value.getFullYear();
 }
 
@@ -124,3 +125,12 @@ function doRequiredChk(ctrl)
 }
 
 /*<span data-bind="text:new Date(parseInt(PostedOn.toString().substr(6))).toLocaleFormat('%d/%m/%Y')"></span>*/
+function makeDateTimezoneNeutral(dt) {
+    console.log(dt);
+    // HT: SPECIAL CASE - some time zone client browsers will show upto 1 day offset based on the UTC time diff
+    //DOESN'T work - dt = new Date(dt.getTime() - dt.getTimezoneOffset() * 60000);
+    dt.setHours(dt.getHours() + dt.getTimezoneOffset() / 60);
+    // ^^^ this shud nullify that difference as per SO : 1486476 (works),  26028466 (nope)
+    console.log(dt);
+    return dt;
+}

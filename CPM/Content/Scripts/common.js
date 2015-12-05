@@ -86,9 +86,10 @@ function stopEvent(e, GoAhead) {
 
     if (!e) e = window.event;
     //e.cancelBubble is supported by IE - this will kill the bubbling process.
-    if (e.cancelBubble) e.cancelBubble = true;
+    if (e.cancelBubble != null) e.cancelBubble = true;
     if (e.stopPropagation) e.stopPropagation(); //e.stopPropagation works in Firefox.
     if (e.preventDefault) e.preventDefault();
+    if (e.returnValue != null) e.returnValue = false; // http://blog.patricktresp.de/2012/02/
     return false;
 }
 

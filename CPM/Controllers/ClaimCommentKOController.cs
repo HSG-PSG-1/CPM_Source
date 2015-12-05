@@ -92,7 +92,7 @@ namespace CPM.Controllers
         [HttpPost]
         public JsonResult CommentsKOEmail(int ClaimID, string ClaimGUID, int AssignedTo, int ClaimNo, [FromJson] Comment CommentObj)
         //int AssignedToOLD,
-        {            
+        {   /*         
             bool sendMail = (ClaimID > Defaults.Integer && AssignedTo != _SessionUsr.ID);// No need to send mail if its current user
             try
             {
@@ -106,6 +106,11 @@ namespace CPM.Controllers
             }
             catch (Exception ex) { sendMail = false; }
             return Json(sendMail, JsonRequestBehavior.AllowGet); ;// RedirectToAction("Comments");//new CommentKOModel()
+            */
+            string msg = "Email queued for new comment";
+            bool sendMail = CommentService.SendEmail(ClaimID, AssignedTo, ClaimNo.ToString(), CommentObj, ref msg);
+            HttpContext.Response.Clear(); // to avoid debug email content from rendering !
+            return Json(new { sendMail, msg }, JsonRequestBehavior.AllowGet);
         }        
     }
 }
