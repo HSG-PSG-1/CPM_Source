@@ -18,10 +18,11 @@ td {font-size: 12px;font-family: Calibri, Verdana, Helvetica, Sans-Serif;border:
         <th>Defect</th>
         <th>Description</th>
         <th>Size</th>
+        <th>DOT</th>
     </tr>
     </thead>
     <tbody>
     @foreach (var item in Model){ 
-<tr><td>@item.ClaimNo</td><td>&nbsp;@item.CustRefNo</td><td>@item.ClaimDate</td><td>&nbsp;@item.CustOrgCode</td><td>@item.CustOrgName</td><td>@item.Brand</td><td>&nbsp;@item.ItemNo</td><td>@item.Defect</td><td>@item.Description</td><td>&nbsp;@item.Size</td></tr>}
+<tr><td>@item.ClaimNo</td><td>&nbsp;@item.CustRefNo</td><td>@item.ClaimDate</td><td>&nbsp;@item.CustOrgCode</td><td>@item.CustOrgName</td><td>@item.Brand</td><td>&nbsp;@item.ItemNo</td><td>@item.Defect</td><td>@item.Description</td><td>&nbsp;@item.Size</td><td>&nbsp;@item.DOT</td></tr>}
     </tbody>
 </table>

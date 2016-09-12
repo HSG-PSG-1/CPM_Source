@@ -7,9 +7,9 @@
 @using CPM.Helper
 @{
     vw_Claim_Master_User_Loc view = @Model.view;
-    List<Comment> comments = @Model.comments;
-    List<FileHeader> filesH = @Model.filesH;
-    List<ClaimDetail> items = @Model.items;
+    var comments = @Model.comments;
+    var filesH = @Model.filesH;
+    var items = @Model.items;
 
     string root = Defaults.getAbsSiteURL(Request.Url.ToString());
 }

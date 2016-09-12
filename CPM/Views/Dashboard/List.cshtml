@@ -50,7 +50,7 @@
                         @if (!isCustomer) { 
                         <td nowrap="nowrap" width="5%">Assigned To</td>
                         <td valign="bottom" nowrap="nowrap">
-                            @Html.TextBox("AssignToName", dSearch.AssignToName, new { @style = "width:200px", data_bind = "value:search.AssignToName" })&nbsp;@Html.Raw(string.Format(Defaults.lookupImgBtn, "AssignToName"))@Html.Hidden("AssignedTo", dSearch.AssignedTo)
+                            @Html.TextBox("AssignToName", dSearch.AssignToName, new { @style = "width:200px", data_bind = "value:search.AssignToName, valueUpdate:'blur' " })&nbsp;@Html.Raw(string.Format(Defaults.lookupImgBtn, "AssignToName"))@Html.Hidden("AssignedTo", dSearch.AssignedTo)
                         </td> 
                         } else { <td colspan="2"></td>   } 
                     </tr>
@@ -62,12 +62,12 @@
                         </td>
                         <td nowrap="nowrap">Brand</td>
                         <td valign="top" nowrap="nowrap">
-                        @Html.TextBox("BrandName", dSearch.BrandName, new { data_bind = "value:search.BrandName" })&nbsp;@Html.Raw(string.Format(Defaults.lookupImgBtn, "BrandName"))@Html.Hidden("BrandID", dSearch.BrandID)
+                        @Html.TextBox("BrandName", dSearch.BrandName, new { data_bind = "value:search.BrandName, valueUpdate:'blur' " })&nbsp;@Html.Raw(string.Format(Defaults.lookupImgBtn, "BrandName"))@Html.Hidden("BrandID", dSearch.BrandID)
                         </td>
                         @if (!isCustomer) { 
                         <td nowrap="nowrap">Customer</td>
                         <td valign="middle" nowrap="nowrap">
-                        @Html.TextBox("CustOrg", dSearch.CustOrg,new {@style="width:200px", data_bind = "value:search.CustOrg"})&nbsp;@Html.Raw(string.Format(Defaults.lookupImgBtn, "CustOrg"))@Html.Hidden("CustID", dSearch.CustID)
+                        @Html.TextBox("CustOrg", dSearch.CustOrg,new {@style="width:200px", data_bind = "value:search.CustOrg, valueUpdate:'blur' " })&nbsp;@Html.Raw(string.Format(Defaults.lookupImgBtn, "CustOrg"))@Html.Hidden("CustID", dSearch.CustID)
                         </td>
                         } else { <td colspan="2"></td>   }
                     </tr>
@@ -85,7 +85,7 @@
                         @if (!isCustomer && !isSales) { 
                         <td nowrap="nowrap">Salesperson</td>
                         <td valign="top" nowrap="nowrap">
-                            @Html.TextBox("Salesperson", dSearch.Salesperson,new {@style="width:200px", data_bind = "value:search.Salesperson" })&nbsp;@Html.Raw(string.Format(Defaults.lookupImgBtn, "Salesperson"))@Html.Hidden("SalespersonID", dSearch.SalespersonID)
+                            @Html.TextBox("Salesperson", dSearch.Salesperson,new {@style="width:200px", data_bind = "value:search.Salesperson, valueUpdate:'blur' " })&nbsp;@Html.Raw(string.Format(Defaults.lookupImgBtn, "Salesperson"))@Html.Hidden("SalespersonID", dSearch.SalespersonID)
                         </td>
                         } else { <td colspan="2"></td>   } 
                     </tr>
