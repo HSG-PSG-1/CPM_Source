@@ -35,7 +35,7 @@
                         <td valign="top" nowrap="nowrap" align="right" width="5%">Assign To</td>
                         <td valign="top" align="right" width="20%">
                             <select id="AssignTo" class="dropbox" name="AssignTo" style="width:90%"
-                            data-bind="options: $parent.Users, value:$parent.AssignTo, optionsText: 'value', optionsValue:'id', enable: ($data.Comment1() != null && $data.Comment1().length > 0)"
+                            data-bind="options: $parent.Users, value:$parent.AssignTo, optionsText: 'value', optionsValue:'id'"
                             onchange="setAssignedTo(this)">
                             </select><br/>
                             <input id="AssignToVal" name="AssignToVal" type="hidden" data-bind="value:$parent.AssignToVal" /> 

@@ -126,11 +126,11 @@ function doRequiredChk(ctrl)
 
 /*<span data-bind="text:new Date(parseInt(PostedOn.toString().substr(6))).toLocaleFormat('%d/%m/%Y')"></span>*/
 function makeDateTimezoneNeutral(dt) {
-    console.log(dt);
+    // ERR in IE < 10 console.log(dt);
     // HT: SPECIAL CASE - some time zone client browsers will show upto 1 day offset based on the UTC time diff
     //DOESN'T work - dt = new Date(dt.getTime() - dt.getTimezoneOffset() * 60000);
     dt.setHours(dt.getHours() + dt.getTimezoneOffset() / 60);
     // ^^^ this shud nullify that difference as per SO : 1486476 (works),  26028466 (nope)
-    console.log(dt);
+    // ERR in IE < 10 console.log(dt);
     return dt;
 }

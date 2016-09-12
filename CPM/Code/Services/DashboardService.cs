@@ -129,7 +129,7 @@ namespace CPM.Services
             else if (!string.IsNullOrEmpty(das.Salesperson))
                 dasQ = dasQ.Where(o => SqlMethods.Like(o.Salesperson.ToLower(), das.Salesperson.ToLower()));
 
-            if (das.ShipToLocationID > 0) dasQ = dasQ.Where(o => o.SalespersonID == das.SalespersonID);
+            if (das.ShipToLocationID > 0) dasQ = dasQ.Where(o => o.ShipToLocationID == das.ShipToLocationID);
             else if (!string.IsNullOrEmpty(das.ShipToLoc)) dasQ = dasQ.Where
                (o => SqlMethods.Like(o.ShipToLoc.ToLower(), das.ShipToLoc.ToLower()));
 

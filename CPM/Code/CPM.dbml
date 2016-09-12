@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?><Database Name="CPM" EntityNamespace="CPM.DAL" ContextNamespace="CPM.DAL" Class="CPMmodel" xmlns="http://schemas.microsoft.com/linqtosql/dbml/2007">
-  <Connection Mode="WebSettings" ConnectionString="Data Source=(local);Initial Catalog=CPM;Persist Security Info=True;User ID=sa" SettingsObjectName="System.Configuration.ConfigurationManager.ConnectionStrings" SettingsPropertyName="CPMConnectionString" Provider="System.Data.SqlClient" />
+  <Connection Mode="WebSettings" ConnectionString="Data Source=.\SQL2K8R2EXP;Initial Catalog=CPM;Persist Security Info=True;User ID=sa" SettingsObjectName="System.Configuration.ConfigurationManager.ConnectionStrings" SettingsPropertyName="CPMConnectionString" Provider="System.Data.SqlClient" />
   <Table Name="dbo.ClaimDetail" Member="ClaimDetails">
     <Type Name="ClaimDetail">
       <Column Name="ID" Type="System.Int32" DbType="Int NOT NULL IDENTITY" IsPrimaryKey="true" IsDbGenerated="true" CanBeNull="false" />
@@ -573,6 +573,8 @@
       <Column Name="Size" Type="System.String" DbType="NVarChar(20) NOT NULL" CanBeNull="false" />
       <Column Name="Ply" Type="System.String" DbType="NVarChar(20) NOT NULL" CanBeNull="false" />
       <Column Name="Type" Type="System.String" DbType="NVarChar(20)" CanBeNull="true" />
+      <Column Name="Serial" Type="System.String" DbType="NVarChar(20)" CanBeNull="true" />
+      <Column Name="DOT" Type="System.String" DbType="NVarChar(20)" CanBeNull="true" />
     </Type>
   </Table>
 </Database>

@@ -118,7 +118,7 @@
 
             viewModelFD.FileDetailTypes = ko.mapping.fromJS(data.FileDetailTypes);
              
-            try{ko.applyBindings(viewModelFD, document.getElementById("divFilesDetail"));}catch(e){alert(e);}
+            try{ko.applyBindings(viewModelFD, document.getElementById("divFilesDetail"));}catch(e){alert(e + " MESSAGE: " + e.Message);}
         });
  }
       
