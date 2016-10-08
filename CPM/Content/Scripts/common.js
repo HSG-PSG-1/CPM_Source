@@ -7,12 +7,16 @@ var autoCompleteALL = "  "; //Must be equal to autoCompMinLen
 var delTR = ""; // Required tohold te deleted TR fopas using taconite plugin
 
 // If the required field is empty then empty the impact control
-function checkReq(ctrl, impactCtrl) { if (!($(ctrl).val().toString().length > 0)) $(impactCtrl).val('').trigger("change"); }
+function checkReq(ctrl, impactCtrl) {
+    if (!($(ctrl).val().toString().length > 0))
+        $(impactCtrl).val('').trigger("change");
+}
 // Log the selected item.id or empty into id textbox
 function log(item, idBox, txtBox) {
-    $(idBox).val(item ? item.id : '').trigger("change"); /*"#ItemID" */
-    //$(txtBox).trigger("change"); /* IE 10+ doesn't trigger the change value */
-    //try { $(txtBox).validate().valid(); } catch (e) { }
+    var isSelected = (item != null) && (item.id != null);
+    //$(idBox).val(item ? item.id : '').trigger("change"); /*"#ItemID" */
+    $(idBox).val(isSelected ? item.id : '').trigger("change"); /*"#ItemID" */
+    $(txtBox).val(isSelected ? item.value : '').trigger("change"); // IE 10+ doesn't trigger the change value */
 }
 //Toggle the display of the two images in parent (make sure you follow the sequence)
 function toggleDDimg(parent, drop) {
@@ -34,8 +38,12 @@ function renderAutoComplete(url, idBox, txtBox) {
     source: url
     , autoFocus: true
     , minLength: autoCompMinLen
-    , select: function (event, ui) { if (ui.item.id == null) { event.preventDefault(); } else log(ui.item, idBox, txtBox); }
+    , select: function (event, ui) {
+        /*if (ui.item.id == null) { event.preventDefault(); } else*/
+            log(ui.item, idBox, txtBox);
+    }
     , focus: function(event, ui) {  if (ui.item.id == null) event.preventDefault(); }
+    , change: function (event, ui) { log(ui.item, idBox, txtBox); }
     //, search: function(event, ui) {$("#msg").show();$("#msg").html($(txtBox + ', li').length); $("#msg").dialog();}
     //Tie up events to toggle dropdown images
     , open: function(event, ui) { toggleDDimg(ddSpan, true); $("#msg").hide(); } //$(txtBox).find('li').length
@@ -49,9 +57,8 @@ function renderAutoComplete(url, idBox, txtBox) {
     }) */
     ;
     
-    //Attach onblur event to empty ID field
-    $(txtBox).change(function() { checkReq(txtBox, idBox); }); //blur
-    $(txtBox).focus(function() { $(this).select(); });//select text
+    //Attach onblur event to empty ID field//$(txtBox).change(function() { checkReq(idBox, txtBox); }); //blur
+    //$(txtBox).focus(function() { $(this).select(); });//select text
     //Set initial value (null if it was defaulted to 0) and set tooltip
     var val = $(idBox).val(); $(idBox).val((val == "0") ? "" : val).trigger("change"); //Because sometimes Int is by default initialized by 0
     $(txtBox).attr('title', 'Start typing to search or enter blank space twice to view all');
@@ -165,7 +172,7 @@ function checksession() {
 function clearForm(oForm) {
     var elements = oForm.elements;
     oForm.reset();
-
+    try{
     for (i = 0; i < elements.length; i++) {
 
 		if (!elements[i].type) continue;//HT: To avoid unwanted elements
@@ -195,6 +202,7 @@ function clearForm(oForm) {
             default: break;
         }
     }
+    }catch(e){}
 }
 
 //minSQLDate & maxSQLDate are declared in Master page
@@ -282,7 +290,7 @@ function openWin(url, h, w) {
     var left = (screen.width / 2) - (w / 2);    
     var top = (screen.height / 2) - (h / 2);
     //Make sure if the window is opened second time old one is closed
-    if (targetWin1 != null) targetWin1.close();
+    if (targetWin1 != null) { targetWin1.close(); }
     //Open new window
     targetWin1 = window.open(url, "_blank", "toolbar=no, location=no, directories=no, status=no, menubar=no, scrollbars=no,"+
     " resizable=yes, copyhistory=no, width=" + w + ", height=" + h + ", top=" + top + ", left=" + left);
